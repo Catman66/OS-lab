@@ -27,5 +27,22 @@ int main(int argc, char *argv[]) {
   c[i] = '\0';
   printf("%s\n", c);
 
+  int cnt_word = 1;
+  while(cnt_word < 3)
+  {
+    if(fgetc(proc_reading) == ' ')
+      cnt_word++;
+  }
+
+  int i = 0;
+  for(; i < 10-1; i++)
+  {
+    c[i] = fgetc(proc_reading);
+    if(c[i] == ' ')
+      break;
+  }
+  c[i] = '\0';
+  printf("%s\n", c);
+
   return 0;
 }
