@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
       cnt_word++;
   }
 
-  int i = 0;
-  for(; i < 10-1; i++)
+  
+  for(i = 0; i < 10-1; i++)
   {
     c[i] = fgetc(proc_reading);
     if(c[i] == ' ')
