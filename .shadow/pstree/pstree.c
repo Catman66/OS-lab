@@ -144,16 +144,24 @@ void print_proc_tree(Proc_info process[], int cnt_proc)
   list_node* arr = malloc(sizeof(list_node) * cnt_proc);
   for(int i = 0; i < cnt_proc; i++) arr[i].next = NULL;
 
-
+  int first_proc = -1;
   for(int i = 0; i < cnt_proc; i++)
   {
     int parent = process[i].ppid;
-    for(int j = 0; j < cnt_proc; j++)
+    
+    int j = 0;
+    for(; j < cnt_proc; j++)
       if(process[j].pid == parent)
       {
         insert(&arr[j], i);
+        break;
       }
+    if(j == cnt_proc)
+      first_proc = i;
   }
+  assert(first_proc != -1);
+
+  print_recursively(process, arr, cnt_proc, i);
 
 }
 
