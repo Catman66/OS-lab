@@ -131,20 +131,39 @@ void insert(list_node* dest, int child)
   pre->next->next = NULL;
 }
 
-void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc, int curr_i)
+void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc, int curr_i, int size_sp)
 {
-  printf("%s(%d)", Proc_info[curr_i].name, Proc_info[curr_i].pid);
+  //is a leaf proc
+  if(is_empty(&relation[curr_i]))
+    printf("%s", Proc_info[curr_i].name);
+  
+  printf("%s", Proc_info[curr_i].name);
+  printf("-");
 
-  if(is_empty(&relation[curr_i]) == false)
+  size_sp += (strlen(Proc_info[curr_i].name) + 1);
+  
+  list_node* p = relation[curr_i].next;
+  if(p->next != NULL)
+    printf("+-");
+  else
+    printf("--");
+  print_recursively(Proc_info, relation, cnt_proc, p->val);
+
+  for(p = p->next; p != NULL; p = p->next)
   {
-    printf("-");
-    for(list_node* p = relation[curr_i].next; p != NULL; p = p->next)
-    {
+    for(int i = 0; i < size_sp; i++)
+      printf(" ");
+
+    if(p->next == NULL)
       printf("+-");
-      print_recursively(Proc_info, relation, cnt_proc, p->val);
-      printf("\n");
-    }
+    else
+      printf("`-");
+    
+    print_recursively(Proc_info, relation, cnt_proc, p->val, size_sp+2);
+    
+    printf("\n");
   }
+  
 
 }
 
@@ -170,11 +189,9 @@ void print_proc_tree(Proc_info process[], int cnt_proc)
   }
   assert(first_proc != -1);
 
-  print_recursively(process, arr, cnt_proc, first_proc);
+  print_recursively(process, arr, cnt_proc, first_proc, 0);
 
 }
-
-
 
 void my_pstree()
 {
@@ -192,7 +209,6 @@ void my_pstree()
   {
     if(is_num(file_in_dir->d_name))
     {
-      printf("%s \n", file_in_dir->d_name);
       path[6] = '\0';
       strcat(path, file_in_dir->d_name);
       strcat(path, "/stat");
