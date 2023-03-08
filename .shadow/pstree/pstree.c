@@ -62,7 +62,7 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
   }
   c[i] = '\0';
   buff->pid = atoi(c);
-
+  printf("  read: %s, atoi: %d", c, buff->pid);
   /*read the process name*/
   for(i = 0; i < TASK_COMM_LEN-1; i++)
     if((c[i] = fgetc(proc_read_begin)) == ' ')
@@ -82,8 +82,8 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
   c[i] = '\0';
   buff->ppid = atoi(c);
   
-  printf(" pid: %d ppid: %d\n", buff->pid, buff->ppid);
-
+  //printf(" pid: %d ppid: %d\n", buff->pid, buff->ppid);
+  printf("  read: %s, atoi: %d", c, buff->ppid);
 }
 
 #define MAX_PATH_LEN 64
@@ -190,16 +190,9 @@ void my_pstree()
       strcat(path, file_in_dir->d_name);
       strcat(path, "/stat");
 
-
-      //read 32 char
-      
-
       /*read the file of path*/
       FILE* p_file = fopen(path, "r");
-      for(int i = 0; i < 32; i++)
-        printf("%c", fgetc(p_file));
-      printf("\n");
-      /*
+      
       if(cnt_proc == capacity)
       {
         capacity *= 2;
@@ -215,7 +208,7 @@ void my_pstree()
       }
       read_proc_info(p_file, &processes[cnt_proc++]);
 
-      */
+      
     }
   }
 
