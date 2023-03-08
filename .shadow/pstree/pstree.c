@@ -126,7 +126,7 @@ void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc
 {
   printf("%s(%d)", Proc_info[curr_i].name, Proc_info[curr_i].pid);
 
-  if(is_empty(relation[curr_i]) == false)
+  if(is_empty(&relation[curr_i]) == false)
   {
     printf("-");
     for(list_node* p = relation[curr_i].next; p != NULL; p = p->next)
