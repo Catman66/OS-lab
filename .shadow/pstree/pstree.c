@@ -32,7 +32,7 @@ bool is_num(const char* str)
     return false;
 
   for(const char* it = str; *it != '\0'; it++)
-    if(get_char_type(*it) == NUM)
+    if(get_char_type(*it) != NUM)
       return false;
   return true;
 }
