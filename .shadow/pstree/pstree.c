@@ -135,7 +135,10 @@ void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc
 {
   //is a leaf proc
   if(is_empty(&relation[curr_i]))
+  {
     printf("%s", Proc_info[curr_i].name);
+    return;
+  }
   
   printf("%s", Proc_info[curr_i].name);
   printf("-");
