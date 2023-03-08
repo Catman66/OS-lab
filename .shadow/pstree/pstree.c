@@ -147,7 +147,7 @@ void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc
     printf("+-");
   else
     printf("--");
-  print_recursively(Proc_info, relation, cnt_proc, p->val);
+  print_recursively(Proc_info, relation, cnt_proc, p->val, size_sp+2);
 
   for(p = p->next; p != NULL; p = p->next)
   {
