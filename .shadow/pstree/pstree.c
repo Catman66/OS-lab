@@ -76,6 +76,7 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
 
 }
 
+#define MAX_PATH_LEN 64
 int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
     assert(argv[i]);
@@ -86,12 +87,15 @@ int main(int argc, char *argv[]) {
   /*read the file of numeric*/
   DIR* proc_dir = opendir("/proc");
   struct dirent* file_in_dir;
+
+  char path[MAX_PATH_LEN] = "/proc/";
+
   while((file_in_dir = readdir(proc_dir)) != NULL)
   {
-    
+
     if(is_num(file_in_dir->d_name))
     {
-      char path[] = "/proc";
+      path[6] = '\0';
       strcat(path, file_in_dir->d_name);
       printf("%s\n", path);
     }
