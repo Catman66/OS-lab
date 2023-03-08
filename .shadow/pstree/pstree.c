@@ -161,7 +161,7 @@ void print_proc_tree(Proc_info process[], int cnt_proc)
   }
   assert(first_proc != -1);
 
-  print_recursively(process, arr, cnt_proc, i);
+  print_recursively(process, arr, cnt_proc, first_proc);
 
 }
 
