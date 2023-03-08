@@ -212,7 +212,7 @@ void my_pstree()
 int main(int argc, char *argv[]) {
 
 
-  test_list();
+  my_pstree();
   
   return 0;
 }
