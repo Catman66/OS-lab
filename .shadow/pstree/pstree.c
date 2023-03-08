@@ -95,6 +95,10 @@ typedef struct list_node
   struct list_node* next; 
 } list_node;
 void insert(list_node* dest, int child);
+bool is_empty(list_node* head)
+{
+  return head->next == NULL;
+}
 void test_list()
 {
   list_node* head = malloc(sizeof(list_node));
