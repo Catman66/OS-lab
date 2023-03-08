@@ -127,7 +127,7 @@ void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc
     printf("-");
     for(list_node* p = relation[curr_i].next; p != NULL; p = p->next)
     {
-      print("+-");
+      printf("+-");
       print_recursively(Proc_info, relation, cnt_proc, p->val);
       printf("\n");
     }
@@ -146,7 +146,9 @@ void print_proc_tree(Proc_info process[], int cnt_proc)
     int parent = process[i].ppid;
     for(int j = 0; j < cnt_proc; j++)
       if(process[j].pid == parent)
+      {
         insert(&arr[j], i);
+      }
   }
 
 }
