@@ -62,10 +62,9 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
   }
   c[i] = '\0';
   buff->pid = atoi(c);
-  printf("  read: %s, atoi: %d", c, buff->pid);
   
   /*read the process name*/
-  //(
+  // read '('
   assert(fgetc(proc_read_begin) == '(');
   
   char buf_c;
@@ -82,7 +81,7 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
   strncpy(buff->name, c, TASK_COMM_LEN);
 
   
-  /*read the state*/
+  /*read the 'state' and ' '*/
   fgetc(proc_read_begin);
   fgetc(proc_read_begin);
 
@@ -92,9 +91,6 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
       break;
   c[i] = '\0';
   buff->ppid = atoi(c);
-  
-  //printf(" pid: %d ppid: %d\n", buff->pid, buff->ppid);
-  printf("  read: %s, atoi: %d", c, buff->ppid);
 }
 
 #define MAX_PATH_LEN 64
@@ -223,16 +219,7 @@ void my_pstree()
     }
   }
 
-
-
-  for(int i = 0; i < cnt_proc; i++)
-  {
-    printf("pid: %d, name: %s, ppid: %d\n", processes[i].pid, processes[i].name, processes[i].ppid);
-
-  }
-  
   /*process the info*/
-  
   print_proc_tree(processes, cnt_proc);
   free(processes);
 }
@@ -246,7 +233,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-/*
+/* used code
   for (int i = 0; i < argc; i++) {
     assert(argv[i]);
     printf("argv[%d] = %s\n", i, argv[i]);
