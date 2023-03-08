@@ -186,26 +186,36 @@ void my_pstree()
     if(is_num(file_in_dir->d_name))
     {
       printf("%s \n", file_in_dir->d_name);
-      // path[6] = '\0';
-      // strcat(path, file_in_dir->d_name);
-      // strcat(path, "/stat");
+      path[6] = '\0';
+      strcat(path, file_in_dir->d_name);
+      strcat(path, "/stat");
 
-      // /*read the file of path*/
-      // FILE* p_file = fopen(path, "r");
-      // if(cnt_proc == capacity)
-      // {
-      //   capacity *= 2;
 
-      //   Proc_info* new_arr = malloc(sizeof(Proc_info) * capacity);
+      //read 32 char
+      
 
-      //   for(int i = 0; i < cnt_proc; i++)
-      //     new_arr[i] = processes[i];
+      /*read the file of path*/
+      FILE* p_file = fopen(path, "r");
+      for(int i = 0; i < 32; i++)
+        printf("%c", fgetc(p_file));
+      printf("\n");
+      /*
+      if(cnt_proc == capacity)
+      {
+        capacity *= 2;
+
+        Proc_info* new_arr = malloc(sizeof(Proc_info) * capacity);
+
+        for(int i = 0; i < cnt_proc; i++)
+          new_arr[i] = processes[i];
         
-      //   free(processes);
-      //   processes = new_arr;
+        free(processes);
+        processes = new_arr;
 
-      // }
-      // read_proc_info(p_file, &processes[cnt_proc++]);
+      }
+      read_proc_info(p_file, &processes[cnt_proc++]);
+
+      */
     }
   }
 
