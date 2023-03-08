@@ -185,38 +185,42 @@ void my_pstree()
   {
     if(is_num(file_in_dir->d_name))
     {
-      path[6] = '\0';
-      strcat(path, file_in_dir->d_name);
-      strcat(path, "/stat");
+      printf("%s \n", file_in_dir->d_name);
+      // path[6] = '\0';
+      // strcat(path, file_in_dir->d_name);
+      // strcat(path, "/stat");
 
-      /*read the file of path*/
-      FILE* p_file = fopen(path, "r");
-      if(cnt_proc == capacity)
-      {
-        capacity *= 2;
+      // /*read the file of path*/
+      // FILE* p_file = fopen(path, "r");
+      // if(cnt_proc == capacity)
+      // {
+      //   capacity *= 2;
 
-        Proc_info* new_arr = malloc(sizeof(Proc_info) * capacity);
+      //   Proc_info* new_arr = malloc(sizeof(Proc_info) * capacity);
 
-        for(int i = 0; i < cnt_proc; i++)
-          new_arr[i] = processes[i];
+      //   for(int i = 0; i < cnt_proc; i++)
+      //     new_arr[i] = processes[i];
         
-        free(processes);
-        processes = new_arr;
+      //   free(processes);
+      //   processes = new_arr;
 
-      }
-      read_proc_info(p_file, &processes[cnt_proc++]);
+      // }
+      // read_proc_info(p_file, &processes[cnt_proc++]);
     }
   }
 
+
+/*
   for(int i = 0; i < cnt_proc; i++)
   {
     printf("pid: %d, name: %s, ppid: %d\n", processes[i].pid, processes[i].name, processes[i].ppid);
 
   }
+  */
   /*process the info*/
   
-  print_proc_tree(processes, cnt_proc);
-  free(processes);
+ // print_proc_tree(processes, cnt_proc);
+  //free(processes);
 }
 
 int main(int argc, char *argv[]) {
