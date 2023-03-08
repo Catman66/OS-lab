@@ -9,6 +9,8 @@
 #define TASK_COMM_LEN 16
 #endif
 
+
+
 #define MAX_NUM_STR_LEN 10
 typedef enum
 {
@@ -92,7 +94,7 @@ typedef struct list_node
   Item_t val;
   struct list_node* next; 
 } list_node;
-
+void insert(list_node* dest, int child);
 void test_list()
 {
   list_node* head = malloc(sizeof(list_node));
@@ -134,12 +136,15 @@ void print_proc_tree(Proc_info process[], int cnt_proc)
 
 void my_pstree()
 {
+
+  /*read the file of numeric*/
   DIR* proc_dir = opendir("/proc");
   struct dirent* file_in_dir;
 
   char path[MAX_PATH_LEN] = "/proc/";
   Proc_info *processes = malloc(sizeof(Proc_info)*MAX_PROC_NUM);
   int cnt_proc = 0, capacity = MAX_PATH_LEN;
+
 
   while((file_in_dir = readdir(proc_dir)) != NULL)
   {
@@ -185,8 +190,6 @@ int main(int argc, char *argv[]) {
   }
   assert(!argv[argc]);
 
-  /*read the file of numeric*/
-  
   
   return 0;
 }
