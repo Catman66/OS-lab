@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <dirent.h>
+#include <string.h>
 
 #ifndef TASK_COMM_LEN
 #define TASK_COMM_LEN 16
@@ -56,6 +57,7 @@ int main(int argc, char *argv[]) {
   struct dirent* file_in_dir;
   while((file_in_dir = readdir(proc_dir)) != NULL)
   {
+    
     if(is_numeric_str(file_in_dir->d_name))
     {
       char path[] = "/proc";
