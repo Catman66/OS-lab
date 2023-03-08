@@ -7,6 +7,37 @@
 #define TASK_COMM_LEN 16
 #endif
 
+typedef enum
+{
+  true = 1, false = 0
+} bool;
+
+typedef enum
+{
+  NUM = 1, OTHER = 0
+} char_type;
+
+char_type get_char_type(char c)
+{
+  if(c >= '0' && c <= '9')
+    return NUM;
+  
+  return OTHER;
+}
+
+
+bool is_num(const char* str)
+{
+  if(*str == '\0')
+    return false;
+
+  for(const char* it = str; *it != '\0'; it++)
+    if(get_char_type(*it) == NUM)
+      return false;
+  return true;
+}
+
+
 typedef struct 
 {
   char name[TASK_COMM_LEN];
@@ -58,7 +89,7 @@ int main(int argc, char *argv[]) {
   while((file_in_dir = readdir(proc_dir)) != NULL)
   {
     
-    if(is_numeric_str(file_in_dir->d_name))
+    if(is_num(file_in_dir->d_name))
     {
       char path[] = "/proc";
       strcat(path, file_in_dir->d_name);
