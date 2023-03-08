@@ -54,7 +54,7 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
 {
   char c[TASK_COMM_LEN];
   int i = 0;
-  for(; i < 10-1; i++)
+  for(; i < MAX_NUM_STR_LEN; i++)
   {
     c[i] = fgetc(proc_read_begin);
     if(c[i] == ' ')
@@ -63,11 +63,22 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
   c[i] = '\0';
   buff->pid = atoi(c);
   printf("  read: %s, atoi: %d", c, buff->pid);
+  
   /*read the process name*/
-  for(i = 0; i < TASK_COMM_LEN-1; i++)
-    if((c[i] = fgetc(proc_read_begin)) == ' ')
-      break;
-  c[i] = '\0';
+  //(
+  assert(fgetc(proc_read_begin) == '(');
+  
+  char buf_c;
+  i = 0;
+  while((buf_c = fgetc(proc_read_begin)) != ' ')
+  {
+    if(i < TASK_COMM_LEN)
+      c[i++] = buf_c;
+    else
+      continue;
+  }
+  
+  c[i-1] = '\0';
   strncpy(buff->name, c, TASK_COMM_LEN);
 
   
@@ -213,17 +224,17 @@ void my_pstree()
   }
 
 
-/*
+
   for(int i = 0; i < cnt_proc; i++)
   {
     printf("pid: %d, name: %s, ppid: %d\n", processes[i].pid, processes[i].name, processes[i].ppid);
 
   }
-  */
+  
   /*process the info*/
   
- // print_proc_tree(processes, cnt_proc);
-  //free(processes);
+  print_proc_tree(processes, cnt_proc);
+  free(processes);
 }
 
 int main(int argc, char *argv[]) {
