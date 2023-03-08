@@ -118,6 +118,23 @@ void insert(list_node* dest, int child)
   pre->next->next = NULL;
 }
 
+void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc, int curr_i)
+{
+  printf("%s(%d)", Proc_info[curr_i].name, Proc_info[curr_i].pid);
+
+  if(is_empty(relation[curr_i]) == false)
+  {
+    printf("-");
+    for(list_node* p = relation[curr_i].next; p != NULL; p = p->next)
+    {
+      print("+-");
+      print_recursively(Proc_info, relation, cnt_proc, p->val);
+      printf("\n");
+    }
+  }
+
+}
+
 void print_proc_tree(Proc_info process[], int cnt_proc)
 {
   list_node* arr = malloc(sizeof(list_node) * cnt_proc);
@@ -133,6 +150,8 @@ void print_proc_tree(Proc_info process[], int cnt_proc)
   }
 
 }
+
+
 
 void my_pstree()
 {
@@ -180,6 +199,7 @@ void my_pstree()
   }
   /*process the info*/
   
+  print_proc_tree(processes, cnt_proc);
   free(processes);
 }
 
