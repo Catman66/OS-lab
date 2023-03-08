@@ -81,6 +81,8 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
       break;
   c[i] = '\0';
   buff->ppid = atoi(c);
+  
+  printf(" pid: %d ppid: %d\n", buff->pid, buff->ppid);
 
 }
 
