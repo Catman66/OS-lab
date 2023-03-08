@@ -85,16 +85,55 @@ void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
 #define MAX_PATH_LEN 64
 #define MAX_PROC_NUM 64
 
+typedef int Item_t;
+
+typedef struct list_node
+{
+  Item_t val;
+  struct list_node* next; 
+} list_node;
+
+void test_list()
+{
+  list_node* head = malloc(sizeof(list_node));
+  for(int i = 0; i < 10; i++)
+    insert(head, i);
+  
+  printf("test list: ");
+  for(list_node* p = head->next; p != NULL; p = p->next)
+    printf("%d ", p->val);
+}
+
+void insert(list_node* dest, int child)
+{
+  list_node* pre = dest, *p = dest->next;
+  
+  for(; p != NULL; pre = p, p = p->next)
+    ;
+  
+  pre->next = malloc(sizeof(list_node));
+  pre->next->val = child;
+  pre->next->next = NULL;
+}
+
+void print_proc_tree(Proc_info process[], int cnt_proc)
+{
+  list_node* arr = malloc(sizeof(list_node) * cnt_proc);
+  for(int i = 0; i < cnt_proc; i++) arr[i].next = NULL;
 
 
-int main(int argc, char *argv[]) {
-  for (int i = 0; i < argc; i++) {
-    assert(argv[i]);
-    printf("argv[%d] = %s\n", i, argv[i]);
+  for(int i = 0; i < cnt_proc; i++)
+  {
+    int parent = process[i].ppid;
+    for(int j = 0; j < cnt_proc; j++)
+      if(process[j].pid == parent)
+        insert(&arr[j], i);
   }
-  assert(!argv[argc]);
 
-  /*read the file of numeric*/
+}
+
+void my_pstree()
+{
   DIR* proc_dir = opendir("/proc");
   struct dirent* file_in_dir;
 
@@ -135,6 +174,18 @@ int main(int argc, char *argv[]) {
 
   }
   /*process the info*/
+  
+  free(processes);
+}
+
+int main(int argc, char *argv[]) {
+  for (int i = 0; i < argc; i++) {
+    assert(argv[i]);
+    printf("argv[%d] = %s\n", i, argv[i]);
+  }
+  assert(!argv[argc]);
+
+  /*read the file of numeric*/
   
   
   return 0;
