@@ -182,6 +182,7 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
   if(print_pid_switch)
   {
     printed[len_proc_name] = '(';
+    printed[len_proc_name+1] = '\0';
     sprintf(&printed[len_proc_name+1],"%d", processes[curr_i].pid);
     strcat(printed, ")");
   }
@@ -401,7 +402,6 @@ int main(int argc, char *argv[]) {
     switch(arg_buff)
     {
       case 'p':
-        printf("haha");
         show_pids = true;
         print_pid_switch = true;
         break;
