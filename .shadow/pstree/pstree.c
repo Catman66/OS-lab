@@ -70,6 +70,9 @@ void release_space(Process_info_arr* container)
   container->capacity = 0;
   container->size = 0;
 }
+
+typedef Proc_info item_swap_t;
+void swap(item_swap_t* a, item_swap_t* b);
 void sort_proc(Process_info_arr* arr)
 {
   Proc_info * processes = arr->content;
@@ -281,13 +284,7 @@ void print_arr(int arr[], int len)
     printf("%d ", arr[i]);
   printf("\n");
 }
-typedef Proc_info item_swap_t;
-void swap(item_swap_t* a, item_swap_t* b)
-{
-  item_swap_t tmpt = *a;
-  *a = *b;
-  *b = tmpt;
-}
+
 
 
 void read_proc_files(Process_info_arr* processes)
@@ -310,7 +307,7 @@ void read_proc_files(Process_info_arr* processes)
       
       //read the info of a proc
       read_proc_info(p_file, &buff);
-      add_new_proc(&processes, &buff);
+      add_new_proc(processes, &buff);
     }
   }
 }
@@ -403,6 +400,11 @@ int parse_arg(int argc, char* argv[])
 int main(int argc, char *argv[]) {
   int succ = 0;
   succ = parse_arg(argc, argv);
+  if(succ != 0)
+  {
+    printf("error in parsing arguments\n");
+    return 0;
+  }
   //parse the opts
   my_pstree();
 
@@ -439,7 +441,13 @@ void print_proc_tree(Process_info_arr* container)
 
 }
 
-
+typedef Proc_info item_swap_t;
+void swap(item_swap_t* a, item_swap_t* b)
+{
+  item_swap_t tmpt = *a;
+  *a = *b;
+  *b = tmpt;
+}
 
 /* used code
   for (int i = 0; i < argc; i++) {
