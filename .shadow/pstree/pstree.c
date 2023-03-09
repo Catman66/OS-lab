@@ -162,6 +162,8 @@ For more information about these matters, see the files named COPYING.\n"
 }
 
 bool print_pid_switch = false;
+bool sort_switch  = false;
+bool show_version_switch = false;
 
 void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc, int curr_i, int size_sp)
 {
@@ -212,34 +214,7 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
 
 }
 
-void print_proc_tree(Proc_info process[], int cnt_proc, bool show_pids, bool numeric_order)
-{
-  list_node* arr = malloc(sizeof(list_node) * cnt_proc);
-  for(int i = 0; i < cnt_proc; i++) arr[i].next = NULL;
-
-  int first_proc = -1;
-  for(int i = 0; i < cnt_proc; i++)
-  {
-    int parent = process[i].ppid;
-    
-    int j = 0;
-    for(; j < cnt_proc; j++)
-      if(process[j].pid == parent)
-      {
-        insert(&arr[j], i);
-        break;
-      }
-    if(j == cnt_proc)
-      first_proc = i;
-  }
-
-
-  assert(first_proc != -1);
-
-  print_recursively(process, arr, cnt_proc, first_proc, 0);
-
-}
-
+void print_proc_tree(Process_info_arr* processes);
 void print_arr(int arr[], int len)
 {
   for(int i = 0; i < len; i++)
@@ -253,71 +228,108 @@ void swap(item_swap_t* a, item_swap_t* b)
   *a = *b;
   *b = tmpt;
 }
-void sort_proc(Proc_info process[], int cnt_process)
+
+#define DEFAULT_NUM_PROCESS 64
+typedef struct
 {
+  Proc_info* content;
+  int size;
+  int capacity;
+} Process_info_arr;
+
+void init_process_arr(Process_info_arr* p_arr)
+{
+  p_arr->size = 0;
+  p_arr->capacity = DEFAULT_NUM_PROCESS;
+  p_arr->content = malloc(sizeof(Proc_info) * p_arr->capacity);
+}
+void release_space(Process_info_arr* container)
+{
+  free(container->content);
+  container->content = NULL;
+  container->capacity = 0;
+  container->size = 0;
+}
+void sort_proc(Process_info_arr* arr)
+{
+  Proc_info * processes = arr->content;
+  int cnt_process = arr->size;
+
   bool move = false;
   for(int i = 0; i < cnt_process - 1; i++)
   {
     move = false;
     for(int j = 0; j < cnt_process - 1 - i; j++)
-      if(process[j].pid > process[j+1].pid)
-        swap(&process[j], &process[j+1]), move = true;
+      if(processes[j].pid > processes[j+1].pid)
+        swap(&processes[j], &processes[j+1]), move = true;
     
     if(move == false)
       break;
   }
 }
-
-
-
-
-void my_pstree(bool in_numeric_order, bool show_pids)
+void add_new_proc(Process_info_arr* curr_processes, Proc_info* info)
 {
-  /*read the file of numeric*/
+  if(is_full(curr_processes))
+  {
+    curr_processes->capacity *= 2;
+
+    Proc_info* new_arr = malloc(sizeof(Proc_info) * curr_processes->capacity);
+
+    for(int i = 0; i < curr_processes->size; i++)
+      new_arr[i] = curr_processes->content[i];
+    
+    free(curr_processes->content);
+    curr_processes->content = new_arr;
+  }
+
+  curr_processes->content[curr_processes->size++] = *info;
+}
+
+
+void read_proc_files(Process_info_arr* processes)
+{
   DIR* proc_dir = opendir("/proc");
   struct dirent* file_in_dir;
-
-  char path[MAX_PATH_LEN] = "/proc/";
-  Proc_info *processes = malloc(sizeof(Proc_info)*MAX_PROC_NUM);
-  int cnt_proc = 0, capacity = MAX_PATH_LEN;
-
+  char proc_file_path[MAX_PATH_LEN] = "/proc/";
+  Proc_info buff;
 
   while((file_in_dir = readdir(proc_dir)) != NULL)
   {
     if(is_num(file_in_dir->d_name))
     {
-      path[6] = '\0';
-      strcat(path, file_in_dir->d_name);
-      strcat(path, "/stat");
+      proc_file_path[6] = '\0';
+      strcat(proc_file_path, file_in_dir->d_name);
+      strcat(proc_file_path, "/stat");
 
       /*read the file of path*/
-      FILE* p_file = fopen(path, "r");
+      FILE* p_file = fopen(proc_file_path, "r");
       
-      //if the arr of process overflows
-      if(cnt_proc == capacity)
-      {
-        capacity *= 2;
-
-        Proc_info* new_arr = malloc(sizeof(Proc_info) * capacity);
-
-        for(int i = 0; i < cnt_proc; i++)
-          new_arr[i] = processes[i];
-        
-        free(processes);
-        processes = new_arr;
-      }
-
       //read the info of a proc
-      read_proc_info(p_file, &processes[cnt_proc++]);
+      read_proc_info(p_file, &buff);
+      add_new_proc(&processes, &buff);
     }
   }
+}
 
-  if(in_numeric_order)
-    sort_proc(processes, cnt_proc);
+void my_pstree()
+{
+  if(show_version_switch)
+  {
+    print_version_pstree();
+    return;
+  }
+
+  Process_info_arr processes;
+  init_process_arr(&processes);
+  
+  read_proc_files(&processes);
+
+  if(sort_switch)
+    sort_proc(&processes);
   
   /*process the info*/
-  print_proc_tree(processes, cnt_proc, show_pids, in_numeric_order);
-  free(processes);
+  print_proc_tree(&processes);
+  release_space(&processes);
 }
 #include<unistd.h>
 #include<getopt.h>
@@ -359,42 +371,70 @@ struct option {
 
 */
 
-
-
-int main(int argc, char *argv[]) {
-
-  bool show_pids = false, numeric_sort = false, opt_V = false;
-  //parse the opts
+int parse_arg(int argc, char argv[])
+{
   char arg_buff;
   while((arg_buff = getopt_long(argc, argv, "Vpn", valid_long_options, NULL)) != -1)
   {
     switch(arg_buff)
     {
       case 'p':
-        show_pids = true;
         print_pid_switch = true;
         break;
       case 'V':
-        opt_V = true;
+        show_version_switch = true;
         break;
       case 'n':
-        numeric_sort = true;
+        sort_switch = true;
         break;
       default:
         printf("shouldn't reach here!");
         assert(0);
     }
   }
-    
-  if(opt_V)
-    print_version_pstree();
-  else
-    my_pstree(show_pids, numeric_sort);
-  
 
   return 0;
+}
+
+int main(int argc, char *argv[]) {
+  int succ = 0;
+  succ = parse_arg(argc, argv);
+  //parse the opts
+  my_pstree();
+
+  return 0;
+}
+
+
+void print_proc_tree(Process_info_arr* container)
+{
+  Proc_info* processes = container->content;
+  int cnt_proc = container->size;
+  list_node* arr = malloc(sizeof(list_node) * cnt_proc);
+  for(int i = 0; i < cnt_proc; i++) arr[i].next = NULL;
+
+  int first_proc = -1;
+  for(int i = 0; i < cnt_proc; i++)
+  {
+    int parent = processes[i].ppid;
+    
+    int j = 0;
+    for(; j < cnt_proc; j++)
+      if(processes[j].pid == parent)
+      {
+        insert(&arr[j], i);
+        break;
+      }
+    if(j == cnt_proc)
+      first_proc = i;
+  }
+
+  assert(first_proc != -1);
+
+  print_recursively(processes, arr, cnt_proc, first_proc, 0);
 
 }
+
 
 
 /* used code
