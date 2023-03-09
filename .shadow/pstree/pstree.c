@@ -162,26 +162,40 @@ the terms of the GNU General Public License.\
 For more information about these matters, see the files named COPYING.\n"
   );
 }
-void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc, int curr_i, int size_sp)
+
+bool print_pid_switch = false;
+
+void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc, int curr_i, int size_sp)
 {
   //is a leaf proc
   if(is_empty(&relation[curr_i]))
   {
-    printf("%s", Proc_info[curr_i].name);
+    printf("%s", processes[curr_i].name);
     return;
   }
   
-  printf("%s", Proc_info[curr_i].name);
+  //have at least one child
+  char printed[TASK_COMM_LEN+MAX_NUM_STR_LEN+2+1] = processes[curr_i].name;
+  int len_proc_name = strlen(processes[curr_i].name);
+  if(print_pid_switch)
+  {
+    printed[len_proc_name] = '(';
+    itoa(processes[curr_i].pid, &printed[len_proc_name+1], 10);
+    strcat(printed, ")");
+  }
+
+
+  printf("%s", processes[curr_i].name);
   printf("-");
 
-  size_sp += (strlen(Proc_info[curr_i].name) + 1);
+  size_sp += (strlen(printed) + 1);
   
   list_node* p = relation[curr_i].next;
   if(p->next != NULL)
     printf("+-");
   else
     printf("--");
-  print_recursively(Proc_info, relation, cnt_proc, p->val, size_sp+2);
+  print_recursively(processes, relation, cnt_proc, p->val, size_sp+2);
   printf("\n");
   for(p = p->next; p != NULL; p = p->next)
   {
@@ -193,7 +207,7 @@ void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc
     else
       printf("`-");
     
-    print_recursively(Proc_info, relation, cnt_proc, p->val, size_sp+2);
+    print_recursively(processes, relation, cnt_proc, p->val, size_sp+2);
     
     printf("\n");
   }
