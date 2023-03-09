@@ -48,7 +48,27 @@ typedef struct
   int ppid;
 } Proc_info;
 
+int print_width_i(int n)
+{
+  assert(n >= 0);
+  if(n < 10)
+    return 1;
+  
+  if(n < 100)
+    return 2;
 
+  if(n < 1000)
+    return 3;
+  
+  if(n < 10000)
+    return 4;
+
+  if(n < 100000)
+    return 5;
+  
+  printf("int too large\n");
+  assert(0);
+}
 
 void read_proc_info(FILE* proc_read_begin, Proc_info* buff)
 {
@@ -170,7 +190,7 @@ void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc
 
 }
 
-void print_proc_tree(Proc_info process[], int cnt_proc)
+void print_proc_tree(Proc_info process[], int cnt_proc, bool show_pids, bool numeric_order)
 {
   list_node* arr = malloc(sizeof(list_node) * cnt_proc);
   for(int i = 0; i < cnt_proc; i++) arr[i].next = NULL;
@@ -190,15 +210,63 @@ void print_proc_tree(Proc_info process[], int cnt_proc)
     if(j == cnt_proc)
       first_proc = i;
   }
+
+
   assert(first_proc != -1);
 
   print_recursively(process, arr, cnt_proc, first_proc, 0);
 
 }
 
-void my_pstree()
-{
 
+typedef int item_swap_t;
+void swap(item_swap_t* a, item_swap_t* b)
+{
+  item_swap_t tmpt = *a;
+  *a = *b;
+  *b = tmpt;
+}
+
+void sort_proc(Proc_info process[], int cnt_process)
+{
+  bool move = false;
+  for(int i = 0; i < cnt_process - 1; i++)
+  {
+    move = false;
+    for(int j = 0; j < cnt_process - 2 - i; j++)
+      if(process[j].pid > process[j+1].pid)
+        swap(&process[i], &process[j]), move = true;
+    
+    if(move == false)
+      break;
+  }
+}
+void sort_int(int process[], int cnt_process)
+{
+  bool move = false;
+  for(int i = 0; i < cnt_process - 1; i++)
+  {
+    move = false;
+    for(int j = 0; j < cnt_process - 2 - i; j++)
+      if(process[j] > process)
+        swap(&process[i], &process[j]), move = true;
+    
+    if(move == false)
+      break;
+  }
+}
+void test_sort()
+{
+  int arr[10] = {};
+  for(int i = 0; i < 10; i++)
+    arr[i] = 10-i;
+  print_arr(arr, 10);
+  sort_int(arr, 10);
+  print_arr(arr, 10);
+}
+
+void my_pstree(bool in_numeric_order, bool show_pids)
+{
   /*read the file of numeric*/
   DIR* proc_dir = opendir("/proc");
   struct dirent* file_in_dir;
@@ -219,6 +287,7 @@ void my_pstree()
       /*read the file of path*/
       FILE* p_file = fopen(path, "r");
       
+      //if the arr of process overflows
       if(cnt_proc == capacity)
       {
         capacity *= 2;
@@ -230,16 +299,18 @@ void my_pstree()
         
         free(processes);
         processes = new_arr;
-
       }
-      read_proc_info(p_file, &processes[cnt_proc++]);
 
-      
+      //read the info of a proc
+      read_proc_info(p_file, &processes[cnt_proc++]);
     }
   }
 
+  if(in_numeric_order)
+    sort_proc(processes, cnt_proc);
+  
   /*process the info*/
-  print_proc_tree(processes, cnt_proc);
+  print_proc_tree(processes, cnt_proc, show_pids, in_numeric_order);
   free(processes);
 }
 #include<unistd.h>
@@ -286,12 +357,35 @@ struct option {
 
 int main(int argc, char *argv[]) {
   
+  test_sort();
+  /*
+  bool show_pids = false, numeric_sort = false, opt_V = false;
   //parse the opts
   char arg_buff;
   while((arg_buff = getopt_long(argc, argv, "Vpn", valid_long_options, NULL)) != -1)
-    printf("%c ", arg_buff);
-  //my_pstree();
-  
+  {
+    switch(arg_buff)
+    {
+      case 'p':
+        show_pids = true;
+        break;
+      case 'V':
+        opt_V = true;
+        break;
+      case 'n':
+        numeric_sort = true;
+        break;
+      default:
+        printf("shouldn't reach here!");
+        assert(0);
+    }
+    
+    if(opt_V)
+      print_version_pstree();
+    else
+      my_pstree(show_pids, numeric_sort);
+  */
+
   return 0;
 }
 
