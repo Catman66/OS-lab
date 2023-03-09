@@ -402,6 +402,7 @@ int main(int argc, char *argv[]) {
     {
       case 'p':
         show_pids = true;
+        print_pid_switch = true;
         break;
       case 'V':
         opt_V = true;
