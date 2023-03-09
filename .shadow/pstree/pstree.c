@@ -151,6 +151,17 @@ void insert(list_node* dest, int child)
   pre->next->next = NULL;
 }
 
+void print_version_pstree()
+{
+  prinf("pstree (PSmisc) 23.4\
+Copyright (C) 1993-2020 Werner Almesberger and Craig Small\
+\
+PSmisc comes with ABSOLUTELY NO WARRANTY.\
+This is free software, and you are welcome to redistribute it under\
+the terms of the GNU General Public License.\
+For more information about these matters, see the files named COPYING.\n"
+  );
+}
 void print_recursively(Proc_info Proc_info[], list_node relation[], int cnt_proc, int curr_i, int size_sp)
 {
   //is a leaf proc
