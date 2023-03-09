@@ -248,20 +248,21 @@ void sort_proc(Proc_info process[], int cnt_process)
 }
 
 */
-void sort_int(int process[], int cnt_process)
+void sort_proc(Proc_info process[], int cnt_process)
 {
   bool move = false;
   for(int i = 0; i < cnt_process - 1; i++)
   {
     move = false;
     for(int j = 0; j < cnt_process - 1 - i; j++)
-      if(process[j] > process[j+1])
+      if(process[j].pid > process[j+1].pid)
         swap(&process[j], &process[j+1]), move = true;
     
     if(move == false)
       break;
   }
 }
+/*
 void test_sort()
 {
   int arr[10] = {};
@@ -271,6 +272,7 @@ void test_sort()
   sort_int(arr, 10);
   print_arr(arr, 10);
 }
+*/
 
 void my_pstree(bool in_numeric_order, bool show_pids)
 {
