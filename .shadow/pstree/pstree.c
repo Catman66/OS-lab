@@ -153,7 +153,7 @@ void insert(list_node* dest, int child)
 
 void print_version_pstree()
 {
-  prinf("pstree (PSmisc) 23.4\
+  printf("pstree (PSmisc) 23.4\
 Copyright (C) 1993-2020 Werner Almesberger and Craig Small\
 \
 PSmisc comes with ABSOLUTELY NO WARRANTY.\
