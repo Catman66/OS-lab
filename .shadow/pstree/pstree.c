@@ -184,12 +184,6 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
     return;
   
   //have at least one child
-
-  
-
-  
-
-  
   printf("-");
   size_sp += (strlen(printed) + 1);
   
@@ -206,7 +200,7 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
       printf(" ");
 
     if(p->next == NULL)
-      printf("+-");
+      printf("|-");
     else
       printf("`-");
     
