@@ -315,8 +315,8 @@ void my_pstree(bool in_numeric_order, bool show_pids)
     }
   }
 
-  // if(in_numeric_order)
-  //   sort_proc(processes, cnt_proc);
+  if(in_numeric_order)
+    sort_proc(processes, cnt_proc);
   
   /*process the info*/
   print_proc_tree(processes, cnt_proc, show_pids, in_numeric_order);
@@ -365,8 +365,7 @@ struct option {
 
 
 int main(int argc, char *argv[]) {
- 
-  /*
+
   bool show_pids = false, numeric_sort = false, opt_V = false;
   //parse the opts
   char arg_buff;
@@ -387,14 +386,16 @@ int main(int argc, char *argv[]) {
         printf("shouldn't reach here!");
         assert(0);
     }
+  }
     
     if(opt_V)
       print_version_pstree();
     else
       my_pstree(show_pids, numeric_sort);
-  */
+  
 
   return 0;
+
 }
 
 
