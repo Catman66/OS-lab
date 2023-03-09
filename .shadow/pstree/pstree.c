@@ -53,7 +53,10 @@ typedef struct
   int size;
   int capacity;
 } Process_info_arr;
-
+bool is_full_proc_arr(Process_info_arr* arr)
+{
+  return arr->size == arr->capacity;
+}
 
 
 
