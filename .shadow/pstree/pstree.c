@@ -401,6 +401,7 @@ int main(int argc, char *argv[]) {
     switch(arg_buff)
     {
       case 'p':
+        printf("here");
         show_pids = true;
         print_pid_switch = true;
         break;
