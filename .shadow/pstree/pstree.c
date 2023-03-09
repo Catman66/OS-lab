@@ -242,11 +242,55 @@ void my_pstree()
   print_proc_tree(processes, cnt_proc);
   free(processes);
 }
+#include<unistd.h>
+#include<getopt.h>
+
+const char * valid_option[] = {"-V", "-p", "-n"};
+const struct option valid_long_options[] = 
+{
+  //name, no-arg:0/arg:1/optional:2
+  { "show-pids",     0, NULL, 'p'},
+  { "numeric-sort",  0, NULL, 'n'},
+  { "version",       0, NULL, 'V'},
+  { "",              0, NULL, '\0'}
+};
+
+
+// struct option //
+/*
+struct option {
+               const char *name;
+               int         has_arg;
+               int        *flag;
+               int         val;
+           };
+
+       The meanings of the different fields are:
+
+       name   is the name of the long option.
+
+       has_arg
+              is:  no_argument (or 0) if the option does not take an argument; required_argument (or 1) if the option
+              requires an argument; or optional_argument (or 2) if the option takes an optional argument.
+
+       flag   specifies how results are returned for a long option.  If flag is NULL, then getopt_long() returns val.
+              (For  example,  the  calling program may set val to the equivalent short option character.)  Otherwise,
+              getopt_long() returns 0, and flag points to a variable which is set to val if the option is found,  but
+              left unchanged if the option is not found.
+
+       val    is the value to return, or to load into the variable pointed to by flag.
+
+*/
+
+
 
 int main(int argc, char *argv[]) {
-
-
-  my_pstree();
+  
+  //parse the opts
+  char arg_buff;
+  while((arg_buff = getopt_long(argc, argv, "Vpn", valid_long_options, NULL)) != -1)
+    printf("%c ", arg_buff);
+  //my_pstree();
   
   return 0;
 }
