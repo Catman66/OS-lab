@@ -255,8 +255,8 @@ void sort_int(int process[], int cnt_process)
   {
     move = false;
     for(int j = 0; j < cnt_process - 2 - i; j++)
-      if(process[j] > process)
-        swap(&process[i], &process[j]), move = true;
+      if(process[j] > process[j+1])
+        swap(&process[j], &process[j+1]), move = true;
     
     if(move == false)
       break;
@@ -313,8 +313,8 @@ void my_pstree(bool in_numeric_order, bool show_pids)
     }
   }
 
-  if(in_numeric_order)
-    sort_proc(processes, cnt_proc);
+  // if(in_numeric_order)
+  //   sort_proc(processes, cnt_proc);
   
   /*process the info*/
   print_proc_tree(processes, cnt_proc, show_pids, in_numeric_order);
