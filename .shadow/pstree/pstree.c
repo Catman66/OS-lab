@@ -165,31 +165,32 @@ bool print_pid_switch = false;
 
 void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc, int curr_i, int size_sp)
 {
-  //is a leaf proc
-  if(is_empty(&relation[curr_i]))
-  {
-    printf("%s", processes[curr_i].name);
-    return;
-  }
-  
-  //have at least one child
-
-  //to be printed
+  //printed this proc
   char printed[TASK_COMM_LEN+MAX_NUM_STR_LEN+2+1];
   strcpy(printed, processes[curr_i].name);
-
   int len_proc_name = strlen(processes[curr_i].name);
+  
   if(print_pid_switch)
   {
-    printed[len_proc_name] = '(';
-    printed[len_proc_name+1] = '\0';
+    strcat(printed, "(");
     sprintf(&printed[len_proc_name+1],"%d", processes[curr_i].pid);
     strcat(printed, ")");
   }
-
   printf("%s", printed);
-  printf("-");
+  
+  
+  //is a leaf proc
+  if(is_empty(&relation[curr_i]))
+    return;
+  
+  //have at least one child
 
+  
+
+  
+
+  
+  printf("-");
   size_sp += (strlen(printed) + 1);
   
   list_node* p = relation[curr_i].next;
