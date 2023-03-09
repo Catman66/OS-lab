@@ -153,12 +153,12 @@ void insert(list_node* dest, int child)
 
 void print_version_pstree()
 {
-  printf("pstree (PSmisc) 23.4\
-Copyright (C) 1993-2020 Werner Almesberger and Craig Small\
-\
-PSmisc comes with ABSOLUTELY NO WARRANTY.\
-This is free software, and you are welcome to redistribute it under\
-the terms of the GNU General Public License.\
+  printf("pstree (PSmisc) 23.4\n\
+Copyright (C) 1993-2020 Werner Almesberger and Craig Small\n\
+\n\
+PSmisc comes with ABSOLUTELY NO WARRANTY.\n\
+This is free software, and you are welcome to redistribute it under\n\
+the terms of the GNU General Public License.\n\
 For more information about these matters, see the files named COPYING.\n"
   );
 }
@@ -400,8 +400,8 @@ int main(int argc, char *argv[]) {
   {
     switch(arg_buff)
     {
+      printf("%c", arg_buff);
       case 'p':
-        printf("here");
         show_pids = true;
         print_pid_switch = true;
         break;
@@ -417,10 +417,10 @@ int main(int argc, char *argv[]) {
     }
   }
     
-    if(opt_V)
-      print_version_pstree();
-    else
-      my_pstree(show_pids, numeric_sort);
+  if(opt_V)
+    print_version_pstree();
+  else
+    my_pstree(show_pids, numeric_sort);
   
 
   return 0;
