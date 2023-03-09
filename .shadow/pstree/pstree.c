@@ -200,9 +200,9 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
       printf(" ");
 
     if(p->next == NULL)
-      printf("|-");
-    else
       printf("`-");
+    else
+      printf("|-");
     
     print_recursively(processes, relation, cnt_proc, p->val, size_sp+2);
     
