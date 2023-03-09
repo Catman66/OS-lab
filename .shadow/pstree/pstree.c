@@ -224,7 +224,7 @@ void print_arr(int arr[], int len)
     printf("%d ", arr[i]);
   printf("\n");
 }
-typedef int item_swap_t;
+typedef Proc_info item_swap_t;
 void swap(item_swap_t* a, item_swap_t* b)
 {
   item_swap_t tmpt = *a;
@@ -365,8 +365,7 @@ struct option {
 
 
 int main(int argc, char *argv[]) {
-  
-  test_sort();
+ 
   /*
   bool show_pids = false, numeric_sort = false, opt_V = false;
   //parse the opts
