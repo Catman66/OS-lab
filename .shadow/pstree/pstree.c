@@ -175,7 +175,9 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
   }
   
   //have at least one child
-  char printed[TASK_COMM_LEN+MAX_NUM_STR_LEN+2+1] = processes[curr_i].name;
+  char printed[TASK_COMM_LEN+MAX_NUM_STR_LEN+2+1];
+  strcpy(printed, processes[curr_i].name);
+
   int len_proc_name = strlen(processes[curr_i].name);
   if(print_pid_switch)
   {
