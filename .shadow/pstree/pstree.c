@@ -276,10 +276,9 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
     
     print_recursively(processes, relation, cnt_proc, p->val, size_sp+2);
     
-    printf("\n");
+    if(p->next != NULL)
+      printf("\n");
   }
-  
-
 }
 
 void print_proc_tree(Process_info_arr* processes);
