@@ -46,6 +46,63 @@ typedef struct
   int ppid;
 } Proc_info;
 
+#define DEFAULT_NUM_PROCESS 64
+typedef struct
+{
+  Proc_info* content;
+  int size;
+  int capacity;
+} Process_info_arr;
+
+void init_process_arr(Process_info_arr* p_arr)
+{
+  p_arr->size = 0;
+  p_arr->capacity = DEFAULT_NUM_PROCESS;
+  p_arr->content = malloc(sizeof(Proc_info) * p_arr->capacity);
+}
+void release_space(Process_info_arr* container)
+{
+  free(container->content);
+  container->content = NULL;
+  container->capacity = 0;
+  container->size = 0;
+}
+void sort_proc(Process_info_arr* arr)
+{
+  Proc_info * processes = arr->content;
+  int cnt_process = arr->size;
+
+  bool move = false;
+  for(int i = 0; i < cnt_process - 1; i++)
+  {
+    move = false;
+    for(int j = 0; j < cnt_process - 1 - i; j++)
+      if(processes[j].pid > processes[j+1].pid)
+        swap(&processes[j], &processes[j+1]), move = true;
+    
+    if(move == false)
+      break;
+  }
+}
+void add_new_proc(Process_info_arr* curr_processes, Proc_info* info)
+{
+  if(is_full(curr_processes))
+  {
+    curr_processes->capacity *= 2;
+
+    Proc_info* new_arr = malloc(sizeof(Proc_info) * curr_processes->capacity);
+
+    for(int i = 0; i < curr_processes->size; i++)
+      new_arr[i] = curr_processes->content[i];
+    
+    free(curr_processes->content);
+    curr_processes->content = new_arr;
+  }
+
+  curr_processes->content[curr_processes->size++] = *info;
+}
+
+
 int print_width_i(int n)
 {
   assert(n >= 0);
@@ -229,62 +286,6 @@ void swap(item_swap_t* a, item_swap_t* b)
   *b = tmpt;
 }
 
-#define DEFAULT_NUM_PROCESS 64
-typedef struct
-{
-  Proc_info* content;
-  int size;
-  int capacity;
-} Process_info_arr;
-
-void init_process_arr(Process_info_arr* p_arr)
-{
-  p_arr->size = 0;
-  p_arr->capacity = DEFAULT_NUM_PROCESS;
-  p_arr->content = malloc(sizeof(Proc_info) * p_arr->capacity);
-}
-void release_space(Process_info_arr* container)
-{
-  free(container->content);
-  container->content = NULL;
-  container->capacity = 0;
-  container->size = 0;
-}
-void sort_proc(Process_info_arr* arr)
-{
-  Proc_info * processes = arr->content;
-  int cnt_process = arr->size;
-
-  bool move = false;
-  for(int i = 0; i < cnt_process - 1; i++)
-  {
-    move = false;
-    for(int j = 0; j < cnt_process - 1 - i; j++)
-      if(processes[j].pid > processes[j+1].pid)
-        swap(&processes[j], &processes[j+1]), move = true;
-    
-    if(move == false)
-      break;
-  }
-}
-void add_new_proc(Process_info_arr* curr_processes, Proc_info* info)
-{
-  if(is_full(curr_processes))
-  {
-    curr_processes->capacity *= 2;
-
-    Proc_info* new_arr = malloc(sizeof(Proc_info) * curr_processes->capacity);
-
-    for(int i = 0; i < curr_processes->size; i++)
-      new_arr[i] = curr_processes->content[i];
-    
-    free(curr_processes->content);
-    curr_processes->content = new_arr;
-  }
-
-  curr_processes->content[curr_processes->size++] = *info;
-}
-
 
 void read_proc_files(Process_info_arr* processes)
 {
@@ -371,7 +372,7 @@ struct option {
 
 */
 
-int parse_arg(int argc, char argv[])
+int parse_arg(int argc, char* argv[])
 {
   char arg_buff;
   while((arg_buff = getopt_long(argc, argv, "Vpn", valid_long_options, NULL)) != -1)
