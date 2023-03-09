@@ -218,7 +218,12 @@ void print_proc_tree(Proc_info process[], int cnt_proc, bool show_pids, bool num
 
 }
 
-
+void print_arr(int arr[], int len)
+{
+  for(int i = 0; i < len; i++)
+    printf("%d ", arr[i]);
+  printf("\n");
+}
 typedef int item_swap_t;
 void swap(item_swap_t* a, item_swap_t* b)
 {
@@ -226,7 +231,7 @@ void swap(item_swap_t* a, item_swap_t* b)
   *a = *b;
   *b = tmpt;
 }
-
+/*
 void sort_proc(Proc_info process[], int cnt_process)
 {
   bool move = false;
@@ -241,6 +246,8 @@ void sort_proc(Proc_info process[], int cnt_process)
       break;
   }
 }
+
+*/
 void sort_int(int process[], int cnt_process)
 {
   bool move = false;
