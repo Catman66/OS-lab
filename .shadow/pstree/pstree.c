@@ -9,8 +9,6 @@
 #define TASK_COMM_LEN 16
 #endif
 
-
-
 #define MAX_NUM_STR_LEN 10
 typedef enum
 {
@@ -175,6 +173,8 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
   }
   
   //have at least one child
+
+  //to be printed
   char printed[TASK_COMM_LEN+MAX_NUM_STR_LEN+2+1];
   strcpy(printed, processes[curr_i].name);
 
@@ -187,8 +187,7 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
     strcat(printed, ")");
   }
 
-
-  printf("%s", processes[curr_i].name);
+  printf("%s", printed);
   printf("-");
 
   size_sp += (strlen(printed) + 1);
@@ -259,23 +258,6 @@ void swap(item_swap_t* a, item_swap_t* b)
   *a = *b;
   *b = tmpt;
 }
-/*
-void sort_proc(Proc_info process[], int cnt_process)
-{
-  bool move = false;
-  for(int i = 0; i < cnt_process - 1; i++)
-  {
-    move = false;
-    for(int j = 0; j < cnt_process - 2 - i; j++)
-      if(process[j].pid > process[j+1].pid)
-        swap(&process[i], &process[j]), move = true;
-    
-    if(move == false)
-      break;
-  }
-}
-
-*/
 void sort_proc(Proc_info process[], int cnt_process)
 {
   bool move = false;
@@ -290,17 +272,9 @@ void sort_proc(Proc_info process[], int cnt_process)
       break;
   }
 }
-/*
-void test_sort()
-{
-  int arr[10] = {};
-  for(int i = 0; i < 10; i++)
-    arr[i] = i*i - 13*i + 50;
-  print_arr(arr, 10);
-  sort_int(arr, 10);
-  print_arr(arr, 10);
-}
-*/
+
+
+
 
 void my_pstree(bool in_numeric_order, bool show_pids)
 {
