@@ -254,7 +254,7 @@ void sort_int(int process[], int cnt_process)
   for(int i = 0; i < cnt_process - 1; i++)
   {
     move = false;
-    for(int j = 0; j < cnt_process - 2 - i; j++)
+    for(int j = 0; j < cnt_process - 1 - i; j++)
       if(process[j] > process[j+1])
         swap(&process[j], &process[j+1]), move = true;
     
