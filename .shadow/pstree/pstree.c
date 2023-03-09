@@ -398,10 +398,10 @@ int main(int argc, char *argv[]) {
   char arg_buff;
   while((arg_buff = getopt_long(argc, argv, "Vpn", valid_long_options, NULL)) != -1)
   {
-    printf("%c", arg_buff);
     switch(arg_buff)
     {
       case 'p':
+        printf("haha");
         show_pids = true;
         print_pid_switch = true;
         break;
