@@ -182,7 +182,7 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
   if(print_pid_switch)
   {
     printed[len_proc_name] = '(';
-    itoa(processes[curr_i].pid, &printed[len_proc_name+1], 10);
+    sprintf(&printed[len_proc_name+1],"%d", processes[curr_i].pid);
     strcat(printed, ")");
   }
 
