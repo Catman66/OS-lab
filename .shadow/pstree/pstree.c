@@ -95,7 +95,7 @@ void sort_proc(Process_info_arr* arr)
 }
 void add_new_proc(Process_info_arr* curr_processes, Proc_info* info)
 {
-  if(is_full(curr_processes))
+  if(is_full_proc_arr(curr_processes))
   {
     curr_processes->capacity *= 2;
 
