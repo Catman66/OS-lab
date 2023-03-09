@@ -252,7 +252,7 @@ const struct option valid_long_options[] =
   { "show-pids",     0, NULL, 'p'},
   { "numeric-sort",  0, NULL, 'n'},
   { "version",       0, NULL, 'V'},
-  { "",              0, NULL, '\0'}
+  { 0,              0, NULL, '\0'}
 };
 
 
