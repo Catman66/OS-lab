@@ -182,7 +182,7 @@ typedef struct list_node
   struct list_node* next; 
 } list_node;
 void insert(list_node* dest, int child);
-bool is_empty(list_node* head)
+bool is_empty_list(list_node* head)
 {
   return head->next == NULL;
 }
@@ -242,7 +242,7 @@ void print_recursively(Proc_info processes[], list_node relation[], int cnt_proc
   
   
   //is a leaf proc
-  if(is_empty(&relation[curr_i]))
+  if(is_empty_list(&relation[curr_i]))
     return;
   
   //have at least one child
