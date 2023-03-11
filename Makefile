@@ -1,4 +1,4 @@
-export TOKEN := ???
+export TOKEN := KYfFcnKg
 
 # ----- DO NOT MODIFY -----
 
