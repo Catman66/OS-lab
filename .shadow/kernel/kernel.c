@@ -3,7 +3,8 @@
 #include <klib.h>
 #include <klib-macros.h>
 
-#define SIDE 16
+#define SIDE 32
+//in pixel, size of one block
 
 static int w, h;  // Screen size
 
