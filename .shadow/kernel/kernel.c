@@ -29,7 +29,7 @@ void print_key() {
 static void draw_tile(int x, int y, int w, int h, uint32_t color) {
   uint32_t pixels[w * h]; // WARNING: large stack-allocated memory
 
-  puts(" in draw tile\n");
+
   AM_GPU_FBDRAW_T event = {
     .x = x, .y = y, .w = w, .h = h, .sync = 1,
     .pixels = pixels,
@@ -42,10 +42,8 @@ static void draw_tile(int x, int y, int w, int h, uint32_t color) {
     pixels[i] = color;
   }
 
-  puts("before calling io_write\n");
 
   ioe_write(AM_GPU_FBDRAW, &event);
-  puts("after calling io\n");
 }
 
 void splash() {
@@ -78,19 +76,25 @@ void show_photo()
 
   //the photo will be some grids 
   //4*4
-  int grid_width = w/4, grid_height = h/4;
-
-
+  
 
   uint32_t color = 0x0;
-  for(int i = 0; i < 4; i++)
-    for(int j = 0; j < 4; j++)
-    {
-      puts("incircle now\n");
-      draw_tile(i*grid_width, j*grid_height, grid_width, grid_height, color);
-      color += 0x100;       //renew the color
-      puts("after calling draw_tile");
+  for (int x = 0; x * SIDE <= w; x ++) {
+    for (int y = 0; y * SIDE <= h; y++) {
+      // trans a cell of side*side once
+      
+      // will be w/side * h/side  cells;
+      //(x, y) will be the idx of the cells
+      color = (x*4) / (w/SIDE) ;
+      assert(color < 0x100);
+      color <<= 8;
+      color += (y*4) / (h/SIDE);
+      draw_tile(x,y, SIDE, SIDE, color);
+      
     }
+  }
+
+
 }
 
 // Operating system is a C program!
