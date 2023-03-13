@@ -29,18 +29,23 @@ void print_key() {
 static void draw_tile(int x, int y, int w, int h, uint32_t color) {
   uint32_t pixels[w * h]; // WARNING: large stack-allocated memory
 
-  
+  puts(" in draw tile\n");
   AM_GPU_FBDRAW_T event = {
     .x = x, .y = y, .w = w, .h = h, .sync = 1,
     .pixels = pixels,
   };
+
 
   //paint an area of w*h 
   // with color 
   for (int i = 0; i < w * h; i++) {
     pixels[i] = color;
   }
+
+  puts("before calling io_write\n");
+
   ioe_write(AM_GPU_FBDRAW, &event);
+  puts("after calling io\n");
 }
 
 void splash() {
