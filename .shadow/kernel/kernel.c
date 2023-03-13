@@ -76,13 +76,11 @@ void show_photo()
 
   //the photo will be some grids 
   //4*4
-  
-
   uint32_t color = 0x0;
   for (int x = 0; x * SIDE <= w; x ++) {
     
     for (int y = 0; y * SIDE <= h; y++) {
-      
+      assert(color < 0x1000000);
       draw_tile(x,y, SIDE, SIDE, color);
       color += 0x10;
     
