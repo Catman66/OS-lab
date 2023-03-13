@@ -217,6 +217,7 @@ void insert(list_node* dest, int child)
 
 void print_version_pstree()
 {
+  /*
   printf("pstree (PSmisc) 23.4\n\
 Copyright (C) 1993-2020 Werner Almesberger and Craig Small\n\
 \n\
@@ -225,6 +226,7 @@ This is free software, and you are welcome to redistribute it under\n\
 the terms of the GNU General Public License.\n\
 For more information about these matters, see the files named COPYING.\n"
   );
+  */
 }
 
 bool print_pid_switch = false;
