@@ -82,10 +82,10 @@ void show_photo()
     for (int y = 0; y * SIDE <= h; y++) {
       assert(color < 0x1000000);
       draw_tile(x*SIDE,y*SIDE, SIDE, SIDE, color);
-      color += 0x10;
+      color += 0x05;
     
     }
-    color += 0x1000;
+    color += 0x500;
   }
 
 
