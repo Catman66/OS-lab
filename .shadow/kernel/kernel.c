@@ -82,10 +82,12 @@ void show_photo()
   for (int x = 0; x * SIDE <= w; x ++) {
     
     for (int y = 0; y * SIDE <= h; y++) {
+      
       draw_tile(x,y, SIDE, SIDE, color);
-      color += 0x1;
+      color += 0x10;
+    
     }
-    color += 0x100;
+    color += 0x1000;
   }
 
 
