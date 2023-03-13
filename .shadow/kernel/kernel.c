@@ -798,7 +798,8 @@ uint32_t pix_info[] =
 int ind(int x, int y)
 {
   assert(x < width_photo && y < height_photo);
-  return x + y*height_photo;
+  
+  return x * height_photo + y;
 }
 
 #define SIDE 16
