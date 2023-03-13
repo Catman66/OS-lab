@@ -80,18 +80,12 @@ void show_photo()
 
   uint32_t color = 0x0;
   for (int x = 0; x * SIDE <= w; x ++) {
+    
     for (int y = 0; y * SIDE <= h; y++) {
-      // trans a cell of side*side once
-      
-      // will be w/side * h/side  cells;
-      //(x, y) will be the idx of the cells
-      color = (x*4) / (w/SIDE) ;
-      assert(color < 0x100);
-      color <<= 8;
-      color += (y*4) / (h/SIDE);
       draw_tile(x,y, SIDE, SIDE, color);
-      
+      color += 0x1;
     }
+    color += 0x100;
   }
 
 
@@ -106,10 +100,9 @@ int main(const char *args) {
   puts(args);  // make run mainargs=xxx
   puts("\"\n");
 
-  puts("before showing photo\n");
   //splash();
   show_photo();
-  puts("photo shown \n");
+  
   puts("Press any key to see its key code...\n");
   while (1) {
     print_key();
