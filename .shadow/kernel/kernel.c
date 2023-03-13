@@ -34,6 +34,9 @@ static void draw_tile(int x, int y, int w, int h, uint32_t color) {
     .x = x, .y = y, .w = w, .h = h, .sync = 1,
     .pixels = pixels,
   };
+
+  //paint an area of w*h 
+  // with color 
   for (int i = 0; i < w * h; i++) {
     pixels[i] = color;
   }
@@ -70,7 +73,7 @@ void show_photo()
 
   //the photo will be some grids 
   //4*4
-  int grid_width = w/4, grid_height = h /4;
+  int grid_width = w/4, grid_height = h/4;
 
 
   uint32_t color = 0x0;
@@ -93,7 +96,7 @@ int main(const char *args) {
 
   splash();
   //show_photo();
-
+  puts("photo shown \n");
   puts("Press any key to see its key code...\n");
   while (1) {
     print_key();
