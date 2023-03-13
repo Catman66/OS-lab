@@ -28,6 +28,8 @@ void print_key() {
 
 static void draw_tile(int x, int y, int w, int h, uint32_t color) {
   uint32_t pixels[w * h]; // WARNING: large stack-allocated memory
+
+  
   AM_GPU_FBDRAW_T event = {
     .x = x, .y = y, .w = w, .h = h, .sync = 1,
     .pixels = pixels,
@@ -39,6 +41,9 @@ static void draw_tile(int x, int y, int w, int h, uint32_t color) {
 }
 
 void splash() {
+  
+  //fetch the width and hight of the screen
+  //in pix
   AM_GPU_CONFIG_T info = {0};
   ioe_read(AM_GPU_CONFIG, &info);
   w = info.width;
@@ -57,7 +62,24 @@ void splash() {
 
 void show_photo()
 {
-  
+  //fetch the width and hight of the screen
+  AM_GPU_CONFIG_T info = {0};
+  ioe_read(AM_GPU_CONFIG, &info);
+  w = info.width;
+  h = info.height;
+
+  //the photo will be some grids 
+  //4*4
+  int grid_width = w/4, grid_height = h /4;
+
+
+  uint32_t color = 0x0;
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+    {
+      draw_tile(i*grid_width, j*grid_height, grid_width, grid_height, color);
+      color += 0x100;       //renew the color
+    }
 }
 
 // Operating system is a C program!
@@ -69,8 +91,9 @@ int main(const char *args) {
   puts(args);  // make run mainargs=xxx
   puts("\"\n");
 
-  splash();
-
+  //splash();
+  show_photo();
+  
   puts("Press any key to see its key code...\n");
   while (1) {
     print_key();
