@@ -219,20 +219,7 @@ void insert(list_node* dest, int child)
 
 void print_version_pstree()
 {
-  //int fd_stdout = 1;
-  //const char version_info[] = "pstree planted by a happy cat programmer. \n";
-  //write(fd_stdout, version_info, strlen(version_info));
-  fprintf(stderr, "pstree planted by a happy cat programmer. \n");
-  /*
-  printf("pstree (PSmisc) 23.4\n\
-Copyright (C) 1993-2020 Werner Almesberger and Craig Small\n\
-\n\
-PSmisc comes with ABSOLUTELY NO WARRANTY.\n\
-This is free software, and you are welcome to redistribute it under\n\
-the terms of the GNU General Public License.\n\
-For more information about these matters, see the files named COPYING.\n"
-  );
-  */
+  fprintf(stderr, " pstree planted by a happy cat programmer. \n");
 }
 
 bool print_pid_switch = false;
