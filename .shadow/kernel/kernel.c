@@ -94,6 +94,7 @@ int main(const char *args) {
   puts(args);  // make run mainargs=xxx
   puts("\"\n");
 
+  puts("before showing photo\n");
   //splash();
   show_photo();
   puts("photo shown \n");
