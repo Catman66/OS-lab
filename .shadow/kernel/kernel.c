@@ -85,7 +85,7 @@ void show_photo()
       color += 0x05;
     
     }
-    color += 0x500;
+    color += 0x100;
   }
 
 
