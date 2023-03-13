@@ -91,9 +91,9 @@ int main(const char *args) {
   puts(args);  // make run mainargs=xxx
   puts("\"\n");
 
-  //splash();
-  show_photo();
-  
+  splash();
+  //show_photo();
+
   puts("Press any key to see its key code...\n");
   while (1) {
     print_key();
