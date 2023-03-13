@@ -74,6 +74,7 @@ void show_photo()
   //the photo will be some grids 
   //4*4
   int grid_width = w/4, grid_height = h/4;
+  
 
 
   uint32_t color = 0x0;
