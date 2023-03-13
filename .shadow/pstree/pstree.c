@@ -217,6 +217,9 @@ void insert(list_node* dest, int child)
 
 void print_version_pstree()
 {
+  int fd_stdout = 1;
+  const char version_info[] = "pstree planted by a happy cat programmer. \n";
+  write(fd_stdout, version_info, strlen(version_info));
   /*
   printf("pstree (PSmisc) 23.4\n\
 Copyright (C) 1993-2020 Werner Almesberger and Craig Small\n\
