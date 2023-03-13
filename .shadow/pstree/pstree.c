@@ -4,6 +4,8 @@
 #include <dirent.h>
 #include <string.h>
 #include <malloc.h>
+#include<unistd.h>
+#include<getopt.h>
 
 #ifndef TASK_COMM_LEN
 #define TASK_COMM_LEN 16
@@ -341,8 +343,7 @@ void my_pstree()
   print_proc_tree(&processes);
   release_space(&processes);
 }
-#include<unistd.h>
-#include<getopt.h>
+
 
 const char * valid_option[] = {"-V", "-p", "-n"};
 const struct option valid_long_options[] = 
