@@ -47,10 +47,17 @@ void splash() {
   for (int x = 0; x * SIDE <= w; x ++) {
     for (int y = 0; y * SIDE <= h; y++) {
       if ((x & 1) ^ (y & 1)) {
-        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0xff00ff); // white
+        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0xffffff); // white
       }
     }
   }
+
+  //X: the last argument of draw_tile signify the color
+}
+
+void show_photo()
+{
+  
 }
 
 // Operating system is a C program!
