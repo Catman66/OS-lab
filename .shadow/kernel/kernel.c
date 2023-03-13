@@ -26,8 +26,10 @@ void print_key() {
     puts(key_names[event.keycode]);
     puts("\n");
 
+    //my piece
     if(event.keycode == AM_KEY_ESCAPE)
       halt(0);
+    //end my piece
   }
 }
 
@@ -58,7 +60,7 @@ void splash() {
   for (int x = 0; x * SIDE <= w; x ++) {
     for (int y = 0; y * SIDE <= h; y++) {
       if ((x & 1) ^ (y & 1)) {
-        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0xffffff); // white
+        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0xff0000); // white
       }
     }
   }
@@ -99,8 +101,8 @@ int main(const char *args) {
   puts(args);  // make run mainargs=xxx
   puts("\"\n");
 
-  //splash();
-  show_photo();
+  splash();
+  //show_photo();
   
   puts("Press any key to see its key code...\n");
   while (1) {
