@@ -219,8 +219,8 @@ void insert(list_node* dest, int child)
 
 void print_version_pstree()
 {
-  int fd_stdout = 1;
-  const char version_info[] = "pstree planted by a happy cat programmer. \n";
+  //int fd_stdout = 1;
+  //const char version_info[] = "pstree planted by a happy cat programmer. \n";
   //write(fd_stdout, version_info, strlen(version_info));
   fprintf(stderr, "pstree planted by a happy cat programmer. \n");
   /*
