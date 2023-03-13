@@ -84,6 +84,7 @@ void show_photo()
       puts("incircle now\n");
       draw_tile(i*grid_width, j*grid_height, grid_width, grid_height, color);
       color += 0x100;       //renew the color
+      puts("after calling draw_tile");
     }
 }
 
