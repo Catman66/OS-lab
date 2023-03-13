@@ -74,13 +74,14 @@ void show_photo()
   //the photo will be some grids 
   //4*4
   int grid_width = w/4, grid_height = h/4;
-  
+
 
 
   uint32_t color = 0x0;
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)
     {
+      puts("incircle now\n");
       draw_tile(i*grid_width, j*grid_height, grid_width, grid_height, color);
       color += 0x100;       //renew the color
     }
