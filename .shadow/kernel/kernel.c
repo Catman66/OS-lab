@@ -800,7 +800,7 @@ uint32_t pix_info[] =
 
 int ind(int h, int r)
 {
-  assert(h < width_photo && r < height_photo);
+  assert(h < height_photo && r < width_photo);
   return h * width_photo + r;
 }
 
