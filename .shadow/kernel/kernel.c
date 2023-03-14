@@ -941,8 +941,8 @@ void show_photo()
 //       draw_block(x * SIDE, y * SIDE, SIDE, SIDE);
 //     }
 //   }
- 
  draw_block(0,0,SIDE, SIDE);
+ draw_block(0,1, SIDE,SIDE);
  
 }
 
