@@ -905,7 +905,8 @@ static void draw_block(int x, int y, int width_block, int height_block) {
       pixels[dx*height_block+dy] = color;
     }
   }
-  color += 0x10;
+  color += 0x101010;
+  color %= 0x1000000;
   ioe_write(AM_GPU_FBDRAW, &event);
 }
 void show_photo()
