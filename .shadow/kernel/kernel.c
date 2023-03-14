@@ -876,6 +876,10 @@ void splash() {
   //X: the last argument of draw_tile signify the color
 }
 
+void fill_block()
+{
+
+}
 void show_photo()
 {
   //fetch the width and hight of the screen
@@ -884,7 +888,6 @@ void show_photo()
   w = info.width;
   h = info.height;
 
-  
   //the photo will be some grids 
   //4*4
   AM_GPU_FBDRAW_T event;
@@ -892,8 +895,9 @@ void show_photo()
   event.w = 1, event.h = 1, event.sync = 1;
   event.pixels = &color;
 
-
   //one pix at a time
+
+  
   for (int x = 0; x < w; x ++) {
     for (int y = 0; y  < h; y++) {
       color = map_xy_pix(x*width_photo/w, y*height_photo/h);
@@ -902,8 +906,6 @@ void show_photo()
       ioe_write(AM_GPU_FBDRAW, &event);
     }
   }
-
-  
 }
 
 // Operating system is a C program!

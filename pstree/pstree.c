@@ -4,6 +4,8 @@
 #include <dirent.h>
 #include <string.h>
 #include <malloc.h>
+#include<unistd.h>
+#include<getopt.h>
 
 #ifndef TASK_COMM_LEN
 #define TASK_COMM_LEN 16
@@ -217,14 +219,7 @@ void insert(list_node* dest, int child)
 
 void print_version_pstree()
 {
-  printf("pstree (PSmisc) 23.4\n\
-Copyright (C) 1993-2020 Werner Almesberger and Craig Small\n\
-\n\
-PSmisc comes with ABSOLUTELY NO WARRANTY.\n\
-This is free software, and you are welcome to redistribute it under\n\
-the terms of the GNU General Public License.\n\
-For more information about these matters, see the files named COPYING.\n"
-  );
+  fprintf(stderr, " pstree planted by a happy cat programmer. \n");
 }
 
 bool print_pid_switch = false;
@@ -336,8 +331,7 @@ void my_pstree()
   print_proc_tree(&processes);
   release_space(&processes);
 }
-#include<unistd.h>
-#include<getopt.h>
+
 
 const char * valid_option[] = {"-V", "-p", "-n"};
 const struct option valid_long_options[] = 
