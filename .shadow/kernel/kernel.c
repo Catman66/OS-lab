@@ -896,7 +896,7 @@ void show_photo()
   //one pix at a time
   for (int x = 0; x < w; x ++) {
     for (int y = 0; y  < h; y++) {
-      color = map_xy_pix(x*width_photo/w, y*height_photo/h);
+      color = map_xy_pix(x*height_photo/w, y*width_photo/h);
       event.x = x, event.y = y;
 
       ioe_write(AM_GPU_FBDRAW, &event);
