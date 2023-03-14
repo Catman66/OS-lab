@@ -805,6 +805,8 @@ int ind(int h, int r)
 }
 
 typedef uint32_t color_t;
+#define RGB_WHITE 0xffffff;
+
 color_t map_xy_pix(int x, int y)
 {
   return pix_info[ind(y, x)]; 
@@ -876,9 +878,30 @@ void splash() {
   //X: the last argument of draw_tile signify the color
 }
 
-void fill_block()
-{
+static void draw_block(int x, int y, int with_block, int height_block) {
+  uint32_t pixels[with_block * height_block]; // WARNING: large stack-allocated memory
 
+  AM_GPU_FBDRAW_T event = {
+    .x = x, .y = y, .w = with_block, .h = height_block, .sync = 1,
+    .pixels = pixels,
+  };
+
+  //paint an area of w*h 
+  // with color 
+  for (int dx = 0; dx < with_block; dx++) 
+  {
+    for(int dy = 0; dy < height_block; dy++)
+    {
+      int x_pho = x+dx, y_pho = y+dy;
+      if(x_pho > w || y_pho > h)   
+      {
+        pixels[dx*h+dy] = 0xffffff;
+        continue;
+      }  
+      pixels[dx*h+dy] = map_xy_pix(x_pho, y_pho);
+    }
+  }
+  ioe_write(AM_GPU_FBDRAW, &event);
 }
 void show_photo()
 {
@@ -890,6 +913,7 @@ void show_photo()
 
   //the photo will be some grids 
   //4*4
+  /*
   AM_GPU_FBDRAW_T event;
   uint32_t color;
   event.w = 1, event.h = 1, event.sync = 1;
@@ -906,6 +930,13 @@ void show_photo()
       ioe_write(AM_GPU_FBDRAW, &event);
     }
   }
+  */
+  for (int x = 0; x*SIDE <= w; x ++) {
+    for (int y = 0; y*SIDE <= h; y++) {
+      draw_block(x * SIDE, y * SIDE, SIDE, SIDE);
+    }
+  }
+ 
 }
 
 // Operating system is a C program!
