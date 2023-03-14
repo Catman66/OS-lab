@@ -879,6 +879,9 @@ void splash() {
 }
 
 static void draw_block(int x, int y, int width_block, int height_block) {
+  if(x+width_block >= w || y+height_block >= h)
+    return;
+  
   uint32_t pixels[width_block * height_block]; // WARNING: large stack-allocated memory
 
   AM_GPU_FBDRAW_T event = {
