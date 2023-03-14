@@ -931,7 +931,7 @@ void show_photo()
     }
   }
   */
-  for (int x = 0; x*SIDE <= w; x ++) {
+  for (int x = 0; x*SIDE <= w; x++) {
     for (int y = 0; y*SIDE <= h; y++) {
       draw_block(x * SIDE, y * SIDE, SIDE, SIDE);
     }
