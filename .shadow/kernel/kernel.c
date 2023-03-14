@@ -889,17 +889,18 @@ static void draw_block(int x, int y, int width_block, int height_block) {
 
   //paint an area of w*h 
   // with color 
+  color_t color;
   for (int dx = 0; dx < width_block; dx++) 
   {
     for(int dy = 0; dy < height_block; dy++)
     {
       int x_screen = x+dx, y_screen = y+dy;
       if(x_screen >= w || y_screen >= h)   
-      {
-        pixels[dx*height_block+dy] = 0x0;
-        continue;
-      }  
-      pixels[dx*height_block+dy] = map_xy_pix(x_screen*width_photo/w, y_screen*height_block/h);
+        color = 0x0;
+      else
+        color = map_xy_pix(x_screen*width_photo/w, y_screen*height_block/h);
+        
+      pixels[dx*height_block+dy] = color;
     }
   }
   ioe_write(AM_GPU_FBDRAW, &event);
