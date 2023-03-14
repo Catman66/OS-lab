@@ -898,7 +898,7 @@ static void draw_block(int x, int y, int with_block, int height_block) {
         pixels[dx*h+dy] = 0xffffff;
         continue;
       }  
-      pixels[dx*h+dy] = map_xy_pix(x_pho, y_pho);
+      pixels[dx*h+dy] = map_xy_pix(x_pho*width_photo/w, y_pho*height_block/h);
     }
   }
   ioe_write(AM_GPU_FBDRAW, &event);
