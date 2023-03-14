@@ -879,8 +879,6 @@ void splash() {
 }
 
 static void draw_block(int x, int y, int width_block, int height_block) {
-  if(x+width_block >= w || y+height_block >= h)
-    return;
   
   uint32_t pixels[width_block * height_block]; // WARNING: large stack-allocated memory
 
@@ -898,7 +896,7 @@ static void draw_block(int x, int y, int width_block, int height_block) {
       int x_screen = x+dx, y_screen = y+dy;
       if(x_screen >= w || y_screen >= h)   
       {
-        pixels[dx*h+dy] = 0x0;
+        pixels[dx*height_block+dy] = 0x0;
         continue;
       }  
       pixels[dx*height_block+dy] = map_xy_pix(x_screen*width_photo/w, y_screen*height_block/h);
