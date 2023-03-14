@@ -878,17 +878,17 @@ void splash() {
   //X: the last argument of draw_tile signify the color
 }
 
-static void draw_block(int x, int y, int with_block, int height_block) {
-  uint32_t pixels[with_block * height_block]; // WARNING: large stack-allocated memory
+static void draw_block(int x, int y, int width_block, int height_block) {
+  uint32_t pixels[width_block * height_block]; // WARNING: large stack-allocated memory
 
   AM_GPU_FBDRAW_T event = {
-    .x = x, .y = y, .w = with_block, .h = height_block, .sync = 1,
+    .x = x, .y = y, .w = width_block, .h = height_block, .sync = 1,
     .pixels = pixels,
   };
 
   //paint an area of w*h 
   // with color 
-  for (int dx = 0; dx < with_block; dx++) 
+  for (int dx = 0; dx < width_block; dx++) 
   {
     for(int dy = 0; dy < height_block; dy++)
     {
@@ -898,7 +898,7 @@ static void draw_block(int x, int y, int with_block, int height_block) {
         pixels[dx*h+dy] = 0xffffff;
         continue;
       }  
-      pixels[dx*h+dy] = map_xy_pix(x_pho*width_photo/w, y_pho*height_block/h);
+      pixels[dx*height_block+dy] = map_xy_pix(x_pho*width_photo/w, y_pho*height_block/h);
     }
   }
   ioe_write(AM_GPU_FBDRAW, &event);
