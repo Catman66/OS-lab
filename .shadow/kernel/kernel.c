@@ -892,13 +892,13 @@ static void draw_block(int x, int y, int width_block, int height_block) {
   {
     for(int dy = 0; dy < height_block; dy++)
     {
-      int x_pho = x+dx, y_pho = y+dy;
-      if(x_pho >= w || y_pho >= h)   
+      int x_screen = x+dx, y_screen = y+dy;
+      if(x_screen >= w || y_screen >= h)   
       {
-        pixels[dx*h+dy] = 0xffffff;
+        pixels[dx*h+dy] = 0x0;
         continue;
       }  
-      pixels[dx*height_block+dy] = map_xy_pix(x_pho*width_photo/w, y_pho*height_block/h);
+      pixels[dx*height_block+dy] = map_xy_pix(x_screen*width_photo/w, y_screen*height_block/h);
     }
   }
   ioe_write(AM_GPU_FBDRAW, &event);
