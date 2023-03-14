@@ -893,7 +893,7 @@ static void draw_block(int x, int y, int with_block, int height_block) {
     for(int dy = 0; dy < height_block; dy++)
     {
       int x_pho = x+dx, y_pho = y+dy;
-      if(x_pho > w || y_pho > h)   
+      if(x_pho >= w || y_pho >= h)   
       {
         pixels[dx*h+dy] = 0xffffff;
         continue;
