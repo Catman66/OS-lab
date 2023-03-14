@@ -902,7 +902,7 @@ static void draw_block(int x, int y, int width_block, int height_block) {
       else
         color = map_xy_pix(x_screen*width_photo/w, y_screen*height_photo/h);
       
-      pixels[dx*height_block+dy] = color;
+      pixels[dx+dy*width_block] = color;
     }
   }
   ioe_write(AM_GPU_FBDRAW, &event);
@@ -936,13 +936,12 @@ void show_photo()
   }
   */
  
-//  for (int x = 0; x*SIDE <= w; x++) {
-//     for (int y = 0; y*SIDE <= h; y++) {
-//       draw_block(x * SIDE, y * SIDE, SIDE, SIDE);
-//     }
-//   }
- draw_block(0,0,SIDE, SIDE);
- draw_block(0,SIDE, SIDE,SIDE);
+ for (int x = 0; x*SIDE <= w; x++) {
+    for (int y = 0; y*SIDE <= h; y++) {
+      draw_block(x * SIDE, y * SIDE, SIDE, SIDE);
+    }
+  }
+ 
  
 }
 
