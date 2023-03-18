@@ -17,12 +17,12 @@ struct thread {
 struct thread tpool[NTHREAD], *tptr = tpool;
 
 void *wrapper(void *arg) {
-  struct thread *thread = (struct thread *)arg;
-  thread->entry(thread->id);
-  return NULL;
+  struct thread *thread = (struct thread *)arg; //强制类型转换成thread*
+  thread->entry(thread->id);                    //函数调用，忽视返回值，
+  return NULL;                                  //返回null
 }
 
-void create(void *fn) {
+void create(void *fn) {                         //can not pass any args in to the process
   assert(tptr - tpool < NTHREAD);
   *tptr = (struct thread) {
     .id = tptr - tpool + 1,
@@ -30,10 +30,10 @@ void create(void *fn) {
     .entry = fn,
   };
   pthread_create(&(tptr->thread), NULL, wrapper, tptr);
-  ++tptr;
+  ++tptr;                                       //manage the pool of processes
 }
 
-void join() {
+void join() {                                   //wait for all threads to jion
   for (int i = 0; i < NTHREAD; i++) {
     struct thread *t = &tpool[i];
     if (t->status == T_LIVE) {
