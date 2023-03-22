@@ -76,6 +76,7 @@ int workload_thread(int round, int tid)
 
 int first_i(int round)
 {
+  assert(round < M+N-1);
   return round < N ? 0 : round - (N-1);
 }
 
@@ -110,6 +111,7 @@ void calculate(int tid)
     int i = position.i;
     int j = position.j;
 
+    assert(IS_VALID_IJ(i, j));
     int skip_a = DP(i-1, j);
     int skip_b = DP(i, j-1);
     int take_both = DP(i-1, j-1) + (A[i] == B[j]);
