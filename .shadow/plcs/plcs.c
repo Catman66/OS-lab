@@ -53,7 +53,7 @@ void Tworker(int id) {
 
   //result = dp[N - 1][M - 1];
 
-  printf("%d\n", id);
+  printf("thread %d \n", id);
 }
 
 void make_same_length()
