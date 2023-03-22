@@ -63,16 +63,12 @@ int workload(int round)
 }
 
 
-int workload_thread(int tid)
+int workload_thread(int round, int tid)
 {
-  int round = progresses[tid]+1,
-  total_load = workload(round),
-  average = total_load/T,
-  left = total_load - average;
-
-  int load_thread = average + (left >= tid);
+  if(tid == T)
+    return workload(round)/T + workload(round)%T;
   
-  return load_thread;
+  return workload(round)/T;
 }
 
 int first_i(int round)
@@ -102,7 +98,7 @@ void calculate(int tid)
   struct coordinate position;
   first_ij(round, tid, &position);
 
-  for(int t = 0; t < workload_thread(tid); t++, RENEW_POSISTION(position))
+  for(int t = 0; t < workload_thread(tid, round); t++, RENEW_POSISTION(position))
   {
     int i = position.i;
     int j = position.j;
@@ -144,12 +140,11 @@ void Tworker(int id) {
 
 
   result = dp[N - 1][M - 1];
-
 }
 
 
-#define INIT_PROGRESSES() (progresses = memset(malloc((T+2)*sizeof(int)), 0, (T+2)*sizeof(int)), progresses[0] = progresses[T] = M+N)
-#define FREE_COND_VARS(vars) (free(vars))
+#define INIT_PROGRESSES() (progresses = memset(malloc((T+2)*sizeof(int)), 0x0, (T+2)*sizeof(int)), progresses[0] = progresses[T+1] = M+N)
+#define FREE_PROGRESSES(vars) (free(vars))
 
 
 
@@ -170,7 +165,7 @@ int main(int argc, char *argv[]) {
 
   printf("%d\n", result);
 
-  FREE_COND_VARS(progresses);
+  FREE_PROGRESSES(progresses);
 
   return 0;
 }
