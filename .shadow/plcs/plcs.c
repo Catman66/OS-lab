@@ -51,7 +51,7 @@ void after_calculating(int tid)
 
 int workload(int round)
 {
-  int min_MN = min(M, N), max_MN = max(M, N);
+  int min_MN = MIN(M, N), max_MN = MAX(M, N);
 
   //logic from the function image
   if(round < min_MN)
