@@ -15,7 +15,7 @@ int result;
 #define DP(x, y) (((x) >= 0 && (y) >= 0) ? dp[x][y] : 0)
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
-#define MIN(X, y) (((x) < (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 //需要一个全局注册表
 int *progresses;
 #define COND_CALCULAT(tid) (progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
