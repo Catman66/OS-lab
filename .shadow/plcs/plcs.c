@@ -132,22 +132,20 @@ void display_dp_mtx()
 }
 
 void Tworker(int id) {
-  // if (id != 1) {
-  //   // This is a serial implementation
-  //   // Only one worker needs to be activated
-  //   return;
-  // }
+  if (id != 1) {
+    
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+      // Always try to make DP code more readable
+      int skip_a = DP(i - 1, j);
+      int skip_b = DP(i, j - 1);
+      int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
+      dp[i][j] = MAX3(skip_a, skip_b, take_both);
+    }
+  }
+  }
 
-  //问题是如何实现，工作量的分配
-  // for (int i = 0; i < N; i++) {
-  //   for (int j = 0; j < M; j++) {
-  //     // Always try to make DP code more readable
-  //     int skip_a = DP(i - 1, j);
-  //     int skip_b = DP(i, j - 1);
-  //     int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
-  //     dp[i][j] = MAX3(skip_a, skip_b, take_both);
-  //   }
-  // }
+  
   for (int round = 0; round < M + N - 1; round++) {
     before_calculating(id);
 
