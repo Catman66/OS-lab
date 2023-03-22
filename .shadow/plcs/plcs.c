@@ -161,6 +161,8 @@ int main(int argc, char *argv[]) {
 
   INIT_PROGRESSES();
   assert(progresses != NULL);
+  for(int i = 0; i < T+2; i++)
+    assert(progresses[i] == -1);
   //thread id: 1, 2, 3, ..., T
   for (int i = 0; i < T; i++) {
     create(Tworker);
