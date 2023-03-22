@@ -143,7 +143,7 @@ void Tworker(int id) {
 }
 
 
-#define INIT_PROGRESSES() (progresses = memset(malloc((T+2)*sizeof(int)), 0x0, (T+2)*sizeof(int)), progresses[0] = progresses[T+1] = M+N)
+#define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0x0, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
 #define FREE_PROGRESSES(vars) (free(vars))
 
 
@@ -151,12 +151,12 @@ void Tworker(int id) {
 int main(int argc, char *argv[]) {
   // No need to change
   assert(scanf("%s%s", A, B) == 2);
-  N = strlen(A);
-  M = strlen(B);
+  N = strlen(B);
+  M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
   INIT_PROGRESSES();
-  
+  assert(progresses != NULL);
   //thread id: 1, 2, 3, ..., T
   for (int i = 0; i < T; i++) {
     create(Tworker);
