@@ -157,7 +157,7 @@ void Tworker(int id) {
   }
 
 
-  result = dp[N - 1][M - 1];
+  result = dp[M - 1][N - 1];
 }
 
 
