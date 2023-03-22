@@ -18,6 +18,9 @@ int result;
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 //需要一个全局注册表
 int *progresses;
+#define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
+#define FREE_PROGRESSES() (free(progresses))
+
 #define COND_CALCULAT(tid) (progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
 #define FINISH_ROUND(tid) (progresses[tid]++)
 mutex_t lk = MUTEX_INIT();    //mutual exclusive lock
@@ -147,10 +150,6 @@ void Tworker(int id) {
 }
 
 
-#define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
-#define FREE_PROGRESSES(vars) (free(vars))
-
-
 
 int main(int argc, char *argv[]) {
   // No need to change
@@ -161,8 +160,9 @@ int main(int argc, char *argv[]) {
 
   INIT_PROGRESSES();
   assert(progresses != NULL);
-  for(int i = 0; i < T+2; i++)
-    printf("%d, ", progresses[i]);
+  for(int t = 1; t <= T; t++)
+    assert(progresses[t] == -1);
+  
   //thread id: 1, 2, 3, ..., T
   for (int i = 0; i < T; i++) {
     create(Tworker);
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 
   printf("%d\n", result);
 
-  FREE_PROGRESSES(progresses);
+  FREE_PROGRESSES();
 
   return 0;
 }
