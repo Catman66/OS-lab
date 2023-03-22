@@ -106,7 +106,7 @@ void calculate(int tid)
   struct coordinate position;
   first_ij(round, tid, &position);
 
-  for(int t = 0; t < workload_thread(tid, round); t++, RENEW_POSISTION(position))
+  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_POSISTION(position))
   {
     int i = position.i;
     int j = position.j;
