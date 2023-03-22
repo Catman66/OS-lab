@@ -37,7 +37,7 @@ void Tworker(int id) {
   //     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   //   }
   // }
-  for (int round = 0; round < 2 * N - 1; round++) {
+  //for (int round = 0; round < 2 * N - 1; round++) {
   // 1. 计算出本轮能够计算的单元格
     //[0, round], [1, round-1], ... [round, 0]
     //一共round+1
@@ -48,10 +48,12 @@ void Tworker(int id) {
   // 3. 等待线程执行完毕
     //线程执行完毕之后，能进入下一个周期，只要前面的都已经满足了即可
     //os会自动切换进程
-  }
+  //}
 
 
-  result = dp[N - 1][M - 1];
+  //result = dp[N - 1][M - 1];
+
+  printf("%d\n", id);
 }
 
 void make_same_length()
@@ -88,6 +90,11 @@ void make_same_length()
 }
 
 
+
+void show_thread_id(int id)
+{
+
+}
 int main(int argc, char *argv[]) {
   // No need to change
   assert(scanf("%s%s", A, B) == 2);

@@ -25,7 +25,7 @@ void *wrapper(void *arg) {
 void create(void *fn) {                         //can not pass any args in to the process
   assert(tptr - tpool < NTHREAD);
   *tptr = (struct thread) {
-    .id = tptr - tpool + 1,
+    .id = tptr - tpool + 1,                     //每个线程会有一个id，且每个线程 的id依次递增
     .status = T_LIVE,
     .entry = fn,
   };
