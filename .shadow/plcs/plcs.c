@@ -120,7 +120,16 @@ void calculate(int tid)
   }
 }
 
+void display_dp_mtx()
+{
+  for(int i = 0 ; i < M; i++)
+  {
+    for(int j = 0; j < N; j++)
+      printf("%d ", dp[i][j]);
+    printf("\n");
+  }
 
+}
 
 void Tworker(int id) {
   // if (id != 1) {
@@ -172,7 +181,7 @@ int main(int argc, char *argv[]) {
   join();  // Wait for all workers
 
   printf("%d\n", result);
-
+  display_dp_mtx();
   FREE_PROGRESSES();
 
   return 0;
