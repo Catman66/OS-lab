@@ -61,7 +61,7 @@ int workload(int round)
   else  
     return M+N-1 - round;
 }
-
+//round : [0, ... , M+N-2]
 
 int workload_thread(int round, int tid)
 {
@@ -147,7 +147,7 @@ void Tworker(int id) {
 }
 
 
-#define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0x0, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
+#define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
 #define FREE_PROGRESSES(vars) (free(vars))
 
 
