@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
   join();  // Wait for all workers
 
   printf("%d\n", result);
-  display_dp_mtx();
+  //display_dp_mtx();
   FREE_PROGRESSES();
 
   return 0;
