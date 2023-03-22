@@ -17,7 +17,104 @@ int result;
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
 
 //需要一个全局注册表
-int *MAP;
+int *progresses;
+#define COND_CALCULAT(tid) (progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
+#define FINISH_ROUND(tid) (progresses[tid]++)
+mutex_t lk = MUTEX_INIT();    //mutual exclusive lock
+cond_t cv = COND_INIT();      //condition variable
+
+void before_calculating(int tid)
+{
+  mutex_lock(&lk);
+
+  while(!COND_CALCULAT(tid))
+  {
+    cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
+  }
+  //划分本次的顺序
+  
+  mutex_unlock(&lk);
+}
+
+
+void after_calculating(int tid)
+{
+  mutex_lock(&lk);
+  
+  FINISH_ROUND(tid);
+
+  cond_broadcast(&cv);
+
+  mutex_unlock(&lk);
+}
+
+
+int workload(int round)
+{
+  int min_MN = min(M, N), max_MN = max(M, N);
+
+  //logic from the function image
+  if(round < min_MN)
+    return round+1;
+  else if(round < max_MN)
+    return min_MN;
+  else  
+    return M+N-1 - round;
+}
+
+
+int workload_thread(int tid)
+{
+  int round = progresses[tid]+1,
+  total_load = workload(round),
+  average = total_load/T,
+  left = total_load - average;
+
+  int load_thread = average + (left >= tid);
+  
+  return load_thread;
+}
+
+int first_i(int round)
+{
+  return round < N ? 0 : round - (N-1);
+}
+
+struct coordinate
+{
+  int i, j;
+};
+
+void first_ij(int round, int tid, struct coordinate* buff)
+{
+  int workload_of_round = workload(round),
+  average = workload_of_round/T;
+
+  buff->i = first_i - (tid-1) * average;
+  buff->j = round - buff->i;
+}
+
+#define RENEW_POSISTION(pos) (pos.i ++, pos.j --)
+void calculate(int tid)
+{
+  int round = progresses[tid]+1;
+
+  struct coordinate position;
+  first_ij(round, tid, &position);
+
+  for(int t = 0; t < workload_thread(tid); t++, RENEW_POSISTION(position))
+  {
+    int i = position.i;
+    int j = position.j;
+
+    int skip_a = dp[i-1][j];
+    int skip_b = dp[i][j-1];
+    int take_both = dp[i-1][j-1] + (A[i] == B[j]);
+
+    dp[i][j] = MAX3(skip_a, skip_b, take_both);
+  }
+}
+
 
 
 void Tworker(int id) {
@@ -37,64 +134,26 @@ void Tworker(int id) {
   //     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   //   }
   // }
-  //for (int round = 0; round < 2 * N - 1; round++) {
-  // 1. 计算出本轮能够计算的单元格
-    //[0, round], [1, round-1], ... [round, 0]
-    //一共round+1
-    //每个线程可以完成 (round+1)/T个单元格
-    
-  // 2. 将任务分配给线程执行
+  for (int round = 0; round < M + N - 1; round++) {
+    before_calculating(id);
 
-  // 3. 等待线程执行完毕
-    //线程执行完毕之后，能进入下一个周期，只要前面的都已经满足了即可
-    //os会自动切换进程
-  //}
+    calculate(id);
+
+    after_calculating(id);
+  }
 
 
   //result = dp[N - 1][M - 1];
 
-  printf("thread %d \n", id);
-}
-
-void make_same_length()
-{
-  int A_len = strlen(A), B_len = strlen(B);
-
-  if(A_len == B_len)
-    return;
-
-  int offset;
-  char* small;
-  int small_len, large_len;
-
-  if(A_len > B_len)
-  {
-    small = B;
-    small_len = B_len, large_len = A_len;
-  }
-  else
-  {
-    small = A;
-    small_len = A_len, large_len = B_len;
-  }
-  offset = large_len - small_len;
-
-  for(int i = large_len; i >= offset; i--)
-    small[i] = small[i-offset];
-    
-  for(int i = 0; i < offset; i++)
-    small[i] = '$';//one letter that wont match large
-  
-  M = N = large_len;
-  assert(strlen(small+offset) == small_len);
+  return dp[M-1][N-1]; 
 }
 
 
+#define INIT_PROGRESSES(T) (progresses = memset(malloc((T+2)*sizeof(int)), 0, (T+2)*sizeof(int)), progresses[0] = progresses[T] = M+N)
+#define FREE_COND_VARS(vars) (free(vars))
 
-void show_thread_id(int id)
-{
 
-}
+
 int main(int argc, char *argv[]) {
   // No need to change
   assert(scanf("%s%s", A, B) == 2);
@@ -102,14 +161,17 @@ int main(int argc, char *argv[]) {
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  // Add preprocessing code here
-  // make a and b of same length
-  make_same_length();
+  INIT_PROGRESSES(T);
   
+  //thread id: 1, 2, 3, ..., T
   for (int i = 0; i < T; i++) {
     create(Tworker);
   }
   join();  // Wait for all workers
 
   printf("%d\n", result);
+
+  FREE_COND_VARS(progresses);
+
+  return 0;
 }
