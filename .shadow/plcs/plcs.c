@@ -64,17 +64,17 @@ void make_same_length()
     return;
 
   int offset;
-  char* small, *large;
+  char* small;
   int small_len, large_len;
 
   if(A_len > B_len)
   {
-    small = B, large = A;
+    small = B;
     small_len = B_len, large_len = A_len;
   }
   else
   {
-    small = A, large = B;
+    small = A;
     small_len = A_len, large_len = B_len;
   }
   offset = large_len - small_len;
