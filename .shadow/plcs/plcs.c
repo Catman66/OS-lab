@@ -86,8 +86,8 @@ void first_ij(int round, int tid, struct coordinate* buff)
 {
   int workload_of_round = workload(round),
   average = workload_of_round/T;
-  
-  buff->i = first_i(round) - (tid-1) * average;
+
+  buff->i = first_i(round) + (tid-1) * average;
   buff->j = round - buff->i;
   assert(IS_VALID_IJ(buff->i, buff->j));
 }
