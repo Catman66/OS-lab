@@ -15,7 +15,7 @@ int result;
 #define DP(x, y) (((x) >= 0 && (y) >= 0) ? dp[x][y] : 0)
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
-
+#define MIN(X, y) (((x) < (y)) ? (x) : (y))
 //需要一个全局注册表
 int *progresses;
 #define COND_CALCULAT(tid) (progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
@@ -90,7 +90,7 @@ void first_ij(int round, int tid, struct coordinate* buff)
   int workload_of_round = workload(round),
   average = workload_of_round/T;
 
-  buff->i = first_i - (tid-1) * average;
+  buff->i = first_i(round) - (tid-1) * average;
   buff->j = round - buff->i;
 }
 
@@ -143,9 +143,8 @@ void Tworker(int id) {
   }
 
 
-  //result = dp[N - 1][M - 1];
+  result = dp[N - 1][M - 1];
 
-  return dp[M-1][N-1]; 
 }
 
 
