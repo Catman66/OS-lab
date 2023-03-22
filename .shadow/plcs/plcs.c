@@ -89,6 +89,8 @@ void first_ij(int round, int tid, struct coordinate* buff)
 
   buff->i = first_i(round) + (tid-1) * average;
   buff->j = round - buff->i;
+  if(!IS_VALID_IJ(buff->i, buff->j))
+    fprintf(stderr, "i = %d, j = %d", buff->i, buff->j);
   assert(IS_VALID_IJ(buff->i, buff->j));
 }
 
