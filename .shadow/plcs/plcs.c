@@ -148,7 +148,7 @@ void Tworker(int id) {
 }
 
 
-#define INIT_PROGRESSES(T) (progresses = memset(malloc((T+2)*sizeof(int)), 0, (T+2)*sizeof(int)), progresses[0] = progresses[T] = M+N)
+#define INIT_PROGRESSES() (progresses = memset(malloc((T+2)*sizeof(int)), 0, (T+2)*sizeof(int)), progresses[0] = progresses[T] = M+N)
 #define FREE_COND_VARS(vars) (free(vars))
 
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  INIT_PROGRESSES(T);
+  INIT_PROGRESSES();
   
   //thread id: 1, 2, 3, ..., T
   for (int i = 0; i < T; i++) {
