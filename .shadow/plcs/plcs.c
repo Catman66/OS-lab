@@ -107,9 +107,9 @@ void calculate(int tid)
     int i = position.i;
     int j = position.j;
 
-    int skip_a = dp[i-1][j];
-    int skip_b = dp[i][j-1];
-    int take_both = dp[i-1][j-1] + (A[i] == B[j]);
+    int skip_a = DP(i-1, j);
+    int skip_b = DP(i, j-1);
+    int take_both = DP(i-1, j-1) + (A[i] == B[j]);
 
     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   }
