@@ -22,7 +22,9 @@ int *progresses;
 #define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
 #define FREE_PROGRESSES() (free(progresses))
 
-#define COND_CALCULAT(tid) (progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
+
+//not init state 
+#define COND_CALCULAT(tid) (progresses[tid] >= 0 && progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
 #define FINISH_ROUND(tid) (progresses[tid]++)
 
 mutex_t lk = MUTEX_INIT();    //mutual exclusive lock
@@ -125,7 +127,6 @@ void calculate(int tid)
     calculate(id);\
     after_calculating(id)
     
-
 void single_worker_finish_round(int round){
   struct coordinate position;
   first_pos(round, 1, &position);
@@ -151,11 +152,9 @@ void Tworker(int id) {
     if(workload(round) < limit_need_concurrent){
       continue;
     }
-
     CONCURRENT_CALCULATE(id);
   }
 }
-
 
 void Tsuper_worker()
 {
@@ -168,8 +167,6 @@ void Tsuper_worker()
     CONCURRENT_CALCULATE(T);
   }
 }
-
-//
 
 void single_worker_finish_all(){
   for (int i = 0; i < N; i++) {
@@ -203,21 +200,17 @@ int main(int argc, char *argv[]) {
   for(int t = 1; t <= T; t++)
     assert(progresses[t] == -1);
   
-  if(T == 1){
-    single_worker_finish_all();
+  //thread id: 1, 2, 3, ..., T
+  for (int i = 0; i < T-1; i++) {
+    create(Tworker);
   }
-  else{
-    //thread id: 1, 2, 3, ..., T
-    for (int i = 0; i < T-1; i++) {
-      create(Tworker);
-    }
-    create(Tsuper_worker);//在工作量未达到一定量之前，不并行，而是由super worker完成工作
+  create(Tsuper_worker);//在工作量未达到一定量之前，不并行，而是由super worker完成工作
 
-    join();  // Wait for all workers
-  }
+  join();  // Wait for all workers
+  
   result = dp[M - 1][N - 1];
   printf("%d\n", result);
   FREE_PROGRESSES();
-
+  //display_dp_mtx();
   return 0;
 }
