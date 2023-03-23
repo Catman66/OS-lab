@@ -153,9 +153,11 @@ void Tsuper_worker()
       single_worker_finish_round(round);
       continue;
     }
+    assert(round == ROUND);
     break;
   }
   //
+  
   LEFT_WORK = T; 
   cond_broadcast(&cv);
 
@@ -166,7 +168,6 @@ void Tsuper_worker()
     }
     CONCURRENT_CALCULATE(T);
   }
-  
 }
 
 void single_worker_finish_all(){
