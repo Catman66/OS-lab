@@ -16,26 +16,29 @@ int result;
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
-//需要一个全局注册表
+
 int *progresses;
+
 #define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
 #define FREE_PROGRESSES() (free(progresses))
 
 #define COND_CALCULAT(tid) (progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
 #define FINISH_ROUND(tid) (progresses[tid]++)
+
 mutex_t lk = MUTEX_INIT();    //mutual exclusive lock
 cond_t cv = COND_INIT();      //condition variable
+
+//尝试用很多把锁
+
 
 void before_calculating(int tid)
 {
   mutex_lock(&lk);
-
   while(!COND_CALCULAT(tid))
   {
     cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
   }
   //划分本次的顺序
-  
   mutex_unlock(&lk);
 }
 
@@ -93,9 +96,6 @@ void first_ij(int round, int tid, struct coordinate* buff)
 
   buff->i = first_i(round) + (tid-1) * average;
   buff->j = round - buff->i;
-  if(!IS_VALID_IJ(buff->i, buff->j))
-    fprintf(stderr, "i = %d, j = %d\n", buff->i, buff->j);
-  assert(IS_VALID_IJ(buff->i, buff->j));
 }
 
 #define RENEW_POSISTION(pos) (pos.i ++, pos.j --)
@@ -128,24 +128,9 @@ void display_dp_mtx()
       printf("%d ", dp[i][j]);
     printf("\n");
   }
-
 }
 
 void Tworker(int id) {
-  if (id != 1) {
-    
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
-      // Always try to make DP code more readable
-      int skip_a = DP(i - 1, j);
-      int skip_b = DP(i, j - 1);
-      int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
-      dp[i][j] = MAX3(skip_a, skip_b, take_both);
-    }
-  }
-  }
-
-  
   for (int round = 0; round < M + N - 1; round++) {
     before_calculating(id);
 
@@ -153,9 +138,7 @@ void Tworker(int id) {
 
     after_calculating(id);
   }
-
-
-  result = dp[M - 1][N - 1];
+  
 }
 
 
@@ -172,12 +155,26 @@ int main(int argc, char *argv[]) {
   for(int t = 1; t <= T; t++)
     assert(progresses[t] == -1);
   
-  //thread id: 1, 2, 3, ..., T
-  for (int i = 0; i < T; i++) {
-    create(Tworker);
+  if(T == 1)
+  {
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < M; j++) {
+        // Always try to make DP code more readable
+        int skip_a = DP(i - 1, j);
+        int skip_b = DP(i, j - 1);
+        int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
+        dp[i][j] = MAX3(skip_a, skip_b, take_both);
+      }
+    }
   }
-  join();  // Wait for all workers
-
+  else{
+    //thread id: 1, 2, 3, ..., T
+    for (int i = 0; i < T; i++) {
+      create(Tworker);
+    }
+    join();  // Wait for all workers
+  }
+  result = dp[M - 1][N - 1];
   printf("%d\n", result);
   //display_dp_mtx();
   FREE_PROGRESSES();
