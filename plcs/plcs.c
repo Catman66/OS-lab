@@ -120,15 +120,6 @@ void calculate(int tid)
   }
 }
 
-void display_dp_mtx()
-{
-  for(int i = 0 ; i < M; i++)
-  {
-    for(int j = 0; j < N; j++)
-      printf("%d ", dp[i][j]);
-    printf("\n");
-  }
-}
 
 void Tworker(int id) {
   for (int round = 0; round < M + N - 1; round++) {
@@ -173,6 +164,17 @@ void single_worker(){
       }
     }
 }
+
+void display_dp_mtx()
+{
+  for(int i = 0 ; i < M; i++)
+  {
+    for(int j = 0; j < N; j++)
+      printf("%d ", dp[i][j]);
+    printf("\n");
+  }
+}
+
 
 
 int main(int argc, char *argv[]) {
