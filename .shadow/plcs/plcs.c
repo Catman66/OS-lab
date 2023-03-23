@@ -120,7 +120,9 @@ void calculate(int tid)
 
 void Tworker(int id) {
   for (int round = 0; round < M + N - 1; round++) {
-    CONCURRENT_CALCULATE(id);
+    if(workload(round) >= limit_need_concurrent) {
+      CONCURRENT_CALCULATE(id);
+    }
   }
 }
 
@@ -139,12 +141,13 @@ void single_worker_finish_round(int round){
 
     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   }
+
+  ROUND++;
 }
 
 
 void Tsuper_worker()
 {
-  //id == T;
   for (int round = 0; round < M + N - 1; round++) {
     if(workload(round) < limit_need_concurrent){
       single_worker_finish_round(round);
@@ -182,9 +185,10 @@ int main(int argc, char *argv[]) {
   T = !argv[1] ? 1 : atoi(argv[1]);
 
   LEFT_WORK = T;
-  for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
+  for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
+  create(Tsuper_worker);
   join();  // Wait for all workers
   
   result = dp[M - 1][N - 1];
