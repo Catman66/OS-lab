@@ -153,8 +153,20 @@ void Tsuper_worker()
       single_worker_finish_round(round);
       continue;
     }
+    break;
+  }
+  //
+  LEFT_WORK = T; 
+  cond_broadcast(&cv);
+  
+  for(int round = ROUND; round < M+N-1; round++) {
+    if(workload(round) < limit_need_concurrent){
+      single_worker_finish_round(round);
+      continue;
+    }
     CONCURRENT_CALCULATE(T);
   }
+  
 }
 
 void single_worker_finish_all(){
@@ -184,7 +196,7 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  LEFT_WORK = T;
+  LEFT_WORK = 1;
   for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
