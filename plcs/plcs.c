@@ -162,6 +162,18 @@ void Tsuper_worker()
 
 //
 
+void single_worker(){
+  for (int i = 0; i < N; i++) {
+      for (int j = 0; j < M; j++) {
+        // Always try to make DP code more readable
+        int skip_a = DP(i - 1, j);
+        int skip_b = DP(i, j - 1);
+        int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
+        dp[i][j] = MAX3(skip_a, skip_b, take_both);
+      }
+    }
+}
+
 
 int main(int argc, char *argv[]) {
   // No need to change
@@ -175,17 +187,8 @@ int main(int argc, char *argv[]) {
   for(int t = 1; t <= T; t++)
     assert(progresses[t] == -1);
   
-  if(T == 1)
-  {
-    for (int i = 0; i < N; i++) {
-      for (int j = 0; j < M; j++) {
-        // Always try to make DP code more readable
-        int skip_a = DP(i - 1, j);
-        int skip_b = DP(i, j - 1);
-        int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
-        dp[i][j] = MAX3(skip_a, skip_b, take_both);
-      }
-    }
+  if(T == 1){
+    single_worker();
   }
   else{
     //thread id: 1, 2, 3, ..., T
