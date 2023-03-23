@@ -22,6 +22,8 @@ int *progresses;
 #define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
 #define FREE_PROGRESSES() (free(progresses))
 
+
+//not init state 
 #define COND_CALCULAT(tid) (progresses[tid] >= 0 && progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
 #define FINISH_ROUND(tid) (progresses[tid]++)
 
