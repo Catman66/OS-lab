@@ -128,7 +128,7 @@ void calculate(int tid)
 
 void single_worker_finish_round(int round){
   struct coordinate position;
-  first_pos(round, T, &position);
+  first_pos(round, 1, &position);
 
   for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)){
     int i = position.i;
