@@ -151,7 +151,6 @@ void Tworker(int id) {
     if(workload(round) < limit_need_concurrent){
       continue;
     }
-
     CONCURRENT_CALCULATE(id);
   }
 }
@@ -169,18 +168,16 @@ void Tsuper_worker()
   }
 }
 
-//
-
 void single_worker_finish_all(){
   for (int i = 0; i < N; i++) {
-      for (int j = 0; j < M; j++) {
-        // Always try to make DP code more readable
-        int skip_a = DP(i - 1, j);
-        int skip_b = DP(i, j - 1);
-        int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
-        dp[i][j] = MAX3(skip_a, skip_b, take_both);
-      }
+    for (int j = 0; j < M; j++) {
+      // Always try to make DP code more readable
+      int skip_a = DP(i - 1, j);
+      int skip_b = DP(i, j - 1);
+      int take_both = DP(i - 1, j - 1) + (A[i] == B[j]);
+      dp[i][j] = MAX3(skip_a, skip_b, take_both);
     }
+  }
 }
 
 void display_dp_mtx(){
