@@ -22,7 +22,7 @@ int *progresses;
 #define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
 #define FREE_PROGRESSES() (free(progresses))
 
-#define COND_CALCULAT(tid) (progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
+#define COND_CALCULAT(tid) (progresses[tid] >= 0 && progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
 #define FINISH_ROUND(tid) (progresses[tid]++)
 
 mutex_t lk = MUTEX_INIT();    //mutual exclusive lock
@@ -120,7 +120,7 @@ void calculate(int tid)
   }
 }
 
-#define limit_need_concurrent 1000
+#define limit_need_concurrent 100
 #define CONCURRENT_CALCULATE(id) before_calculating(id);\
     calculate(id);\
     after_calculating(id)
@@ -154,7 +154,6 @@ void Tworker(int id) {
     CONCURRENT_CALCULATE(id);
   }
 }
-
 
 void Tsuper_worker()
 {
