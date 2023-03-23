@@ -94,7 +94,7 @@ void first_pos(int round, int tid, struct coordinate* buff)
 void calculate(int tid)
 {
   int round = ROUND;
-
+  
   struct coordinate position;
   first_pos(round, tid, &position);
 
@@ -143,8 +143,8 @@ void single_worker_finish_round(int round){
   }
 
   ROUND++;
+  printf("%d ", ROUND);
 }
-
 
 void Tsuper_worker()
 {
@@ -156,7 +156,6 @@ void Tsuper_worker()
     assert(round == ROUND);
     break;
   }
-  //
   
   LEFT_WORK = T; 
   cond_broadcast(&cv);
