@@ -215,6 +215,6 @@ int main(int argc, char *argv[]) {
   result = dp[M - 1][N - 1];
   printf("%d\n", result);
   FREE_PROGRESSES();
-
+  display_dp_mtx();
   return 0;
 }
