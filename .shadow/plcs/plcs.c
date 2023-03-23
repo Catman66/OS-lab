@@ -143,7 +143,7 @@ void single_worker_finish_round(int round){
   }
 
   ROUND++;
-  printf("%d ", ROUND);
+  //printf("%d ", ROUND);
 }
 
 void Tsuper_worker()
