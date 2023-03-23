@@ -158,7 +158,7 @@ void Tsuper_worker()
   //
   LEFT_WORK = T; 
   cond_broadcast(&cv);
-  
+
   for(int round = ROUND; round < M+N-1; round++) {
     if(workload(round) < limit_need_concurrent){
       single_worker_finish_round(round);
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  LEFT_WORK = 1;
+  LEFT_WORK = 0;
   for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
