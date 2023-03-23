@@ -142,11 +142,7 @@ void Tsuper_worker()
     before_calculating(T);
 
     calculate(T);
-    //此处该线程在运算，
-    // 其他线程
-    // round finish ：在wait
-    // round not done :在并行运算
-    // 其他线程应该在能计算时并行计算
+    
     after_calculating(T);
   }
 }
