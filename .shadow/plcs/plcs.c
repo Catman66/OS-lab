@@ -165,7 +165,14 @@ void Tsuper_worker()
       single_worker_finish_round(round);
       continue;
     }
+    mutex_lock(&lk);
+    while(COND_CALCULAT) {
+      cond_wait(&cv, &lk);
+    }
+    LEFT_WORK = 0;
+    mutex_unlock(&lk);
     CONCURRENT_CALCULATE(T);
+    //this guy,在最后一次完工之后，不会等待其他小伙伴
   }
 }
 
