@@ -116,6 +116,13 @@ void calculate(int tid)
     calculate(tid);\
     after_calculating()
     
+
+void Tworker(int id) {
+  for (int round = 0; round < M + N - 1; round++) {
+    CONCURRENT_CALCULATE(id);
+  }
+}
+
 void single_worker_finish_round(int round){
   struct coordinate position;
   first_pos(round, 1, &position);
@@ -133,11 +140,6 @@ void single_worker_finish_round(int round){
   }
 }
 
-void Tworker(int id) {
-  for (int round = 0; round < M + N - 1; round++) {
-    CONCURRENT_CALCULATE(id);
-  }
-}
 
 void Tsuper_worker()
 {
@@ -187,6 +189,6 @@ int main(int argc, char *argv[]) {
   result = dp[M - 1][N - 1];
   printf("%d\n", result);
   
-  //display_dp_mtx();
+  display_dp_mtx();
   return 0;
 }
