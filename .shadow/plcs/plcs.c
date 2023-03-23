@@ -120,7 +120,7 @@ void calculate(int tid)
   }
 }
 
-#define limit_need_concurrent 100
+#define limit_need_concurrent 1000
 #define CONCURRENT_CALCULATE(id) before_calculating(id);\
     calculate(id);\
     after_calculating(id)
