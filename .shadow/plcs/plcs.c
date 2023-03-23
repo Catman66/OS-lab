@@ -201,18 +201,14 @@ int main(int argc, char *argv[]) {
   for(int t = 1; t <= T; t++)
     assert(progresses[t] == -1);
   
-  if(T == 1){
-    single_worker_finish_all();
+  //thread id: 1, 2, 3, ..., T
+  for (int i = 0; i < T-1; i++) {
+    create(Tworker);
   }
-  else{
-    //thread id: 1, 2, 3, ..., T
-    for (int i = 0; i < T-1; i++) {
-      create(Tworker);
-    }
-    create(Tsuper_worker);//在工作量未达到一定量之前，不并行，而是由super worker完成工作
+  create(Tsuper_worker);//在工作量未达到一定量之前，不并行，而是由super worker完成工作
 
-    join();  // Wait for all workers
-  }
+  join();  // Wait for all workers
+  
   result = dp[M - 1][N - 1];
   printf("%d\n", result);
   FREE_PROGRESSES();
