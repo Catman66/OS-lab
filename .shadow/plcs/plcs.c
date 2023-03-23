@@ -20,16 +20,16 @@ int result;
 mutex_t lk = MUTEX_INIT();
 cond_t cv = COND_INIT();      //condition variable
 
-int WORK_LEFT, DONE_WORK = 0, ROUND = 0;
+int LEFT_WORK, DONE_WORK = 0, ROUND = 0;
 #define ROUND_FINISHED (DONE_WORK == T)
-#define COND_CALCULAT (WORK_LEFT > 0)
+#define COND_CALCULAT (LEFT_WORK > 0)
 
 void before_calculating() {
   mutex_lock(&lk);
   while(!COND_CALCULAT) {
     cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
   }
-  WORK_LEFT--;
+  LEFT_WORK--;
   mutex_unlock(&lk);
 }
 
@@ -38,8 +38,9 @@ void after_calculating() {
 
   DONE_WORK++;
   if(ROUND_FINISHED) {
-    WORK_LEFT = T;
+    LEFT_WORK = T;
     DONE_WORK = 0;
+    ROUND++;
     cond_broadcast(&cv);
   }
   mutex_unlock(&lk);
@@ -180,7 +181,7 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  WORK_LEFT = T;
+  LEFT_WORK = T;
   for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
