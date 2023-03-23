@@ -120,30 +120,58 @@ void calculate(int tid)
   }
 }
 
+#define limit_need_concurrent 100
+#define CONCURRENT_CALCULATE(id) before_calculating(id);\
+    calculate(id);\
+    after_calculating(id)
+    
+
+void single_worker_finish_round(int round){
+  struct coordinate position;
+  first_pos(round, 1, &position);
+
+  for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)){
+    int i = position.i;
+    int j = position.j;
+
+    assert(IS_VALID_IJ(i, j));
+    int skip_a = DP(i-1, j);
+    int skip_b = DP(i, j-1);
+    int take_both = DP(i-1, j-1) + (A[i] == B[j]);
+
+    dp[i][j] = MAX3(skip_a, skip_b, take_both);
+  }
+
+  for(int i = 1; i <= T; i++)
+    progresses[i]++;
+}
 
 void Tworker(int id) {
   for (int round = 0; round < M + N - 1; round++) {
-    before_calculating(id);
+    if(workload(round) < limit_need_concurrent){
+      continue;
+    }
 
-    calculate(id);
-    
-    after_calculating(id);
+    CONCURRENT_CALCULATE(id);
   }
 }
+
 
 void Tsuper_worker()
 {
   //id == T;
   for (int round = 0; round < M + N - 1; round++) {
-    before_calculating(T);
-
-    calculate(T);
-    
-    after_calculating(T);
+    if(workload(round) < limit_need_concurrent){
+      single_worker_finish_round(round);
+      continue;
+    }
+    CONCURRENT_CALCULATE(T);
   }
 }
 
-void single_worker(){
+//
+
+void single_worker_finish_all(){
   for (int i = 0; i < N; i++) {
       for (int j = 0; j < M; j++) {
         // Always try to make DP code more readable
@@ -155,16 +183,13 @@ void single_worker(){
     }
 }
 
-void display_dp_mtx()
-{
-  for(int i = 0 ; i < M; i++)
-  {
+void display_dp_mtx(){
+  for(int i = 0 ; i < M; i++){
     for(int j = 0; j < N; j++)
       printf("%d ", dp[i][j]);
     printf("\n");
   }
 }
-
 
 int main(int argc, char *argv[]) {
   // No need to change
@@ -179,18 +204,19 @@ int main(int argc, char *argv[]) {
     assert(progresses[t] == -1);
   
   if(T == 1){
-    single_worker();
+    single_worker_finish_all();
   }
   else{
     //thread id: 1, 2, 3, ..., T
-    for (int i = 0; i < T; i++) {
+    for (int i = 0; i < T-1; i++) {
       create(Tworker);
     }
+    create(Tsuper_worker);//在工作量未达到一定量之前，不并行，而是由super worker完成工作
+
     join();  // Wait for all workers
   }
   result = dp[M - 1][N - 1];
   printf("%d\n", result);
-  //display_dp_mtx();
   FREE_PROGRESSES();
 
   return 0;
