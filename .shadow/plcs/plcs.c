@@ -63,7 +63,7 @@ int workload_thread(int round, int tid)
 {
   if(tid == T)
     return workload(round)/T + workload(round)%T;
-  
+    
   return workload(round)/T;
 }
 
@@ -156,7 +156,6 @@ void Tsuper_worker() {
         cond_wait(&cv, &lk);
       }
       mutex_unlock(&lk);
-
       //printf("ready to finish left alone\n");
       break;
     }
