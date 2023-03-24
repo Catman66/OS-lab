@@ -125,7 +125,7 @@ void Tworker(int id) {
       CONCURRENT_CALCULATE(id, round);
     }
   }
-  printf("all work of %d finished\n", id);
+  //printf("all work of %d finished\n", id);
 }
 
 void single_worker_finish_round(int round){
@@ -157,18 +157,18 @@ void Tsuper_worker() {
     break;
   }
 
-  printf("ready to broadcast \n");
+  //printf("ready to broadcast \n");
   cond_broadcast(&cv);
   for(int round = ROUND; round < M+N-1; round++) {
     if(workload(round) < limit_need_concurrent) {
-      printf("concurrent stage end, currentround&ROUND is %d&%d \n",round, ROUND);
+      //printf("concurrent stage end, current round & ROUND is %d & %d \n",round, ROUND);
       mutex_lock(&lk);
       while(!COND_CALCULAT(round)) {
         cond_wait(&cv, &lk);
       }
       mutex_unlock(&lk);
 
-      printf("ready to finish left alone\n");
+      //printf("ready to finish left alone\n");
       break;
     }
 
