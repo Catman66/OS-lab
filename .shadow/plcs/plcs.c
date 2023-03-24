@@ -166,7 +166,7 @@ void Tsuper_worker()
     if(workload(round) < limit_need_concurrent) {
       printf("concurrent stage end, currentround&ROUND is %d&%d \n",round, ROUND);
       mutex_lock(&lk);
-      while(COND_CALCULAT(round)) {
+      while(!COND_CALCULAT(round)) {
         cond_wait(&cv, &lk);
       }
       mutex_unlock(&lk);
