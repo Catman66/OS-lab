@@ -127,7 +127,6 @@ void calculate(int tid)
     calculate(id);\
     after_calculating(id)
     
-
 void single_worker_finish_round(int round){
   struct coordinate position;
   first_pos(round, 1, &position);
