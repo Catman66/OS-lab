@@ -119,9 +119,14 @@ void calculate(int tid)
     
 
 void Tworker(int id) {
+  int first = 1;
   for (int round = 0; round < M + N - 1; round++) {
     if(workload(round) >= limit_need_concurrent) {
-      printf("%d waiting\n", id);
+      if(first) {
+        printf("%d waiting\n", id);
+        first = 0;
+      }
+        
       CONCURRENT_CALCULATE(id);
     }
   }
@@ -163,22 +168,19 @@ void Tsuper_worker()
   cond_broadcast(&cv);
 
   for(int round = ROUND; round < M+N-1; round++) {
-    if(workload(round) < limit_need_concurrent){
-      single_worker_finish_round(round);
-      continue;
+    if(workload(round) < limit_need_concurrent) {
+      mutex_lock(&lk);
+      while(COND_CALCULAT) {
+        cond_wait(&cv, &lk);
+      }
+      mutex_unlock(&lk);
+
+      break;
     }
-    
-    //会在此处死锁？
-    printf("before dead lock\n");
-    mutex_lock(&lk);
-    while(COND_CALCULAT) {
-      cond_wait(&cv, &lk);
-    }
-    printf("post dead lock\n");
-    LEFT_WORK = 0;
-    mutex_unlock(&lk);
-    CONCURRENT_CALCULATE(T);
-    //this guy,在最后一次完工之后，不会等待其他小伙伴
+  }
+
+  for(int round = ROUND; round < M+N-1; round++) {
+    single_worker_finish_round(round);
   }
 }
 
