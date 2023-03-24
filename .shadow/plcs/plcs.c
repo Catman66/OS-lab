@@ -110,7 +110,7 @@ void calculate(int tid, int round) {
     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   }
 
-  printf(" %d id finished %d round\n", tid, round);
+  //printf(" %d id finished %d round\n", tid, round);
 }
 
 #define limit_need_concurrent 200
@@ -147,8 +147,7 @@ void single_worker_finish_round(int round){
   ROUND++;
 }
 
-void Tsuper_worker()
-{
+void Tsuper_worker() {
   for (int round = 0; round < M + N - 1; round++) {
     if(workload(round) < limit_need_concurrent){
       single_worker_finish_round(round);
@@ -158,10 +157,8 @@ void Tsuper_worker()
     break;
   }
 
-  mutex_lock(&lk);
   printf("ready to broadcast \n");
   cond_broadcast(&cv);
-  mutex_unlock(&lk);
   for(int round = ROUND; round < M+N-1; round++) {
     if(workload(round) < limit_need_concurrent) {
       printf("concurrent stage end, currentround&ROUND is %d&%d \n",round, ROUND);
