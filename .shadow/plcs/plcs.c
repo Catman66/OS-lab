@@ -17,8 +17,8 @@ int result;
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-mutex_t lk = MUTEX_INIT();
-cond_t cv = COND_INIT();      //condition variable
+mutex_t lk = MUTEX_INIT(), lk_main = MUTEX_INIT();
+cond_t cv = COND_INIT(), cv_main = COND_INIT();      //condition variable
 
 volatile int ROUND = 0, DONE_WORK = 0;
 #define ROUND_FINISHED (DONE_WORK == T)
@@ -178,6 +178,10 @@ void Tsuper_worker() {
   for(int round = ROUND; round < M+N-1; round++) {
     single_worker_finish_round(round);
   }
+  mutex_lock(&lk_main);
+  cond_broadcast(&cv_main);
+  mutex_unlock(&lk_main);
+  
 }
 
 void single_worker_finish_all(){
@@ -200,6 +204,8 @@ void display_dp_mtx(){
   }
 }
 
+
+
 int main(int argc, char *argv[]) {
   // No need to change
   assert(scanf("%s%s", A, B) == 2);
@@ -210,7 +216,12 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
+  mutex_lock(&lk_main);
+  cond_wait(&cv_main, &lk_main);
+  mutex_unlock(&lk_main);
+
   create(Tsuper_worker);
+
   join();  // Wait for all workers
   
   result = dp[M - 1][N - 1];
