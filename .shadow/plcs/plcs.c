@@ -86,6 +86,8 @@ struct coordinate
 #define IS_VALID_IJ(i, j) ((i>=0) && (i<M) && (j>=0) && (j<N))
 void first_pos(int round, int tid, struct coordinate* buff)
 {
+  assert(round < M+N-1);
+
   int workload_of_round = workload(round),
   average = workload_of_round/T;
 
