@@ -112,7 +112,7 @@ void calculate(int tid, int round) {
   //printf(" %d id finished %d round\n", tid, round);
 }
 
-#define limit_need_concurrent 2000
+#define limit_need_concurrent 500
 #define CONCURRENT_CALCULATE(tid, round) before_calculating(round);\
     calculate(tid, round);\
     after_calculating(round)
