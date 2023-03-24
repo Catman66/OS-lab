@@ -132,7 +132,7 @@ void single_worker_finish_round(int round){
   struct coordinate position;
   first_pos(round, 1, &position);
 
-  for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)){
+  for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)) {
     int i = position.i;
     int j = position.j;
 
@@ -149,7 +149,7 @@ void single_worker_finish_round(int round){
 
 void Tsuper_worker() {
   for (int round = 0; round < M + N - 1; round++) {
-    if(workload(round) < limit_need_concurrent){
+    if(workload(round) < limit_need_concurrent) {
       single_worker_finish_round(round);
       continue;
     }
