@@ -76,31 +76,24 @@ int first_i(int round)
   return round < N ? 0 : round - (N-1);
 }
 
-struct coordinate
-{
-  int i, j;
-};
-
 #define IS_VALID_IJ(i, j) ((i>=0) && (i<M) && (j>=0) && (j<N))
-void first_pos(int round, int tid, struct coordinate* buff)
+void set_first_ij(int round, int tid, int* pi, int *pj)
 {
   assert(round < M+N-1);
 
   int workload_of_round = workload(round),
   average = workload_of_round/T;
 
-  buff->i = first_i(round) + (tid-1) * average;
-  buff->j = round - buff->i;
+  *pi = first_i(round) + (tid-1) * average;
+  *pj = round - *pi;
 }
 
-#define RENEW_POSISTION(pos) (pos.i ++, pos.j --)
+#define RENEW_IJ(i, j) (i++, j--)
 void calculate(int tid, int round) {  
-  struct coordinate position;
-  first_pos(round, tid, &position);
+  int i, j;
+  set_first_ij(round, tid, &i, &j);
 
-  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_POSISTION(position)) {
-    int i = position.i;
-    int j = position.j;
+  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_IJ(i, j)) {
 
     assert(IS_VALID_IJ(i, j));
     int skip_a = DP(i-1, j);
@@ -128,13 +121,10 @@ void Tworker(int id) {
 }
 
 void single_worker_finish_round(int round){
-  struct coordinate position;
-  first_pos(round, 1, &position);
+  int i, j;
+  set_first_ij(round, 1, &i, &j);
 
-  for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)) {
-    int i = position.i;
-    int j = position.j;
-
+  for(int step = 0; step < workload(round); step++, RENEW_IJ(i, j)) {
     assert(IS_VALID_IJ(i, j));
     int skip_a = DP(i-1, j);
     int skip_b = DP(i, j-1);
@@ -216,6 +206,7 @@ int main(int argc, char *argv[]) {
   }
   create(Tsuper_worker);
 
+  //no need to switch to main thread
   mutex_lock(&lk_main);
   cond_wait(&cv_main, &lk_main);
   mutex_unlock(&lk_main);
