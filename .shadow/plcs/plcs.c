@@ -149,7 +149,6 @@ void single_worker_finish_round(int round){
   }
 
   ROUND++;
-  //printf("%d ", ROUND);
 }
 
 void Tsuper_worker()
@@ -169,15 +168,18 @@ void Tsuper_worker()
 
   for(int round = ROUND; round < M+N-1; round++) {
     if(workload(round) < limit_need_concurrent) {
+      printf("concurrent stage end\n");
       mutex_lock(&lk);
       while(COND_CALCULAT) {
         cond_wait(&cv, &lk);
       }
       mutex_unlock(&lk);
 
+      printf("ready to finish left alone\n");
       break;
     }
   }
+
 
   for(int round = ROUND; round < M+N-1; round++) {
     single_worker_finish_round(round);
