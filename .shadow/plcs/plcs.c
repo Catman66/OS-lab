@@ -162,7 +162,7 @@ void Tsuper_worker()
 
   for(int round = ROUND; round < M+N-1; round++) {
     if(workload(round) < limit_need_concurrent) {
-      printf("concurrent stage end\n");
+      printf("concurrent stage end, current ROUND is : %d \n", ROUND);
       mutex_lock(&lk);
       while(COND_CALCULAT(round)) {
         cond_wait(&cv, &lk);
