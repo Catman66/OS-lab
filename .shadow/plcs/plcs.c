@@ -158,10 +158,10 @@ void Tsuper_worker()
     break;
   }
 
-
+  mutex_lock(&lk);
   printf("ready to broadcast \n");
-  //cond_broadcast(&cv);
-
+  cond_broadcast(&cv);
+  mutex_unlock(&lk);
   for(int round = ROUND; round < M+N-1; round++) {
     if(workload(round) < limit_need_concurrent) {
       printf("concurrent stage end, current ROUND is : %d \n", ROUND);
