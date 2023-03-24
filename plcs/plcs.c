@@ -17,42 +17,30 @@ int result;
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-int *progresses;
-
-#define INIT_PROGRESSES() (progresses = malloc((T+2)*sizeof(int)), memset(progresses, 0xff, (T+2) * sizeof(int)), progresses[0] = progresses[T+1] = M+N)
-#define FREE_PROGRESSES() (free(progresses))
-
-
-//not init state 
-#define COND_CALCULAT(tid) (progresses[tid] >= 0 && progresses[tid] <= progresses[tid+1] && progresses[tid] <= progresses[tid-1]) 
-#define FINISH_ROUND(tid) (progresses[tid]++)
-
-mutex_t lk = MUTEX_INIT();    //mutual exclusive lock
+mutex_t lk = MUTEX_INIT();
 cond_t cv = COND_INIT();      //condition variable
 
-//尝试用很多把锁
+volatile int ROUND = 0, DONE_WORK = 0;
+#define ROUND_FINISHED (DONE_WORK == T)
+#define COND_CALCULAT(round) (round == ROUND)
 
-
-void before_calculating(int tid)
-{
+void before_calculating(int round) {
   mutex_lock(&lk);
-  while(!COND_CALCULAT(tid))
-  {
+  while(!COND_CALCULAT(round)) {
     cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
   }
-  //划分本次的顺序
   mutex_unlock(&lk);
 }
 
-
-void after_calculating(int tid)
-{
+void after_calculating() {
   mutex_lock(&lk);
-  
-  FINISH_ROUND(tid);
 
-  cond_broadcast(&cv);
-
+  DONE_WORK++;
+  if(ROUND_FINISHED) {
+    DONE_WORK = 0;
+    ROUND++;
+    cond_broadcast(&cv);
+  }
   mutex_unlock(&lk);
 }
 
@@ -81,7 +69,10 @@ int workload_thread(int round, int tid)
 
 int first_i(int round)
 {
-  assert(round < M+N-1);
+  if(!(round < M+N-1)) {
+    printf("error round : %d \n", round);
+    assert(0);
+  }
   return round < N ? 0 : round - (N-1);
 }
 
@@ -93,6 +84,8 @@ struct coordinate
 #define IS_VALID_IJ(i, j) ((i>=0) && (i<M) && (j>=0) && (j<N))
 void first_pos(int round, int tid, struct coordinate* buff)
 {
+  assert(round < M+N-1);
+
   int workload_of_round = workload(round),
   average = workload_of_round/T;
 
@@ -101,15 +94,11 @@ void first_pos(int round, int tid, struct coordinate* buff)
 }
 
 #define RENEW_POSISTION(pos) (pos.i ++, pos.j --)
-void calculate(int tid)
-{
-  int round = progresses[tid]+1;
-
+void calculate(int tid, int round) {  
   struct coordinate position;
   first_pos(round, tid, &position);
 
-  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_POSISTION(position))
-  {
+  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_POSISTION(position)) {
     int i = position.i;
     int j = position.j;
 
@@ -120,18 +109,29 @@ void calculate(int tid)
 
     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   }
+  //printf(" %d id finished %d round\n", tid, round);
 }
 
-#define limit_need_concurrent 100
-#define CONCURRENT_CALCULATE(id) before_calculating(id);\
-    calculate(id);\
-    after_calculating(id)
+#define limit_need_concurrent 2000
+#define CONCURRENT_CALCULATE(tid, round) before_calculating(round);\
+    calculate(tid, round);\
+    after_calculating(round)
     
+
+void Tworker(int id) {
+  for (int round = 0; round < M + N - 1; round++) {
+    if(workload(round) >= limit_need_concurrent) {        
+      CONCURRENT_CALCULATE(id, round);
+    }
+  }
+  //printf("all work of %d finished\n", id);
+}
+
 void single_worker_finish_round(int round){
   struct coordinate position;
   first_pos(round, 1, &position);
 
-  for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)){
+  for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)) {
     int i = position.i;
     int j = position.j;
 
@@ -143,28 +143,40 @@ void single_worker_finish_round(int round){
     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   }
 
-  for(int i = 1; i <= T; i++)
-    progresses[i]++;
+  ROUND++;
 }
 
-void Tworker(int id) {
+void Tsuper_worker() {
   for (int round = 0; round < M + N - 1; round++) {
-    if(workload(round) < limit_need_concurrent){
-      continue;
-    }
-    CONCURRENT_CALCULATE(id);
-  }
-}
-
-void Tsuper_worker()
-{
-  //id == T;
-  for (int round = 0; round < M + N - 1; round++) {
-    if(workload(round) < limit_need_concurrent){
+    if(workload(round) < limit_need_concurrent) {
       single_worker_finish_round(round);
       continue;
     }
-    CONCURRENT_CALCULATE(T);
+    assert(round == ROUND);
+    break;
+  }
+
+  //printf("ready to broadcast \n");
+  cond_broadcast(&cv);
+  for(int round = ROUND; round < M+N-1; round++) {
+    if(workload(round) < limit_need_concurrent) {
+      //printf("concurrent stage end, current round & ROUND is %d & %d \n",round, ROUND);
+      mutex_lock(&lk);
+      while(!COND_CALCULAT(round)) {
+        cond_wait(&cv, &lk);
+      }
+      mutex_unlock(&lk);
+
+      //printf("ready to finish left alone\n");
+      break;
+    }
+
+    CONCURRENT_CALCULATE(T, round);
+  }
+
+
+  for(int round = ROUND; round < M+N-1; round++) {
+    single_worker_finish_round(round);
   }
 }
 
@@ -195,22 +207,15 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  INIT_PROGRESSES();
-  assert(progresses != NULL);
-  for(int t = 1; t <= T; t++)
-    assert(progresses[t] == -1);
-  
-  //thread id: 1, 2, 3, ..., T
-  for (int i = 0; i < T-1; i++) {
+  for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
-  create(Tsuper_worker);//在工作量未达到一定量之前，不并行，而是由super worker完成工作
-
+  create(Tsuper_worker);
   join();  // Wait for all workers
   
   result = dp[M - 1][N - 1];
   printf("%d\n", result);
-  FREE_PROGRESSES();
+  
   //display_dp_mtx();
   return 0;
 }
