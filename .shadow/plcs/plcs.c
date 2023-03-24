@@ -168,10 +168,13 @@ void Tsuper_worker()
       continue;
     }
     
+    //会在此处死锁？
+    printf("before dead lock\n");
     mutex_lock(&lk);
     while(COND_CALCULAT) {
       cond_wait(&cv, &lk);
     }
+    printf("post dead lock\n");
     LEFT_WORK = 0;
     mutex_unlock(&lk);
     CONCURRENT_CALCULATE(T);
