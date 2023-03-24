@@ -159,6 +159,7 @@ void Tsuper_worker()
   }
   
   LEFT_WORK = T; 
+  printf("ready to broadcast \n");
   cond_broadcast(&cv);
 
   for(int round = ROUND; round < M+N-1; round++) {
