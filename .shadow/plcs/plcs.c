@@ -109,7 +109,6 @@ void calculate(int tid, int round) {
 
     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   }
-
   //printf(" %d id finished %d round\n", tid, round);
 }
 
