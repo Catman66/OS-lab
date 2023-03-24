@@ -204,8 +204,6 @@ void display_dp_mtx(){
   }
 }
 
-
-
 int main(int argc, char *argv[]) {
   // No need to change
   assert(scanf("%s%s", A, B) == 2);
@@ -216,11 +214,11 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
+  create(Tsuper_worker);
+
   mutex_lock(&lk_main);
   cond_wait(&cv_main, &lk_main);
   mutex_unlock(&lk_main);
-
-  create(Tsuper_worker);
 
   join();  // Wait for all workers
   
