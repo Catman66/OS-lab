@@ -71,7 +71,10 @@ int workload_thread(int round, int tid)
 
 int first_i(int round)
 {
-  assert(round < M+N-1);
+  if(!(round < M+N-1)) {
+    printf("error round : %d \n", round);
+    assert(0);
+  }
   return round < N ? 0 : round - (N-1);
 }
 
