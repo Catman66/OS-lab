@@ -135,6 +135,8 @@ void Tworker(int id) {
       CONCURRENT_CALCULATE(id);
     }
   }
+
+  printf("work of %d finished\n", id);
 }
 
 void single_worker_finish_round(int round){
