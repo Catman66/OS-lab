@@ -20,16 +20,15 @@ int result;
 mutex_t lk = MUTEX_INIT();
 cond_t cv = COND_INIT();      //condition variable
 
-volatile int LEFT_WORK, DONE_WORK = 0, ROUND = 0;
+volatile int ROUND = 0, DONE_WORK;
 #define ROUND_FINISHED (DONE_WORK == T)
-#define COND_CALCULAT (LEFT_WORK > 0)
+#define COND_CALCULAT(round) (round == ROUND)
 
-void before_calculating() {
+void before_calculating(int round) {
   mutex_lock(&lk);
-  while(!COND_CALCULAT) {
+  while(!COND_CALCULAT(round)) {
     cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
   }
-  LEFT_WORK--;
   mutex_unlock(&lk);
 }
 
@@ -38,7 +37,6 @@ void after_calculating() {
 
   DONE_WORK++;
   if(ROUND_FINISHED) {
-    LEFT_WORK = T;
     DONE_WORK = 0;
     ROUND++;
     cond_broadcast(&cv);
@@ -118,25 +116,18 @@ void calculate(int tid)
 }
 
 #define limit_need_concurrent 200
-#define CONCURRENT_CALCULATE(tid) before_calculating();\
+#define CONCURRENT_CALCULATE(tid, round) before_calculating(round);\
     calculate(tid);\
-    after_calculating()
+    after_calculating(round)
     
 
 void Tworker(int id) {
-  int first = 1;
   for (int round = 0; round < M + N - 1; round++) {
-    if(workload(round) >= limit_need_concurrent) {
-      if(first) {
-        printf("%d waiting\n", id);
-        first = 0;
-      }
-        
-      CONCURRENT_CALCULATE(id);
+    if(workload(round) >= limit_need_concurrent) {        
+      CONCURRENT_CALCULATE(id, round);
     }
   }
-
-  printf("work of %d finished\n", id);
+  printf("all work of %d finished\n", id);
 }
 
 void single_worker_finish_round(int round){
@@ -168,8 +159,6 @@ void Tsuper_worker()
     assert(round == ROUND);
     break;
   }
-  
-  LEFT_WORK = T; 
   printf("ready to broadcast \n");
   cond_broadcast(&cv);
 
@@ -177,7 +166,7 @@ void Tsuper_worker()
     if(workload(round) < limit_need_concurrent) {
       printf("concurrent stage end\n");
       mutex_lock(&lk);
-      while(COND_CALCULAT) {
+      while(COND_CALCULAT(round)) {
         cond_wait(&cv, &lk);
       }
       mutex_unlock(&lk);
@@ -220,7 +209,6 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  LEFT_WORK = 0;
   for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
