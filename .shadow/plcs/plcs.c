@@ -157,8 +157,10 @@ void Tsuper_worker()
     assert(round == ROUND);
     break;
   }
+
+
   printf("ready to broadcast \n");
-  cond_broadcast(&cv);
+  //cond_broadcast(&cv);
 
   for(int round = ROUND; round < M+N-1; round++) {
     if(workload(round) < limit_need_concurrent) {
