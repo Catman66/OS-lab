@@ -121,6 +121,7 @@ void calculate(int tid)
 void Tworker(int id) {
   for (int round = 0; round < M + N - 1; round++) {
     if(workload(round) >= limit_need_concurrent) {
+      printf("%d waiting\n", id);
       CONCURRENT_CALCULATE(id);
     }
   }
@@ -165,6 +166,7 @@ void Tsuper_worker()
       single_worker_finish_round(round);
       continue;
     }
+    
     mutex_lock(&lk);
     while(COND_CALCULAT) {
       cond_wait(&cv, &lk);
