@@ -20,7 +20,7 @@ int result;
 mutex_t lk = MUTEX_INIT();
 cond_t cv = COND_INIT();      //condition variable
 
-int LEFT_WORK, DONE_WORK = 0, ROUND = 0;
+volatile int LEFT_WORK, DONE_WORK = 0, ROUND = 0;
 #define ROUND_FINISHED (DONE_WORK == T)
 #define COND_CALCULAT (LEFT_WORK > 0)
 
