@@ -172,6 +172,8 @@ void Tsuper_worker()
       printf("ready to finish left alone\n");
       break;
     }
+
+    CONCURRENT_CALCULATE(T, round);
   }
 
 
