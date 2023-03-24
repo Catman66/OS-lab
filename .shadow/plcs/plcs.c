@@ -94,15 +94,11 @@ void first_pos(int round, int tid, struct coordinate* buff)
 }
 
 #define RENEW_POSISTION(pos) (pos.i ++, pos.j --)
-void calculate(int tid)
-{
-  int round = ROUND;
-  
+void calculate(int tid, int round) {  
   struct coordinate position;
   first_pos(round, tid, &position);
 
-  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_POSISTION(position))
-  {
+  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_POSISTION(position)) {
     int i = position.i;
     int j = position.j;
 
@@ -113,11 +109,13 @@ void calculate(int tid)
 
     dp[i][j] = MAX3(skip_a, skip_b, take_both);
   }
+
+  printf(" %d id finished %d round\n", tid, round);
 }
 
 #define limit_need_concurrent 200
 #define CONCURRENT_CALCULATE(tid, round) before_calculating(round);\
-    calculate(tid);\
+    calculate(tid, round);\
     after_calculating(round)
     
 
