@@ -88,7 +88,7 @@ void calculate(int tid, int round) {
   finish_block(i, j, h, w);
 }
 
-#define limit_need_concurrent 1000
+#define limit_need_concurrent 800
 #define CONCURRENT_CALCULATE(tid, round) wait_for_other_thread(tid, round);\
     calculate(tid, round);\
     after_calculating(tid)
