@@ -63,6 +63,7 @@ void after_calculating(int tid) {
 
 
 void finish_block(int m, int n, int height, int width){
+  printf("finish %d %d %d %d \n", m ,n, height, width);
   for(int i = m; i < m + height; i++){
     for(int j = n; j < n + width; j++){
       assert(IS_VALID_IJ(i, j));
@@ -129,7 +130,7 @@ int main(int argc, char *argv[]) {
   INIT_PROGRESSES();
   INIT_BLOCK_INFO();
 
-  for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
+  for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
 
