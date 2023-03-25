@@ -26,7 +26,7 @@ int* PROGRESSES;
                         PROGRESSES[0] = NUM_ROUNDS;
 #define FREE_PROGRESSES() free(PROGRESSES)
 
-int BLCOK_WIDTH = 50;
+int BLCOK_WIDTH = 300;
 int BLOCK_HEIGHT, LAST_HEIGHT;
 int NUM_ROUNDS;
 #define INIT_BLOCK_INFO() \
