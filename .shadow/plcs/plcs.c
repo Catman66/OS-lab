@@ -24,7 +24,7 @@ int* PROGRESSES;
 #define INIT_PROGRESSES() PROGRESSES = malloc((T+1)* sizeof(int));\
                         memset(PROGRESSES, 0xff, (T+1)* sizeof(int)); \
                         PROGRESSES[0] = NUM_ROUNDS;
-#define FREE_PROGRESSES() free(FINISHED_ROUNDS);
+#define FREE_PROGRESSES() free(PROGRESSES)
 
 int BLCOK_WIDTH = 100;
 int BLOCK_HEIGHT, LAST_HEIGHT;
@@ -127,8 +127,9 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  INIT_PROGRESSES();
+
   INIT_BLOCK_INFO();
+  INIT_PROGRESSES();
 
   for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
@@ -145,5 +146,6 @@ int main(int argc, char *argv[]) {
   printf("%d\n", result);
   
   display_dp_mtx();
+  FREE_PROGRESSES();
   return 0;
 }
