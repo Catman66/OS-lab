@@ -26,7 +26,7 @@ int* PROGRESSES;
                         PROGRESSES[0] = NUM_ROUNDS;
 #define FREE_PROGRESSES() free(PROGRESSES)
 
-int BLCOK_WIDTH = 300;
+int BLCOK_WIDTH = 500;
 int BLOCK_HEIGHT, LAST_HEIGHT;
 int NUM_ROUNDS;
 #define INIT_BLOCK_INFO() \
@@ -45,12 +45,17 @@ void wait_for_other_thread(int tid, int round) {
   mutex_unlock(&lk);
 }
 
+
+int DONE_WORK = 0, WORK_LOAD = 1;
 void after_calculating(int tid) {
   mutex_lock(&lk);
 
   PROGRESSES[tid]++;
-  cond_broadcast(&cv);
-
+  DONE_WORK++;
+  if(DONE_WORK == WORK_LOAD){
+    DONE_WORK = 0;
+    cond_broadcast(&cv);
+  }
   mutex_unlock(&lk);
 }
 
@@ -88,19 +93,19 @@ void calculate(int tid, int round) {
   finish_block(i, j, h, w);
 }
 
-#define limit_need_concurrent 800
 #define CONCURRENT_CALCULATE(tid, round) wait_for_other_thread(tid, round);\
     calculate(tid, round);\
     after_calculating(tid)
     
-
 void Tworker(int tid) {
   for (int round = 0; round < NUM_ROUNDS; round++) {  
       CONCURRENT_CALCULATE(tid, round);
   }
   //printf("all work of %d finished, and my progress is %d\n", tid, PROGRESSES[tid]);
+  mutex_lock(&lk);
   PROGRESSES[tid] = NUM_ROUNDS;
   cond_broadcast(&cv);
+  mutex_unlock(&lk);
 }
 
 void single_worker_finish_all(){
