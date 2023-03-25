@@ -54,17 +54,7 @@ void after_calculating(int tid) {
 
 
 #define IS_VALID_IJ(i, j) ((i>=0) && (i<M) && (j>=0) && (j<N))
-void set_first_ij(int round, int tid, int* pi, int *pj)
-{
-  assert(round < M+N-1);
 
-  int workload_of_round = workload(round),
-  average = workload_of_round/T;
-
-  *pi = first_i(round) + (tid-1) * average;
-  *pj = round - *pi;
-}
-#define RENEW_IJ(i, j) (i++, j--)
 #define CALCULATE_GRID(i, j) int skip_a = DP(i-1, j);\
     int skip_b = DP(i, j-1);\
     int take_both = DP(i-1, j-1) + (A[i] == B[j]);\
