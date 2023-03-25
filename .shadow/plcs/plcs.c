@@ -34,7 +34,7 @@ BLOCK_HEIGHT = M / T, \
 LAST_HEIGHT = M - (T-1) * BLOCK_HEIGHT,\
 NUM_ROUNDS = (N + BLCOK_WIDTH - 1) / BLCOK_WIDTH
 
-#define COND_CALCULAT(id, round) ((round) <= PROGRESSES[(id)-1] )
+#define COND_CALCULAT(id, round) ((round) < PROGRESSES[(id)-1] )
 
 void wait_for_other_thread(int tid, int round) {
   mutex_lock(&lk);
