@@ -127,15 +127,15 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-
   INIT_BLOCK_INFO();
   INIT_PROGRESSES();
 
   for(int i = 1; i <= T; i ++){
     assert(PROGRESSES[i] == -1);
   }
-  printf("ok");
+  printf("ok\n");
   sleep(1000);
+
   for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
