@@ -39,6 +39,7 @@ NUM_ROUNDS = (N + BLCOK_WIDTH - 1) / BLCOK_WIDTH
 void wait_for_other_thread(int tid, int round) {
   mutex_lock(&lk);
   while(!COND_CALCULAT(tid, round)) {
+    printf("%d waiting", tid);
     cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
   }
   mutex_unlock(&lk);
@@ -52,7 +53,6 @@ void after_calculating(int tid) {
 
   mutex_unlock(&lk);
 }
-
 
 #define IS_VALID_IJ(i, j) ((i>=0) && (i<M) && (j>=0) && (j<N))
 
