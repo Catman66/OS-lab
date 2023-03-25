@@ -21,8 +21,9 @@ mutex_t lk = MUTEX_INIT();//, lk_main = MUTEX_INIT();
 cond_t cv = COND_INIT();//, cv_main = COND_INIT();      //condition variable
 
 int* PROGRESSES;
-#define INIT_PROGRESSES() FINISHED_ROUNDS = malloc((T+1)* sizeof(int));\
-                        memset(PROGRESSES, 0xff, (T+1)* sizeof(int))
+#define INIT_PROGRESSES() PROGRESSES = malloc((T+1)* sizeof(int));\
+                        memset(PROGRESSES, 0xff, (T+1)* sizeof(int)); \
+                        PROGRESSES[0] = NUM_ROUNDS;
 #define FREE_PROGRESSES() free(FINISHED_ROUNDS);
 
 int BLCOK_WIDTH = 100;
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-
+  INIT_PROGRESSES();
   INIT_BLOCK_INFO();
 
   for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
