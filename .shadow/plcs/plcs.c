@@ -60,6 +60,16 @@ void after_calculating(int tid) {
     int take_both = DP(i-1, j-1) + (A[i] == B[j]);\
     dp[i][j] = MAX3(skip_a, skip_b, take_both)
 
+
+void finish_block(int m, int n, int height, int width){
+  for(int i = m; i < m + height; i++){
+    for(int j = n; j < n + width; j++){
+      assert(IS_VALID_IJ(i, j));
+      CALCULATE_GRID(i, j);
+    }
+  }
+}
+
 void calculate(int tid, int round) {  
   
   int i = (tid-1) * BLOCK_HEIGHT;
@@ -89,14 +99,6 @@ void Tworker(int id) {
   printf("all work of %d finished\n", id);
 }
 
-void finish_block(int m, int n, int height, int width){
-  for(int i = m; i < m + height; i++){
-    for(int j = n; j < n + width; j++){
-      assert(IS_VALID_IJ(i, j));
-      CALCULATE_GRID(i, j);
-    }
-  }
-}
 void single_worker_finish_all(){
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {
