@@ -17,167 +17,90 @@ int result;
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-mutex_t lk = MUTEX_INIT();
-cond_t cv = COND_INIT();      //condition variable
+mutex_t lk = MUTEX_INIT();//, lk_main = MUTEX_INIT();
+cond_t cv = COND_INIT();//, cv_main = COND_INIT();      //condition variable
 
-volatile int ROUND = 0, DONE_WORK = 0;
-#define ROUND_FINISHED (DONE_WORK == T)
-#define COND_CALCULAT(round) (round == ROUND)
+int* PROGRESSES;
+#define INIT_PROGRESSES() PROGRESSES = malloc((T+1)* sizeof(int));\
+                        memset(PROGRESSES, 0xff, (T+1)* sizeof(int)); \
+                        PROGRESSES[0] = NUM_ROUNDS;
+#define FREE_PROGRESSES() free(PROGRESSES)
 
-void before_calculating(int round) {
+int BLCOK_WIDTH = 100;
+int BLOCK_HEIGHT, LAST_HEIGHT;
+int NUM_ROUNDS;
+#define INIT_BLOCK_INFO() \
+BLOCK_HEIGHT = M / T, \
+LAST_HEIGHT = M - (T-1) * BLOCK_HEIGHT,\
+NUM_ROUNDS = (N + BLCOK_WIDTH - 1) / BLCOK_WIDTH
+
+#define COND_CALCULAT(tid, round) ((round) < PROGRESSES[tid-1] )
+
+void wait_for_other_thread(int tid, int round) {
   mutex_lock(&lk);
-  while(!COND_CALCULAT(round)) {
+  while(!COND_CALCULAT(tid, round)) {
+    //printf("%d waiting becasue %d >= %d\n", tid, round, PROGRESSES[]);
     cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
   }
   mutex_unlock(&lk);
 }
 
-void after_calculating() {
+void after_calculating(int tid) {
   mutex_lock(&lk);
 
-  DONE_WORK++;
-  if(ROUND_FINISHED) {
-    DONE_WORK = 0;
-    ROUND++;
-    cond_broadcast(&cv);
-  }
+  PROGRESSES[tid]++;
+  cond_broadcast(&cv);
+
   mutex_unlock(&lk);
 }
 
-
-int workload(int round)
-{
-  int min_MN = MIN(M, N), max_MN = MAX(M, N);
-
-  //logic from the function image
-  if(round < min_MN)
-    return round+1;
-  else if(round < max_MN)
-    return min_MN;
-  else  
-    return M+N-1 - round;
-}
-//round : [0, ... , M+N-2]
-
-int workload_thread(int round, int tid)
-{
-  if(tid == T)
-    return workload(round)/T + workload(round)%T;
-  
-  return workload(round)/T;
-}
-
-int first_i(int round)
-{
-  if(!(round < M+N-1)) {
-    printf("error round : %d \n", round);
-    assert(0);
-  }
-  return round < N ? 0 : round - (N-1);
-}
-
-struct coordinate
-{
-  int i, j;
-};
-
 #define IS_VALID_IJ(i, j) ((i>=0) && (i<M) && (j>=0) && (j<N))
-void first_pos(int round, int tid, struct coordinate* buff)
-{
-  assert(round < M+N-1);
 
-  int workload_of_round = workload(round),
-  average = workload_of_round/T;
+#define CALCULATE_GRID(i, j) int skip_a = DP(i-1, j);\
+    int skip_b = DP(i, j-1);\
+    int take_both = DP(i-1, j-1) + (A[i] == B[j]);\
+    dp[i][j] = MAX3(skip_a, skip_b, take_both)
 
-  buff->i = first_i(round) + (tid-1) * average;
-  buff->j = round - buff->i;
-}
 
-#define RENEW_POSISTION(pos) (pos.i ++, pos.j --)
-void calculate(int tid, int round) {  
-  struct coordinate position;
-  first_pos(round, tid, &position);
-
-  for(int t = 0; t < workload_thread(round, tid); t++, RENEW_POSISTION(position)) {
-    int i = position.i;
-    int j = position.j;
-
-    assert(IS_VALID_IJ(i, j));
-    int skip_a = DP(i-1, j);
-    int skip_b = DP(i, j-1);
-    int take_both = DP(i-1, j-1) + (A[i] == B[j]);
-
-    dp[i][j] = MAX3(skip_a, skip_b, take_both);
+void finish_block(int m, int n, int height, int width){
+  //printf("finish %d %d %d %d \n", m ,n, height, width);
+  for(int i = m; i < m + height; i++){
+    for(int j = n; j < n + width; j++){
+      assert(IS_VALID_IJ(i, j));
+      CALCULATE_GRID(i, j);
+    }
   }
-  //printf(" %d id finished %d round\n", tid, round);
 }
 
-#define limit_need_concurrent 2000
-#define CONCURRENT_CALCULATE(tid, round) before_calculating(round);\
+void calculate(int tid, int round) {  
+  
+  int i = (tid-1) * BLOCK_HEIGHT;
+  int j = round * BLCOK_WIDTH;
+  int w = BLCOK_WIDTH;
+  int h = BLOCK_HEIGHT;
+
+  if(round == NUM_ROUNDS-1){
+    w = N - round * BLCOK_WIDTH;
+  }
+  if(tid == T){
+    h = LAST_HEIGHT;
+  }
+  finish_block(i, j, h, w);
+}
+
+#define limit_need_concurrent 500
+#define CONCURRENT_CALCULATE(tid, round) wait_for_other_thread(tid, round);\
     calculate(tid, round);\
-    after_calculating(round)
+    after_calculating(tid)
     
 
-void Tworker(int id) {
-  for (int round = 0; round < M + N - 1; round++) {
-    if(workload(round) >= limit_need_concurrent) {        
-      CONCURRENT_CALCULATE(id, round);
-    }
+void Tworker(int tid) {
+  for (int round = 0; round < NUM_ROUNDS; round++) {  
+      CONCURRENT_CALCULATE(tid, round);
   }
-  //printf("all work of %d finished\n", id);
-}
-
-void single_worker_finish_round(int round){
-  struct coordinate position;
-  first_pos(round, 1, &position);
-
-  for(int step = 0; step < workload(round); step++, RENEW_POSISTION(position)) {
-    int i = position.i;
-    int j = position.j;
-
-    assert(IS_VALID_IJ(i, j));
-    int skip_a = DP(i-1, j);
-    int skip_b = DP(i, j-1);
-    int take_both = DP(i-1, j-1) + (A[i] == B[j]);
-
-    dp[i][j] = MAX3(skip_a, skip_b, take_both);
-  }
-
-  ROUND++;
-}
-
-void Tsuper_worker() {
-  for (int round = 0; round < M + N - 1; round++) {
-    if(workload(round) < limit_need_concurrent) {
-      single_worker_finish_round(round);
-      continue;
-    }
-    assert(round == ROUND);
-    break;
-  }
-
-  //printf("ready to broadcast \n");
+  //printf("all work of %d finished, and my progress is %d\n", tid, PROGRESSES[tid]);
+  PROGRESSES[tid] = NUM_ROUNDS;
   cond_broadcast(&cv);
-  for(int round = ROUND; round < M+N-1; round++) {
-    if(workload(round) < limit_need_concurrent) {
-      //printf("concurrent stage end, current round & ROUND is %d & %d \n",round, ROUND);
-      mutex_lock(&lk);
-      while(!COND_CALCULAT(round)) {
-        cond_wait(&cv, &lk);
-      }
-      mutex_unlock(&lk);
-
-      //printf("ready to finish left alone\n");
-      break;
-    }
-
-    CONCURRENT_CALCULATE(T, round);
-  }
-
-
-  for(int round = ROUND; round < M+N-1; round++) {
-    single_worker_finish_round(round);
-  }
 }
 
 void single_worker_finish_all(){
@@ -201,21 +124,30 @@ void display_dp_mtx(){
 }
 
 int main(int argc, char *argv[]) {
-  // No need to change
   assert(scanf("%s%s", A, B) == 2);
   N = strlen(B);
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
-  for (int i = 0; i < T-1; i++) {   //thread id: 1, 2, 3, ..., T
+  INIT_BLOCK_INFO();
+  INIT_PROGRESSES();
+
+
+  for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
   }
-  create(Tsuper_worker);
+
+  //no need to switch to main thread
+  // mutex_lock(&lk_main);
+  // cond_wait(&cv_main, &lk_main);
+  // mutex_unlock(&lk_main);
+
   join();  // Wait for all workers
   
   result = dp[M - 1][N - 1];
   printf("%d\n", result);
   
   //display_dp_mtx();
+  FREE_PROGRESSES();
   return 0;
 }
