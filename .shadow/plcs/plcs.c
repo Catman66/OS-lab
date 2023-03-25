@@ -63,7 +63,7 @@ void after_calculating(int tid) {
 
 
 void finish_block(int m, int n, int height, int width){
-  printf("finish %d %d %d %d \n", m ,n, height, width);
+  //printf("finish %d %d %d %d \n", m ,n, height, width);
   for(int i = m; i < m + height; i++){
     for(int j = n; j < n + width; j++){
       assert(IS_VALID_IJ(i, j));
@@ -98,7 +98,7 @@ void Tworker(int tid) {
   for (int round = 0; round < NUM_ROUNDS; round++) {  
       CONCURRENT_CALCULATE(tid, round);
   }
-  printf("all work of %d finished, and my progress is %d\n", tid, PROGRESSES[tid]);
+  //printf("all work of %d finished, and my progress is %d\n", tid, PROGRESSES[tid]);
   PROGRESSES[tid] = NUM_ROUNDS;
   cond_broadcast(&cv);
 }
