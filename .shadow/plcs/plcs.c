@@ -99,6 +99,8 @@ void Tworker(int tid) {
       CONCURRENT_CALCULATE(tid, round);
   }
   printf("all work of %d finished, and my progress is %d\n", tid, PROGRESSES[tid]);
+  PROGRESSES[tid] = NUM_ROUNDS;
+  cond_broadcast(&cv);
 }
 
 void single_worker_finish_all(){
