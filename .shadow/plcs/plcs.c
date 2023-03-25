@@ -34,12 +34,12 @@ BLOCK_HEIGHT = M / T, \
 LAST_HEIGHT = M - (T-1) * BLOCK_HEIGHT,\
 NUM_ROUNDS = (N + BLCOK_WIDTH - 1) / BLCOK_WIDTH
 
-#define COND_CALCULAT(id, round) ((round) < PROGRESSES[(id)-1] )
+#define COND_CALCULAT(tid, round) ((round) < PROGRESSES[tid-1] )
 
 void wait_for_other_thread(int tid, int round) {
   mutex_lock(&lk);
   while(!COND_CALCULAT(tid, round)) {
-    printf("%d waiting", tid);
+    //printf("%d waiting becasue %d >= %d\n", tid, round, PROGRESSES[]);
     cond_wait(&cv, &lk);          //必须要等到条件满足时才会开始运算
   }
   mutex_unlock(&lk);
@@ -94,11 +94,11 @@ void calculate(int tid, int round) {
     after_calculating(round)
     
 
-void Tworker(int id) {
+void Tworker(int tid) {
   for (int round = 0; round < NUM_ROUNDS; round++) {  
-      CONCURRENT_CALCULATE(id, round);
+      CONCURRENT_CALCULATE(tid, round);
   }
-  printf("all work of %d finished\n", id);
+  printf("all work of %d finished, and my progress is %d\n", tid, PROGRESSES[tid]);
 }
 
 void single_worker_finish_all(){
@@ -130,11 +130,6 @@ int main(int argc, char *argv[]) {
   INIT_BLOCK_INFO();
   INIT_PROGRESSES();
 
-  for(int i = 1; i <= T; i ++){
-    assert(PROGRESSES[i] == -1);
-  }
-  printf("ok\n");
-  sleep(1000);
 
   for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
