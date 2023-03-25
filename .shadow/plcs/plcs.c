@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
   for(int i = 1; i <= T; i ++){
     assert(PROGRESSES[i] == -1);
   }
+  printf("ok");
   sleep(1000);
   for (int i = 0; i < T; i++) {   //thread id: 1, 2, 3, ..., T
     create(Tworker);
