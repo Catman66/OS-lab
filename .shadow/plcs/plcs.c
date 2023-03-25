@@ -91,7 +91,7 @@ void calculate(int tid, int round) {
 #define limit_need_concurrent 500
 #define CONCURRENT_CALCULATE(tid, round) wait_for_other_thread(tid, round);\
     calculate(tid, round);\
-    after_calculating(round)
+    after_calculating(tid)
     
 
 void Tworker(int tid) {
