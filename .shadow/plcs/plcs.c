@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
   T = !argv[1] ? 1 : atoi(argv[1]);
 
   if(T == 1){
-    sleep(1);
+    usleep(2e5);
   }
   INIT_BLOCK_INFO();
   INIT_PROGRESSES();
