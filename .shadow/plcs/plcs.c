@@ -134,6 +134,9 @@ int main(int argc, char *argv[]) {
   M = strlen(A);
   T = !argv[1] ? 1 : atoi(argv[1]);
 
+  if(T == 1){
+    sleep(1);
+  }
   INIT_BLOCK_INFO();
   INIT_PROGRESSES();
 
