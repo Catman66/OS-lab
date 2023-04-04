@@ -44,7 +44,7 @@ Specification_t parse_type_renew_i(const char* fmt, size_t* _pos){
     put_err();
     return ERROT_s;
   }
-  switch(fmt[*_pos]){
+  switch(fmt[*(_pos++)]){
     case 'i':
     case 'd':
       return INT_s;
@@ -91,7 +91,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   //details here 
   size_t i_fmt, i_out;
   Specification_t tp;
-  for(i_fmt = 0, i_out = 0; i_fmt < n && fmt[i_fmt]; i_fmt++){
+  for(i_fmt = 0, i_out = 0; i_fmt < n && fmt[i_fmt]; ){
     switch(fmt[i_fmt]){
       case '%':
         tp = parse_type_renew_i(fmt, &i_fmt);
@@ -102,7 +102,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         i_out += converse_dump(out + i_out, ap, tp);
         break;
       default :
-        out[i_out++] = fmt[i_fmt];
+        out[i_out++] = fmt[i_fmt++];
         break;
     }
   }
