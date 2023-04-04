@@ -39,12 +39,12 @@ void put_err(){
   putch('\n'), putch('E'), putch('\n');
 }
 
-Specification_t parse_type(const char* fmt, size_t* _pos){
+Specification_t parse_type_renew_i(const char* fmt, size_t* _pos){
   if(fmt[(*_pos)++] != '%'){
     put_err();
     return ERROT_s;
   }
-  switch(fmt[(*_pos)++]){
+  switch(fmt[*_pos]){
     case 'i':
     case 'd':
       return INT_s;
@@ -94,7 +94,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   for(i_fmt = 0, i_out = 0; i_fmt < n && fmt[i_fmt]; i_fmt++){
     switch(fmt[i_fmt]){
       case '%':
-        tp = parse_type(fmt, &i_fmt);
+        tp = parse_type_renew_i(fmt, &i_fmt);
         if(tp == ERROT_s){
           put_err();
           return -1;
