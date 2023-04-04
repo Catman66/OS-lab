@@ -34,9 +34,6 @@ int sprintf(char *out, const char *fmt, ...) {
 int snprintf(char *out, size_t n, const char *fmt, ...) {
   panic("Not implemented");
 }
-typedef enum{
-  INT_s, OCT_INT_s, CHAR_s, STR_s, ERROT_s
-} Specification_t;
 
 void put_err(){
   putch('\n'), putch('E'), putch('\n');
@@ -57,6 +54,8 @@ Specification_t parse_type(const char* fmt, size_t* _pos){
       return STR_s;
     case 'x':
       return OCT_INT_s;
+    case 'p':
+      return PTR_s;
     default:
       return ERROT_s;
   }
@@ -67,7 +66,7 @@ int converse_dump(char* out, va_list ap, Specification_t tp){
   {
   case INT_s:
     num = va_arg(ap, int);
-    int len_num = itoa(num, out, BASE_DEC);
+    int len_num = utoa(num, out, BASE_DEC);
     return len_num;
   case CHAR_s:
     char c = va_arg(ap, int);
@@ -77,8 +76,11 @@ int converse_dump(char* out, va_list ap, Specification_t tp){
     strcpy(out, va_arg(ap, char* ));
     return strlen(out);
   case OCT_INT_s:
-    num = va_arg(ap, int);
-    return itoa(num, out, BASE_HEX);
+    num = va_arg(ap, uint32_t);
+    return utoa(num, out, BASE_HEX);
+  case PTR_s:
+    uintptr_t ptr_val = (unsigned long)va_arg(ap, uintptr_t);
+    return utoa(ptr_val, out, BASE_HEX);
   default:
     return 0x7fffffff;
   }
@@ -123,8 +125,6 @@ char itoc(int n){
   return n + '0';
 }
 
-
-
 //stack operations
 #define PUSH(st, tp, v) (st)[++(tp)] = (v);
 #define POP(st, tp) ((st)[(tp)--])
@@ -132,7 +132,7 @@ char itoc(int n){
 #define STK_SZ(tp) ((tp)+1)
 #define ST_OVERFLOW(tp) (STK_SZ((tp)) > CONVERSION_BUFFER_SIZE)
 
-int itoa(int num, char* out, itoa_BASE b){
+int utoa(uint64_t num, char* out, itoa_BASE b){
   char* pos_before = out;
   if(b == BASE_HEX){
     ADD_HEX_PREFIX(out);
@@ -157,5 +157,12 @@ int itoa(int num, char* out, itoa_BASE b){
   return out - pos_before - 1;
 }
 
+int itoa(int64_t num, char* out, itoa_BASE bs){
+  if(num > 0){
+    return utoa(num, out, bs);
+  }
+  *(out++) = '-';
+  return utoa(abs64(num), out, bs) + 1;
+}
 
 #endif
