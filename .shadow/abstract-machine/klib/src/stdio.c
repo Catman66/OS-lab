@@ -44,7 +44,7 @@ Specification_t parse_type_renew_i(const char* fmt, size_t* _pos){
     put_err();
     return ERROT_s;
   }
-  switch(fmt[*(_pos++)]){
+  switch(fmt[(*_pos)++]){
     case 'i':
     case 'd':
       return INT_s;
