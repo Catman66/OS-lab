@@ -10,6 +10,4 @@ typedef struct {
 } Area;
 extern Area heap;
 
-
-
 #endif
