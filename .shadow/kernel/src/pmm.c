@@ -33,7 +33,7 @@ void merge_node(Heap_node* reslt, Heap_node* merged){
 static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE;
   Heap_node* p, *pre;
-
+  printf("required size : %ld\n", required_sz);
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p=p->next){
     if(p->size < required_sz){
       continue;
@@ -45,6 +45,7 @@ static void *kalloc(size_t size) {
     /*reduce the size of the node*/
     p->size -= required_sz;
     p = end_of_node(p);
+    break;
   }
   if(p == NULL){
     return NULL;
