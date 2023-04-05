@@ -5,4 +5,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+typedef struct {
+  void *start, *end;
+} Area;
+extern Area heap;
+
 #endif
