@@ -11,7 +11,6 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->next = nxt;
 }
 
-
 #define HEAP_HEAD_SIZE (sizeof(void*) + sizeof(Heap_node*))
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL)
