@@ -15,9 +15,20 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL)
 
+void display_space_lst(){
+  for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
+    printf("[sz: %x ], ", p->size);
+  }
+  printf("\n");
+}
 void* end_of_node(Heap_node* nd){
   return (void*)nd + HEAP_HEAD_SIZE + nd->size;
 }
+void merge_node(Heap_node* reslt, Heap_node* merged){
+  reslt->size += merged->size + HEAP_HEAD_SIZE;
+  reslt->next = merged->next;
+}
+
 
 static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE;
@@ -41,10 +52,6 @@ static void *kalloc(size_t size) {
   return (void*)p + HEAP_HEAD_SIZE;
 }
 
-void merge_node(Heap_node* reslt, Heap_node* merged){
-  reslt->size += merged->size + HEAP_HEAD_SIZE;
-  reslt->next = merged->next;
-}
 
 static void kfree(void *ptr) {
   /*find the position*/
@@ -97,7 +104,6 @@ MODULE_DEF(pmm) = {
   .alloc = kalloc,
   .free  = kfree,
 };
-
 
 /*
 original version of pmm_init
