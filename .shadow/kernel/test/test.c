@@ -1,12 +1,19 @@
 #include"common.h"
 
+
+#define SCALE 10
+struct alloc_tst{
+    int sz;
+    void* reslt;
+} cases[SCALE] = {
+    {}
+};
+
+
 void test_alloc(){
-    void* p[10];
-    for(int i = 0; i < 10; i++){
-        p[i] = pmm->alloc(rand()%1024);
-    }
-    for(int i = 0; i < 10; i++){
-        printf("alloc %d : %p\n", i, p[i]);
+    for(int i = 0; i < SCALE; i++){
+        cases[i].sz = rand();
+        cases[i].reslt = pmm->alloc(cases[i].sz);
     }
 }
 
