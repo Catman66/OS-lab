@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #endif
 
-
-
 int main() {
   os->init();
   mpe_init(os->run);
