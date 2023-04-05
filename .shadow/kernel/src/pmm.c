@@ -82,6 +82,7 @@ static void pmm_init() {
 #else
 // 测试代码的 pmm_init ()
 #define HEAP_SIZE 0x8000000 - 0x300000 
+Area heap = {};
 static void pmm_init() {
   char *ptr  = malloc(HEAP_SIZE);
   heap.start = ptr;
