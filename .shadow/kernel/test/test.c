@@ -11,6 +11,7 @@ void test_alloc(){
 }
 
 int main(){
+    pmm->init();
     test_alloc();
 
     return 0;
