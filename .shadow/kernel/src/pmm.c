@@ -11,6 +11,7 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->next = nxt;
 }
 
+
 #define HEAP_HEAD_SIZE (sizeof(void*) + sizeof(Heap_node*))
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL)
@@ -22,6 +23,7 @@ void* end_of_node(Heap_node* nd){
 static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE;
   Heap_node* p, *pre;
+
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p=p->next){
     if(p->size < required_sz){
       continue;
@@ -42,6 +44,7 @@ static void *kalloc(size_t size) {
 
 void merge_node(Heap_node* reslt, Heap_node* merged){
   reslt->size += merged->size + HEAP_HEAD_SIZE;
+  reslt->next = merged->next;
 }
 
 static void kfree(void *ptr) {
@@ -57,12 +60,18 @@ static void kfree(void *ptr) {
   if(end_of_node((Heap_node*)freed) == p){
     merge_node((Heap_node*)freed, p);
   }
+  else{
+    ((Heap_node*)freed)->next = p;
+  }
   if((uintptr_t)end_of_node(pre) == freed){
     merge_node(pre, (Heap_node*)freed);
   }
+  else{
+    pre->next = (Heap_node*)freed;
+  }
 }
-
-
+#ifndef TEST
+// 框架代码中的 pmm_init (在 AbstractMachine 中运行)
 static void pmm_init() {
   uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
   assert(pmsize >= HEAP_HEAD_SIZE);
@@ -70,9 +79,27 @@ static void pmm_init() {
   
   printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
 }
+#else
+// 测试代码的 pmm_init ()
+static void pmm_init() {
+  char *ptr  = malloc(HEAP_SIZE);
+  heap.start = ptr;
+  heap.end   = ptr + HEAP_SIZE;
+  printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
+}
+#endif
 
 MODULE_DEF(pmm) = {
   .init  = pmm_init,
   .alloc = kalloc,
   .free  = kfree,
 };
+
+
+/*
+original version of pmm_init
+static void pmm_init() {
+  uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
+  printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+}
+*/
