@@ -4,7 +4,7 @@
 #define SCALE 10
 struct alloc_tst{
     int sz;
-    void* reslt;
+    void* ptr;
 } cases[SCALE] = {
     {}
 };
@@ -13,7 +13,10 @@ struct alloc_tst{
 void test_alloc(){
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand();
-        cases[i].reslt = pmm->alloc(cases[i].sz);
+        cases[i].ptr = pmm->alloc(cases[i].sz);
+    }
+    for(int i = 0; i < SCALE; i++){
+        printf("case %d, size : %d, ptr : %p\n", i, cases[i].sz, cases[i].ptr);
     }
 }
 
