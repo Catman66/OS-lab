@@ -78,7 +78,7 @@ void check_align(){
         uintptr_t ptr = (uintptr_t)(cases[i].ptr);
 
         if(!ALLOC_FAIL(cases[i]) && ((ptr & mask) != 0)){
-            printf("alignment error : %d \n", i);
+            printf("alignment error : case%d(%p, %x)\n", i, cases[i].ptr, cases[i].sz);
         }
     }
     printf("check alignment passed\n");
