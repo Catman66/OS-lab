@@ -8,6 +8,7 @@ struct alloc_tst{
 } cases[SCALE] = {
     {}
 };
+typedef struct alloc_tst alloc_tst;
 
 #define END_SP(c) ((c).ptr + (c).sz)
 #define START_SP(c) ((c).ptr)
