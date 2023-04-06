@@ -17,7 +17,7 @@ HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_
 
 void display_space_lst(){
   for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
-    printf("[sz: %lx ], ", p->size);
+    printf("[sz: %lx ] ", p->size);
   }
   printf("\n");
 }

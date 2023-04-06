@@ -17,6 +17,7 @@ void check_overlap(){
             assert(0);
         }
     }
+    printf("check overlap passed\n");
 }
 
 void check_in_heap(){
@@ -27,6 +28,8 @@ void check_in_heap(){
             assert(0);
         }
     }
+    printf("check in heap passed\n");
+
 }
 
 int align_bit_of(int sz){
@@ -51,6 +54,8 @@ void check_align(){
             printf("alignment error : %d \n", i);
         }
     }
+    printf("check alignment passed\n");
+
 }
 
 void check(){
