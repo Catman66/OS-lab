@@ -18,22 +18,6 @@ void print_cases(){
     }
 }
 
-void check_sort(){
-    int a[SCALE] = {1, 9,5,4,6,8,7,3,2,10};
-    for(int i = 0; i < SCALE - 1; i++){
-        for(int j = 0; j < SCALE - 1 - i; j++){
-            if(a[j] > a[j+1]){
-                int tmpt = a[j];
-                a[j] = a[j+1];
-                a[j+1] = tmpt;
-            }
-        }
-    }
-    for(int i = 0; i < SCALE; i++){
-        printf("%d ", a[i]);
-    }
-}
-
 void sort_cases(){
     for(int i = 0; i < SCALE - 1; i++){
         for(int j = 0; j < SCALE - 1; j++){
@@ -47,12 +31,12 @@ void sort_cases(){
                 //printf("c1: %p, c2: %p \n", cases[j].ptr, cases[j+1].ptr);
             }
         }
-        for(int i = 0; i < SCALE; i++){
-            printf("%p  ", cases[i].ptr);
-        }
+        
         printf("\n");
     }
-
+    for(int i = 0; i < SCALE; i++){
+        printf("%p  ", cases[i].ptr);
+    }
     
     for(int i = 0; i < SCALE - 1; i++){
         if(!(cases[i].ptr < cases[i+1].ptr)){
@@ -133,10 +117,6 @@ void check(){
     check_in_heap();
     check_align();
 }
-
-
-
-
 
 int main(){
     pmm->init();
