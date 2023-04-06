@@ -43,6 +43,7 @@ void do_alloc(){
         cases[i].sz = rand() % alloc_sz;
         cases[i].ptr = pmm->alloc(cases[i].sz); 
     }
+    print_cases();
     sort_cases();
     copy_cases();
     print_cases();
