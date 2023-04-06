@@ -1,5 +1,6 @@
 #include "test.h"
 #include <assert.h>
+#include <unistd.h>
 
 void print_cases(FILE* fp){
     assert(fp != NULL);
@@ -27,6 +28,7 @@ void sort_cases(){
 }
 
 void do_alloc(){
+    srand((unsigned int)time(NULL));
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand() % alloc_sz;
         cases[i].ptr = pmm->alloc(cases[i].sz); 
