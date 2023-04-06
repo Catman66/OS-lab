@@ -97,7 +97,7 @@ extern uintptr_t make_round_sz(size_t sz);
 void check_makeround(){
     for(int i = 0; i < 10; i++){
         uintptr_t n = (uintptr_t)rand() * rand();
-        printf("%lx, round sz: %lx \n", n, make_round_sz(n));
+        printf("%lx, round sz: \n%lx \n===\n", n, make_round_sz(n));
     }
 }
 
