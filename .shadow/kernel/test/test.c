@@ -92,13 +92,7 @@ void check(){
     check_align();
 }
 
-uintptr_t make_round_sz(size_t sz){
-  uintptr_t ret = 1;
-  while(ret < sz){
-    ret <<= 1;
-  }
-  return ret;
-}
+extern uintptr_t make_round_sz(size_t sz);
 
 void check_makeround(){
     for(int i = 0; i < 10; i++){
