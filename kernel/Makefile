@@ -18,3 +18,10 @@ include $(AM_HOME)/Makefile
 #copy makefile in parent dir here
 include ../Makefile.lab
 image: git
+
+test: git
+	@gcc $(shell find src/ -name "*.c")  \
+			$(shell find test/ -name "*.c") \
+			-Iframework -Itest -DTEST -lpthread \
+			-o build/test
+	@build/test 
