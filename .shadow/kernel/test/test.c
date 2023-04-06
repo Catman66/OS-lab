@@ -34,8 +34,7 @@ void sort_cases(){
         }
     }
 
-    assert(0);
-    /*
+    
     for(int i = 0; i < SCALE - 1; i++){
         if(!(cases[i].ptr < cases[i+1].ptr)){
             printf("%d larger than %d\n", i, i + 1 );
@@ -43,7 +42,7 @@ void sort_cases(){
             assert(0);
         }
     }
-    */
+    
 }
 
 
