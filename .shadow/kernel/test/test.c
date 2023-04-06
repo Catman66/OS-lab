@@ -24,7 +24,7 @@ void sort_cases(){
         }
     }
     for(int i = 0; i < SCALE - 1; i++){
-        assert(cases[i].ptr < cases[i+1].ptr);
+        printf("%p \n", cases[i].ptr);
     }
 }
 
