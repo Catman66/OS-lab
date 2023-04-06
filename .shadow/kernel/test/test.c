@@ -1,6 +1,6 @@
 #include "test.h"
 #include <assert.h>
-#include <unistd.h>
+#include <time.h>
 
 void print_cases(FILE* fp){
     assert(fp != NULL);
