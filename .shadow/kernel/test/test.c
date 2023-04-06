@@ -96,13 +96,6 @@ extern uintptr_t make_round_sz(size_t sz);
 
 #define ROUND_DOWN(a, sz) ((((uintptr_t)a)) & ~((uintptr_t)(sz) - 1))
 
-void check_makeround(){
-    for(int i = 0; i < 10; i++){
-        uintptr_t n = (uintptr_t)rand() * rand();
-        //printf("%lx, round sz: \n%lx \n===\n", n, make_round_sz(n));
-        assert(ROUND_DOWN(n, make_round_sz(n)) == 0);
-    }
-}
 
 int main(){
     //pmm->init();
