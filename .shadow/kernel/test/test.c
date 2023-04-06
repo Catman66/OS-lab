@@ -2,11 +2,13 @@
 #include <assert.h>
 
 void do_alloc(){
+    FILE * fp = fopen("tmpt", "w");
     for(int i = 0; i < SCALE; i++){
-        //scanf("%d", &(cases[i].sz));
         cases[i].sz = rand() % alloc_sz;
         cases[i].ptr = pmm->alloc(cases[i].sz);
+        fprintf(fp, "%p %d\n", cases[i].ptr, cases[i].sz);   
     }
+    fclose(fp);
 }
 
 void check_overlap(){
