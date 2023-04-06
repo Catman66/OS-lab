@@ -87,8 +87,9 @@ void check_align(){
 
 void check(){
     do_alloc();
-    printf("hello\n");
+    printf("alloc finished\n");
     sort_cases();
+    printf("sort finished\n");
     check_overlap();
     check_in_heap();
     check_align();
