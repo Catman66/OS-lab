@@ -72,8 +72,6 @@ uintptr_t make_mask(int align_bit){
     return ~(UINTPTR_MAX << align_bit);
 }
 
-
-
 void check_align(){
     for(int i = 0; i < SCALE; i++){
         int align_bit = num_bit_set(cases[i].sz);
@@ -85,7 +83,6 @@ void check_align(){
         }
     }
     printf("check alignment passed\n");
-
 }
 
 void check(){
