@@ -18,17 +18,20 @@ void print_cases(){
     }
 }
 
+
 void sort_cases(){
     for(int i = 0; i < SCALE - 1; i++){
         for(int j = 0; j < SCALE - 1 - i; j++){
             if(cases[j].sz > cases[j+1].sz){
-                
-                struct alloc_tst tmpt = cases[j];
-                cases[j] = cases[j+1];
-                cases[j+1] = tmpt;
+                printf("before swap: \n");
+                printf("c1: %p, c2: %p \n", cases[j].ptr, cases[j+1].ptr);
+                printf("after swap\n");
+                printf("c1: %p, c2: %p \n", cases[j].ptr, cases[j+1].ptr);
             }
         }
     }
+
+    assert(0);
     /*
     for(int i = 0; i < SCALE - 1; i++){
         if(!(cases[i].ptr < cases[i+1].ptr)){
