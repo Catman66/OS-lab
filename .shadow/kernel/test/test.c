@@ -109,7 +109,7 @@ void check(){
     check_align();
     shuffle_cases();
     printf("shuffle finished\n");
-    fflush();
+    fflush(stdout);
     free_all();
 }
 
