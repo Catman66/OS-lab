@@ -67,7 +67,7 @@ void check(){
 
 int main(){
     pmm->init();
-    do_alloc();
+    check();
 
     return 0;
 }
