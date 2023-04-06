@@ -28,11 +28,16 @@ void sort_cases(){
 }
 
 void do_alloc(){
+    printf("SCALE : %d\n", SCALE);
     srand((unsigned int)time(NULL));
+
+    int cnt = 0;
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand() % alloc_sz;
-        cases[i].ptr = pmm->alloc(cases[i].sz); 
+        cnt += ((cases[i].ptr = pmm->alloc(cases[i].sz)) != NULL);
+         
     }
+    printf("successfully allocted: %d\n", cnt);
     //copy_cases();
 }
 
@@ -110,7 +115,6 @@ void check(){
     check_in_heap();
     check_align();
     shuffle_cases();
-    printf("shuffle finished\n");
     fflush(stdout);
     free_all();
     
