@@ -91,7 +91,7 @@ void swap(alloc_tst* c1, alloc_tst* c2){
 }
 void shuffle_cases(){
     for(int i = 0; i < SCALE; i++){
-        int i1 = rand(), i2 = rand();
+        int i1 = rand() % SCALE, i2 = rand()%SCALE;
         swap(&cases[i1], &cases[i2]);
     }
 }
