@@ -1,8 +1,6 @@
 #include "test.h"
 #include <assert.h>
 
-
-
 void copy_cases(){
     FILE * fp = fopen("tmpt", "w");
     for(int i = 0; i < SCALE; i++){
@@ -38,7 +36,6 @@ void sort_cases(){
         }
     }
 }
-
 
 
 void do_alloc(){
