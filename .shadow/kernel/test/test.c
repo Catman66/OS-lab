@@ -58,9 +58,10 @@ void check_in_heap(){
 
 }
 
-int align_bit_of(int sz){
+int num_bit_set(int sz){
+    sz--;
     int ret = 0;
-    while(sz > 0){
+    while(sz > 1){
         sz >>= 1;
         ret++;
     }
@@ -71,14 +72,16 @@ uintptr_t make_mask(int align_bit){
     return ~(UINTPTR_MAX << align_bit);
 }
 
+
+
 void check_align(){
     for(int i = 0; i < SCALE; i++){
-        int align_bit = align_bit_of(cases[i].sz);
+        int align_bit = num_bit_set(cases[i].sz);
         uintptr_t mask = make_mask(align_bit);
         uintptr_t ptr = (uintptr_t)(cases[i].ptr);
 
         if(!ALLOC_FAIL(cases[i]) && ((ptr & mask) != 0)){
-            printf("alignment error : case%d(%p, %x)\n", i, cases[i].ptr, cases[i].sz);
+            printf("alignment error : case %d(%p, %x)\n", i, cases[i].ptr, cases[i].sz);
         }
     }
     printf("check alignment passed\n");
