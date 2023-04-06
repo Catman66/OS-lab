@@ -98,8 +98,7 @@ extern uintptr_t make_round_sz(size_t sz);
 
 
 int main(){
-    //pmm->init();
-    //check();
-    check_makeround();
+    pmm->init();
+    check();
     return 0;
 }
