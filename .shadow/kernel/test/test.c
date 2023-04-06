@@ -31,8 +31,8 @@ void do_alloc(){
         cases[i].sz = rand() % alloc_sz;
         cases[i].ptr = pmm->alloc(cases[i].sz); 
     }
-    sort_cases();
-    copy_cases();
+    
+    //copy_cases();
 }
 
 void check_overlap(){
@@ -87,9 +87,12 @@ void check_align(){
 
 void check(){
     do_alloc();
+    printf("hello\n");
+    sort_cases();
     check_overlap();
     check_in_heap();
     check_align();
+    printf("hello\n");
 }
 
 
