@@ -134,7 +134,7 @@ void check_sort(){
 
 int main(){
     pmm->init();
-    //check();
-    check_sort();
+    check();
+    //check_sort();
     return 0;
 }
