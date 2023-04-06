@@ -17,7 +17,7 @@ HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_
 
 void display_space_lst(){
   for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
-    printf("[sz: %lx ] ", p->size);
+    printf("[sz: %lx] ", p->size);
   }
   printf("\n");
 }
@@ -28,7 +28,6 @@ void merge_node(Heap_node* reslt, Heap_node* merged){
   reslt->size += merged->size + HEAP_HEAD_SIZE;
   reslt->next = merged->next;
 }
-
 
 static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE;
