@@ -45,7 +45,7 @@ void check_align(){
     for(int i = 0; i < SCALE; i++){
         int align_bit = align_bit_of(cases[i].sz);
         uintptr_t mask = make_mask(align_bit);
-        uintptr_t ptr = uintptr_t(cases[i].ptr);
+        uintptr_t ptr = (uintptr_t)(cases[i].ptr);
 
         if(!ALLOC_FAIL(cases[i]) && ((ptr & mask) != 0)){
             printf("alignment error : %d \n", i);
