@@ -1,21 +1,16 @@
 #include "test.h"
 #include <assert.h>
 
-void copy_cases(){
-    FILE * fp = fopen("tmpt", "w");
+void print_cases(FILE* fp){
     assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){
-        cases[i].sz = rand() % alloc_sz;
-        cases[i].ptr = pmm->alloc(cases[i].sz);
         fprintf(fp, "%p %d\n", cases[i].ptr, cases[i].sz);   
     }
     fclose(fp);
 }
 
-void print_cases(){
-    for(int i = 0; i < SCALE; i++){
-        printf("case : sz: %d, ptr : %p\n", cases[i].sz, cases[i].ptr);
-    }
+void copy_cases(){
+    print_cases(stdout);
 }
 
 void sort_cases(){
@@ -31,21 +26,7 @@ void sort_cases(){
                 //printf("c1: %p, c2: %p \n", cases[j].ptr, cases[j+1].ptr);
             }
         }
-        
-        printf("\n");
     }
-    for(int i = 0; i < SCALE; i++){
-        printf("%p  ", cases[i].ptr);
-    }
-    
-    for(int i = 0; i < SCALE - 1; i++){
-        if(!(cases[i].ptr < cases[i+1].ptr)){
-            printf("%d larger than %d\n", i, i + 1 );
-            print_cases();
-            assert(0);
-        }
-    }
-    
 }
 
 
@@ -54,10 +35,8 @@ void do_alloc(){
         cases[i].sz = rand() % alloc_sz;
         cases[i].ptr = pmm->alloc(cases[i].sz); 
     }
-    printf("\n");
     sort_cases();
     copy_cases();
-    print_cases();
 }
 
 
