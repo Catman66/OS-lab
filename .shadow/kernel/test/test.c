@@ -15,7 +15,7 @@ void copy_cases(){
 
 void sort_cases(){
     for(int i = 0; i < SCALE - 1; i++){
-        for(int j = 0; j < SCALE - 2 - i; j++){
+        for(int j = 0; j < SCALE - 1 - i; j++){
             if(cases[j].ptr > cases[j+1].ptr){
                 struct alloc_tst tmpt = cases[j];
                 cases[j] = cases[j+1];
