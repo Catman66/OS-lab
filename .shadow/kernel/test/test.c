@@ -92,9 +92,6 @@ void check(){
     check_align();
 }
 
-extern uintptr_t make_round_sz(size_t sz);
-
-#define ROUND_DOWN(a, sz) ((((uintptr_t)a)) & ~((uintptr_t)(sz) - 1))
 
 int main(){
     pmm->init();
