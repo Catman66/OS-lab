@@ -117,7 +117,7 @@ void check(){
 }
 
 void check_sort(){
-    int a[SCALE] = {10, 9,8,7,6,5,4,3,2,1};
+    int a[SCALE] = {10, 9,5,4,6,8,7,3,2,1};
     for(int i = 0; i < SCALE - 1; i++){
         for(int j = 0; j < SCALE - 1 - i; j++){
             if(a[j] > a[j+1]){
@@ -136,7 +136,7 @@ void check_sort(){
 
 int main(){
     pmm->init();
-    check();
-    //check_sort();
+    //check();
+    check_sort();
     return 0;
 }
