@@ -3,6 +3,7 @@
 
 void copy_cases(){
     FILE * fp = fopen("tmpt", "w");
+    assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand() % alloc_sz;
         cases[i].ptr = pmm->alloc(cases[i].sz);
