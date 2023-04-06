@@ -111,6 +111,7 @@ void check(){
     printf("shuffle finished\n");
     fflush(stdout);
     free_all();
+    
 }
 
 
