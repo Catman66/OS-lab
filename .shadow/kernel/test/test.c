@@ -108,6 +108,7 @@ void check(){
     check_in_heap();
     check_align();
     shuffle_cases();
+    printf("shuffle finished\n");
     free_all();
 }
 
