@@ -12,7 +12,7 @@ struct alloc_tst{
 
 void test_alloc(){
     for(int i = 0; i < SCALE; i++){
-        scanf("%d", cases[i].sz);
+        scanf("%d", &(cases[i].sz));
         cases[i].ptr = pmm->alloc(cases[i].sz);
     }
     for(int i = 0; i < SCALE; i++){
