@@ -26,7 +26,6 @@ void sort_cases(){
     }
 }
 
-
 void do_alloc(){
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand() % alloc_sz;
@@ -35,8 +34,6 @@ void do_alloc(){
     sort_cases();
     copy_cases();
 }
-
-
 
 void check_overlap(){
     for(int i = 1; i < SCALE; i++){
@@ -69,6 +66,7 @@ int align_bit_of(int sz){
     }
     return ret;
 }
+
 uintptr_t make_mask(int align_bit){
     return ~(UINTPTR_MAX << align_bit);
 }
@@ -94,8 +92,24 @@ void check(){
     check_align();
 }
 
+uintptr_t make_round_sz(size_t sz){
+  uintptr_t ret = 1;
+  while(ret < sz){
+    ret <<= 1;
+  }
+  return ret;
+}
+
+void check_makeround(){
+    for(int i = 0; i < 10; i++){
+        uintptr_t n = (uintptr_t)rand() * rand();
+        printf("%lx, round sz: %ld \n", n, make_round_sz(n));
+    }
+}
+
 int main(){
-    pmm->init();
-    check();
+    //pmm->init();
+    //check();
+    check_makeround();
     return 0;
 }

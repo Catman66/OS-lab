@@ -29,22 +29,26 @@ void merge_node(Heap_node* reslt, Heap_node* merged){
   reslt->next = merged->next;
 }
 
+
+#define ROUND_DOWN(a, sz) ((((uintptr_t)a)) & ~((uintptr_t)(sz) - 1))
+
+uintptr_t make_round_sz(size_t sz){
+  uintptr_t ret = 1;
+  while(ret < sz){
+    ret <<= 1;
+  }
+  return ret;
+}
 static void *kalloc(size_t size) {
-  size_t required_sz = size + HEAP_HEAD_SIZE;
+  size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p, *pre;
   
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p=p->next){
     if(p->size < required_sz){
       continue;
     }
-    if(p->size == required_sz){/*just remove the node from list*/
-      pre->next = p->next;
-      break;
-    }
-    /*reduce the size of the node*/
-    p->size -= required_sz;
-    p = end_of_node(p);
-    break;
+    uintptr_t ret = (uintptr_t)end_of_node(p) - size;
+    ret = ROUND_DOWN(ret, round_sz);
   }
   if(p == NULL){
     return NULL;
