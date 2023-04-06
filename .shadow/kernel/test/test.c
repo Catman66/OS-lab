@@ -26,8 +26,16 @@ void sort_cases(){
     for(int i = 0; i < SCALE - 1; i++){
         if(!(cases[i].ptr < cases[i+1].ptr)){
             printf("%d larger than %d\n", i, i + 1 );
+            print_cases();
             assert(0);
+
         }
+    }
+}
+
+void print_cases(){
+    for(int i = 0; i < SCALE; i++){
+        printf("case : sz: %d, ptr : %p\n", cases[i].sz, cases[i].ptr);
     }
 }
 
