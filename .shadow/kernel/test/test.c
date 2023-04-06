@@ -2,7 +2,7 @@
 #include <assert.h>
 
 void copy_cases(){
-    FILE * fp = fopen("../tmpt", "w");
+    FILE * fp = fopen("tmpt", "w");
     assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand() % alloc_sz;
