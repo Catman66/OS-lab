@@ -31,7 +31,6 @@ void do_alloc(){
         cases[i].sz = rand() % alloc_sz;
         cases[i].ptr = pmm->alloc(cases[i].sz); 
     }
-    
     //copy_cases();
 }
 
@@ -85,15 +84,31 @@ void check_align(){
     printf("check alignment passed\n");
 }
 
+void swap(alloc_tst* c1, alloc_tst* c2){
+    alloc_tst tmpt = *c1;
+    *c1 = *c2;
+    *c2 = tmpt;
+}
+void shuffle_cases(){
+    for(int i = 0; i < SCALE; i++){
+        int i1 = rand(), i2 = rand();
+        swap(&cases[i1], &cases[i2]);
+    }
+}
+
+void free_all(){
+    for(int i = 0;i < SCALE; i++){
+        pmm->free(cases[i].ptr);
+    }
+}
 void check(){
     do_alloc();
-    printf("alloc finished\n");
     sort_cases();
-    printf("sort finished\n");
     check_overlap();
     check_in_heap();
     check_align();
-    printf("hello\n");
+    shuffle_cases();
+    free_all();
 }
 
 
