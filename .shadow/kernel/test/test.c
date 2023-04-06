@@ -45,6 +45,7 @@ void do_alloc(){
     }
     sort_cases();
     copy_cases();
+    print_cases();
 }
 
 
