@@ -13,6 +13,12 @@ void copy_cases(){
     fclose(fp);
 }
 
+void print_cases(){
+    for(int i = 0; i < SCALE; i++){
+        printf("case : sz: %d, ptr : %p\n", cases[i].sz, cases[i].ptr);
+    }
+}
+
 void sort_cases(){
     for(int i = 0; i < SCALE - 1; i++){
         for(int j = 0; j < SCALE - 1 - i; j++){
@@ -33,11 +39,7 @@ void sort_cases(){
     }
 }
 
-void print_cases(){
-    for(int i = 0; i < SCALE; i++){
-        printf("case : sz: %d, ptr : %p\n", cases[i].sz, cases[i].ptr);
-    }
-}
+
 
 void do_alloc(){
     for(int i = 0; i < SCALE; i++){
