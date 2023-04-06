@@ -16,7 +16,7 @@ void test_alloc(){
         cases[i].ptr = pmm->alloc(cases[i].sz);
     }
     for(int i = 0; i < SCALE; i++){
-        printf("%p\n", cases[i].ptr);
+        printf("%p %d\n", cases[i].ptr, cases[i].sz);
     }
 }
 
