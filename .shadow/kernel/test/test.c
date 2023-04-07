@@ -4,6 +4,7 @@
 
 int main(){
     pmm->init();
+    printf("hello\n");
     random_test();
     return 0;
 }
