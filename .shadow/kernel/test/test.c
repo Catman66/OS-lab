@@ -16,6 +16,9 @@ void copy_cases_totmpt(){
     fclose(fp);
 }
 
+
+
+
 void swap(alloc_tst* c1, alloc_tst* c2){
     alloc_tst tmpt = *c1;
     *c1 = *c2;
@@ -32,7 +35,9 @@ void sort_cases(){
     }
 }
 
-void do_alloc(){
+
+
+void do_all_alloc(){
     printf("SCALE : %d\n", SCALE);
     srand((unsigned int)time(NULL));
 
@@ -108,7 +113,7 @@ void free_all(){
     }
 }
 void check(){
-    do_alloc();
+    do_all_alloc();
     sort_cases();
     copy_cases_totmpt();
     check_overlap();
@@ -123,6 +128,6 @@ void check(){
 
 int main(){
     pmm->init();
-    check();
+    random_test();
     return 0;
 }
