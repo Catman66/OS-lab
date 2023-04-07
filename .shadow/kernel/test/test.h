@@ -1,6 +1,6 @@
 #include"common.h"
 
-#define SCALE 1000000
+#define SCALE 10
 #define alloc_sz 1024
 struct alloc_tst{
     int sz;

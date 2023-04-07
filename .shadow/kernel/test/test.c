@@ -34,11 +34,9 @@ void do_alloc(){
     int cnt = 0;
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand() % alloc_sz;
-        cnt += ((cases[i].ptr = pmm->alloc(cases[i].sz)) != NULL);
-         
+        cnt += ((cases[i].ptr = pmm->alloc(cases[i].sz)) != NULL);  
     }
     printf("successfully allocted: %d\n", cnt);
-    //copy_cases();
 }
 
 void check_overlap(){
