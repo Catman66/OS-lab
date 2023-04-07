@@ -5,7 +5,7 @@
 void print_cases(FILE* fp){
     assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){
-        fprintf(fp, "%p %d\n", cases[i].ptr, cases[i].sz);   
+        fprintf(fp, "%p %x\n", cases[i].ptr, cases[i].sz);   
     }
 }
 
