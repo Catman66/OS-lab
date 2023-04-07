@@ -3,6 +3,7 @@
 
 void Tclient(int tid){
     STK stk;
+    printf("hello from thread %d \n", tid);
     while(1){
         switch (rand_act())
         {
