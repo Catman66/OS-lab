@@ -1,38 +1,47 @@
 #include "test.h"
 #include <assert.h>
+#include <time.h>
 
 void print_cases(FILE* fp){
     assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){
-        fprintf(fp, "%p %d\n", cases[i].ptr, cases[i].sz);   
+        fprintf(fp, "%p 0x%x\n", cases[i].ptr, cases[i].sz);   
     }
 }
 
-void copy_cases(){
+void copy_cases_totmpt(){
     FILE* fp = fopen("tmpt", "w");
+    assert(fp != NULL);
     print_cases(fp);
     fclose(fp);
+}
+
+void swap(alloc_tst* c1, alloc_tst* c2){
+    alloc_tst tmpt = *c1;
+    *c1 = *c2;
+    *c2 = tmpt;
 }
 
 void sort_cases(){
     for(int i = 0; i < SCALE - 1; i++){
         for(int j = 0; j < SCALE - 1; j++){
             if(cases[j].ptr > cases[j+1].ptr){
-                alloc_tst tmpt = cases[j];
-                cases[j] = cases[j+1];
-                cases[j+1] = tmpt;
+                swap(&cases[j], &cases[j+1]);
             }
         }
     }
 }
 
 void do_alloc(){
+    printf("SCALE : %d\n", SCALE);
+    srand((unsigned int)time(NULL));
+
+    int cnt = 0;
     for(int i = 0; i < SCALE; i++){
         cases[i].sz = rand() % alloc_sz;
-        cases[i].ptr = pmm->alloc(cases[i].sz); 
+        cnt += ((cases[i].ptr = pmm->alloc(cases[i].sz)) != NULL);  
     }
-    sort_cases();
-    copy_cases();
+    printf("successfully allocted: %d\n", cnt);
 }
 
 void check_overlap(){
@@ -58,9 +67,10 @@ void check_in_heap(){
 
 }
 
-int align_bit_of(int sz){
+int num_bit_set(int sz){
+    sz--;
     int ret = 0;
-    while(sz > 0){
+    while(sz > 1){
         sz >>= 1;
         ret++;
     }
@@ -73,24 +83,43 @@ uintptr_t make_mask(int align_bit){
 
 void check_align(){
     for(int i = 0; i < SCALE; i++){
-        int align_bit = align_bit_of(cases[i].sz);
+        int align_bit = num_bit_set(cases[i].sz);
         uintptr_t mask = make_mask(align_bit);
         uintptr_t ptr = (uintptr_t)(cases[i].ptr);
 
         if(!ALLOC_FAIL(cases[i]) && ((ptr & mask) != 0)){
-            printf("alignment error : %d \n", i);
+            printf("alignment error : case %d(%p, %x)\n", i, cases[i].ptr, cases[i].sz);
         }
     }
     printf("check alignment passed\n");
-
 }
 
+
+void shuffle_cases(){
+    for(int i = 0; i < SCALE; i++){
+        int i1 = rand() % SCALE, i2 = rand()%SCALE;
+        swap(&cases[i1], &cases[i2]);
+    }
+}
+
+void free_all(){
+    for(int i = 0;i < SCALE; i++){
+        pmm->free(cases[i].ptr);
+    }
+}
 void check(){
     do_alloc();
+    sort_cases();
+    copy_cases_totmpt();
     check_overlap();
     check_in_heap();
     check_align();
+    shuffle_cases();
+    fflush(stdout);
+    free_all();
+    
 }
+
 
 int main(){
     pmm->init();

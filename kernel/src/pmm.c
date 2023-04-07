@@ -15,67 +15,76 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL)
 
+#define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
+#define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
+#define NODE(ptr)             ((Heap_node*)(ptr))
+#define INTP(nd)              ((uintptr_t)(nd))
+
 void display_space_lst(){
   for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
     printf("[sz: %lx] ", p->size);
   }
   printf("\n");
 }
-void* end_of_node(Heap_node* nd){
-  return (void*)nd + HEAP_HEAD_SIZE + nd->size;
-}
+
 void merge_node(Heap_node* reslt, Heap_node* merged){
   reslt->size += merged->size + HEAP_HEAD_SIZE;
   reslt->next = merged->next;
 }
 
+uintptr_t make_round_sz(size_t sz){
+  uintptr_t ret = 1;
+  while(ret < sz){
+    ret <<= 1;
+  }
+  return ret;
+}
 static void *kalloc(size_t size) {
-  size_t required_sz = size + HEAP_HEAD_SIZE;
-  Heap_node* p, *pre;
-  
-  for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p=p->next){
-    if(p->size < required_sz){
+  size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
+  Heap_node* p;
+  uintptr_t ret;
+
+  for(p = HEAP_HEAD.next; p != NULL; p=p->next){
+    if(required_sz > p->size){
       continue;
     }
-
-    
-    if(p->size == required_sz){/*just remove the node from list*/
-      pre->next = p->next;
-      break;
+    if(ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz) < FREE_SPACE_BEGIN(p) + HEAP_HEAD_SIZE){
+      continue; 
     }
-    /*reduce the size of the node*/
-    p->size -= required_sz;
-    p = end_of_node(p);
+    
+    ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
+    Heap_node* ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
+    ret_nd->size = FREE_SPACE_END(p) - ret;
+    p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
     break;
   }
   if(p == NULL){
     return NULL;
   }
-  return (void*)p + HEAP_HEAD_SIZE;
+  return (void*)ret;
 }
-
 
 static void kfree(void *ptr) {
   /*find the position*/
-  uintptr_t freed = (uintptr_t)ptr - HEAP_HEAD_SIZE;
+  Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
 
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
-    if(freed < (uintptr_t)p){
+    if(freed_nd < p){
       break;
     }
   }
-  if(end_of_node((Heap_node*)freed) == p){
-    merge_node((Heap_node*)freed, p);
+  if(FREE_SPACE_END(freed_nd) == INTP(p)){
+    merge_node(freed_nd, p);
   }
   else{
-    ((Heap_node*)freed)->next = p;
+    freed_nd->next = p;
   }
-  if((uintptr_t)end_of_node(pre) == freed){
-    merge_node(pre, (Heap_node*)freed);
+  if(FREE_SPACE_END(pre) == INTP(freed_nd)){
+    merge_node(pre, (Heap_node*)freed_nd);
   }
   else{
-    pre->next = (Heap_node*)freed;
+    pre->next = freed_nd;
   }
 }
 #ifndef TEST
