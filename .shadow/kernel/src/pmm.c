@@ -36,6 +36,7 @@ void display_space_lst(){
 void merge_node(Heap_node* reslt, Heap_node* merged){
   assert(FREE_SPACE_END(reslt) == INTP(merged));
 
+  printf("merge happend\n");
   reslt->size += (merged->size + HEAP_HEAD_SIZE);
   reslt->next = merged->next;
 }
