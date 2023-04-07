@@ -4,9 +4,10 @@
 
 int main(){
     pmm->init();
-    printf("hello\n");
+    //printf("hello\n");
     //check();
-    random_test();
+    //random_test();
+    threads_test();
     return 0;
 }
 
