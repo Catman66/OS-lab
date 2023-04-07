@@ -56,6 +56,7 @@ void do_free(){
     pmm->free(freed);
 }
 
+int cnt_succ_act = 0;
 void random_test(){
     while(1){
         switch(rand_act()){
@@ -65,6 +66,10 @@ void random_test(){
             case ACT_FREE:
                 do_free();
                 break;
+        }
+        cnt_succ_act++;
+        if(cnt_succ_act % 10000 == 0){
+            printf("10000 succ acts\n");
         }
     }
 }
