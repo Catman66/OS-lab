@@ -4,7 +4,6 @@
 
 #define alloc_sz 1024
 
-
 void random_test();
 
 

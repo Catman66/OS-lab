@@ -1,9 +1,19 @@
 #include <common.h>
 #include <pthread.h>
 
+
+// Mutex
+typedef pthread_mutex_t mutex_t;
+#define MUTEX_INIT() PTHREAD_MUTEX_INITIALIZER
+void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
+void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
+
+mutex_t lk = MUTEX_INIT();
+
 #define PAINT 1
 const char IN_HEAP = 0xcc;
 const char OUT_HEAP = 0x0;
+
 
 struct Heap_node{
   uintptr_t size;
@@ -16,17 +26,17 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->next = nxt;
 }
 
-#define HEAP_HEAD_SIZE (sizeof(void*) + sizeof(Heap_node*))
+#define HEAP_HEAD_SIZE        (sizeof(void*) + sizeof(Heap_node*))
+#define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
+#define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
+#define NODE(ptr)             ((Heap_node*)(ptr))
+#define INTP(nd)              ((uintptr_t)(nd))
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; \
 init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
 paint(HEAP_HEAD.next, IN_HEAP)
 
 
-#define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
-#define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
-#define NODE(ptr)             ((Heap_node*)(ptr))
-#define INTP(nd)              ((uintptr_t)(nd))
 
 void display_space_lst(){
   for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
@@ -68,6 +78,8 @@ static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p;
   uintptr_t ret;
+  
+  //mutex_lock(&lk);
 
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
@@ -91,6 +103,7 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
+  //mutex_unlock(&lk);
   return (void*)ret;
 }
 
@@ -98,10 +111,11 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
+  
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
-
+  //mutex_lock(&lk);
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
     if(freed_nd < p){
@@ -120,6 +134,7 @@ static void kfree(void *ptr) {
   else{
     pre->next = freed_nd;
   }
+  //mutex_unlock(&lk);
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
