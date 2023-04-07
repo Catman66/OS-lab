@@ -4,7 +4,7 @@
 #define STK_SZ 10000
 
 extern void* STK[STK_SZ];
-extern int top;
+int top = -1;
 
 static typedef enum{
     ACT_ALLOC = 0, ACT_FREE = 1
