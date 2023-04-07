@@ -1,4 +1,5 @@
 #include "test.h"
+#include "thread.h"
 
 void Tclient(int tid){
     STK stk;
