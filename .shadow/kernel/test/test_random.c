@@ -56,3 +56,7 @@ void rand_push(STK* stk, void* ptr){
 void *pop(STK* stk){
     return stk->content[stk->top--];
 }
+
+ACT     rand_act()      {  return rand()%2; }
+size_t  rand_alloc_sz() {  return rand() % MAX_ALLOC_SZ + 1; }
+
