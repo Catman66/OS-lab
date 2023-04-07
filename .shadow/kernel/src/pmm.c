@@ -16,7 +16,10 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 
 #define HEAP_HEAD_SIZE (sizeof(void*) + sizeof(Heap_node*))
 #define INIT_HEAP_HEAD(heap_sz) \
-HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL)
+HEAP_HEAD.next = heap.start; \
+init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
+paint(HEAP_HEAD.next, IN_HEAP)
+
 
 #define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
 #define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
@@ -134,9 +137,7 @@ static void pmm_init() {
   heap.end   = ptr + HEAP_SIZE;
   INIT_HEAP_HEAD(HEAP_SIZE);
   printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
-  printf("display:\n");
-  display_space_lst();
-  printf("end of display\n");
+  
 }
 #endif
 
