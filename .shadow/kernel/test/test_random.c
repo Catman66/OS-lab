@@ -29,7 +29,6 @@ ACT rand_act(){
     return rand()%2;
 }
 
-
 #define max_alloc_sz 1024
 
 void do_alloc(){
@@ -43,7 +42,8 @@ void do_alloc(){
     if(ptr == NULL){
         printf("alloc fails\n");
     }
-    else{        
+    else{      
+        printf("allocated : %p\n", ptr);  
         push_rand(ptr);
     }
 }
@@ -53,6 +53,7 @@ void do_free(){
         return;
     }
     void *freed = POP();
+    printf("freeing %p\n", freed);
     pmm->free(freed);
 }
 
