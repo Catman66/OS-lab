@@ -43,7 +43,7 @@ void do_alloc(){
         printf("alloc fails\n");
     }
     else{      
-        printf("allocated : %p\n", ptr);  
+        //printf("allocated : %p\n", ptr);  
         push_rand(ptr);
     }
 }
@@ -53,7 +53,7 @@ void do_free(){
         return;
     }
     void *freed = POP();
-    printf("freeing %p\n", freed);
+    //printf("freeing %p\n", freed);
     pmm->free(freed);
 }
 
@@ -69,10 +69,10 @@ void random_test(){
                 break;
         }
         cnt_succ_act++;
-        printf("%d succ\n", cnt_succ_act);
-        // if(cnt_succ_act % 1000000 == 0){
-        //     printf("1000000 succ acts\n");
-        // }
+        //  printf("%d succ\n", cnt_succ_act);
+        if(cnt_succ_act % 1000000 == 0){
+            printf("1000000 succ acts\n");
+        }
     }
 }
 
