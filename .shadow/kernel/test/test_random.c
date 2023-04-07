@@ -3,10 +3,24 @@
 
 #define STK_SZ 10000
 
-extern void* STK[STK_SZ];
+static void* STK[STK_SZ];
 int top = -1;
 
-static typedef enum{
+
+
+#define EMPTY()         (top == -1)
+#define FULL()          (top == STK_SZ - 1)
+#define PUSH(ptr)       (STK[++top] = (ptr))
+#define POP()           (STK[top--])
+#define INIT_STK()      (top = -1)
+
+void push_rand(void* ptr){
+    int idx = rand() % (top + 1);
+    STK[++top] = STK[idx];
+    STK[idx] = ptr;
+}
+
+typedef enum{
     ACT_ALLOC = 0, ACT_FREE = 1
 } ACT; 
 ACT rand_act(){
