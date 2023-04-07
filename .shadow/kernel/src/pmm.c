@@ -28,7 +28,9 @@ void display_space_lst(){
 }
 
 void merge_node(Heap_node* reslt, Heap_node* merged){
-  reslt->size += merged->size + HEAP_HEAD_SIZE;
+  assert(FREE_SPACE_END(reslt) == INTP(merged));
+
+  reslt->size += (merged->size + HEAP_HEAD_SIZE);
   reslt->next = merged->next;
 }
 
@@ -81,11 +83,13 @@ static void kfree(void *ptr) {
     freed_nd->next = p;
   }
   if(FREE_SPACE_END(pre) == INTP(freed_nd)){
-    merge_node(pre, (Heap_node*)freed_nd);
+    merge_node(pre, freed_nd);
   }
   else{
     pre->next = freed_nd;
   }
+
+  
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
