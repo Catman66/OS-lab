@@ -32,7 +32,9 @@ void do_alloc(){
     if(FULL()){
         return;
     }
-    void* ptr = pmm->alloc(rand()%(max_alloc_sz + 1));
+    size_t sz = rand() % (max_alloc_sz + 1);
+    void* ptr = pmm->alloc(sz);
+    
     if(ptr == NULL){
         printf("alloc fails\n");
     }
