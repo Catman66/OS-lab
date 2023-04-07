@@ -1,4 +1,5 @@
 #include <common.h>
+#include <pthread.h>
 
 #define PAINT 1
 const char IN_HEAP = 0xcc;
