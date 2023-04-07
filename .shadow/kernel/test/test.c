@@ -2,6 +2,12 @@
 #include <assert.h>
 #include <time.h>
 
+int main(){
+    pmm->init();
+    random_test();
+    return 0;
+}
+
 struct alloc_tst{
     int sz;
     void* ptr;
@@ -146,8 +152,3 @@ void check(){
 }
 
 
-int main(){
-    pmm->init();
-    random_test();
-    return 0;
-}
