@@ -13,6 +13,10 @@ int top = -1;
 #define INIT_STK()      (top = -1)
 
 void push_rand(void* ptr){
+    if(EMPTY()){
+        PUSH(ptr);
+        return;
+    }
     int idx = rand() % (top + 1);
     STK[++top] = STK[idx];
     STK[idx] = ptr;
