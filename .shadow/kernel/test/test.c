@@ -2,6 +2,26 @@
 #include <assert.h>
 #include <time.h>
 
+struct alloc_tst{
+    int sz;
+    void* ptr;
+} cases[SCALE] = {
+    {}
+};
+typedef struct alloc_tst alloc_tst;
+
+#define END_SP(c) ((c).ptr + (c).sz)
+#define START_SP(c) ((c).ptr)
+#define ALLOC_FAIL(c) ((c).ptr == NULL)
+void do_all_alloc();
+void check_overlap();
+void check_in_heap();
+void check_align();
+
+void check();
+
+
+
 void print_cases(FILE* fp){
     assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){
