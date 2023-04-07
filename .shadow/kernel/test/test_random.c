@@ -6,8 +6,6 @@
 static void* STK[STK_SZ];
 int top = -1;
 
-
-
 #define EMPTY()         (top == -1)
 #define FULL()          (top == STK_SZ - 1)
 #define PUSH(ptr)       (STK[++top] = (ptr))
