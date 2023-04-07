@@ -33,12 +33,13 @@ void display_space_lst(){
   printf("\n");
 }
 
-void merge_node(Heap_node* reslt, Heap_node* merged){
+Heap_node* merge_node(Heap_node* reslt, Heap_node* merged){
   assert(FREE_SPACE_END(reslt) == INTP(merged));
 
   printf("merge happend\n");
   reslt->size += (merged->size + HEAP_HEAD_SIZE);
   reslt->next = merged->next;
+  return reslt;
 }
 
 void paint(Heap_node* nd, char val){
@@ -95,7 +96,6 @@ static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   check_paint(freed_nd, OUT_HEAP);
-  paint(freed_nd, IN_HEAP);
 
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
@@ -104,19 +104,18 @@ static void kfree(void *ptr) {
     }
   }
   if(FREE_SPACE_END(freed_nd) == INTP(p)){
-    merge_node(freed_nd, p);
+    freed_nd = merge_node(freed_nd, p);
   }
   else{
     freed_nd->next = p;
   }
   if(FREE_SPACE_END(pre) == INTP(freed_nd)){
-    merge_node(pre, freed_nd);
+    freed_nd = merge_node(pre, freed_nd);
   }
   else{
     pre->next = freed_nd;
   }
-
-  
+  paint(freed_nd, IN_HEAP);
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
