@@ -1,5 +1,9 @@
 #include <common.h>
 
+#define PAINT 1
+const char IN_HEAP = 0xcc;
+const char OUT_HEAP = 0x0;
+
 struct Heap_node{
   uintptr_t size;
   struct Heap_node* next;
@@ -13,7 +17,10 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 
 #define HEAP_HEAD_SIZE (sizeof(void*) + sizeof(Heap_node*))
 #define INIT_HEAP_HEAD(heap_sz) \
-HEAP_HEAD.next = heap.start; init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL)
+HEAP_HEAD.next = heap.start; \
+init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
+paint(HEAP_HEAD.next, IN_HEAP)
+
 
 #define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
 #define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
@@ -27,9 +34,25 @@ void display_space_lst(){
   printf("\n");
 }
 
-void merge_node(Heap_node* reslt, Heap_node* merged){
-  reslt->size += merged->size + HEAP_HEAD_SIZE;
+Heap_node* merge_node(Heap_node* reslt, Heap_node* merged){
+  assert(FREE_SPACE_END(reslt) == INTP(merged));
+
+  reslt->size += (merged->size + HEAP_HEAD_SIZE);
   reslt->next = merged->next;
+  return reslt;
+}
+
+void paint(Heap_node* nd, char val){
+  memset((void*)FREE_SPACE_BEGIN(nd), val, nd->size);
+}
+
+void check_paint(Heap_node* nd, char val){
+  for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
+    if(*p != val){
+      printf("node: nd:%p,  expected: %x, actual: %x \n", nd, val, (int)(uint8_t)*p);
+      assert(0);
+    }
+  }
 }
 
 uintptr_t make_round_sz(size_t sz){
@@ -39,6 +62,7 @@ uintptr_t make_round_sz(size_t sz){
   }
   return ret;
 }
+
 static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p;
@@ -51,11 +75,16 @@ static void *kalloc(size_t size) {
     if(ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz) < FREE_SPACE_BEGIN(p) + HEAP_HEAD_SIZE){
       continue; 
     }
-    
     ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
     Heap_node* ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
+
+#ifdef PAINT
+    check_paint(ret_nd, IN_HEAP);
+    paint(ret_nd, OUT_HEAP);
+#endif
+
     break;
   }
   if(p == NULL){
@@ -64,9 +93,13 @@ static void *kalloc(size_t size) {
   return (void*)ret;
 }
 
+
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
+#ifdef PAINT
+  check_paint(freed_nd, OUT_HEAP);
+#endif
 
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
@@ -75,17 +108,20 @@ static void kfree(void *ptr) {
     }
   }
   if(FREE_SPACE_END(freed_nd) == INTP(p)){
-    merge_node(freed_nd, p);
+    freed_nd = merge_node(freed_nd, p);
   }
   else{
     freed_nd->next = p;
   }
   if(FREE_SPACE_END(pre) == INTP(freed_nd)){
-    merge_node(pre, (Heap_node*)freed_nd);
+    freed_nd = merge_node(pre, freed_nd);
   }
   else{
     pre->next = freed_nd;
   }
+#ifdef PAINT
+  paint(freed_nd, IN_HEAP);
+#endif
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
@@ -107,9 +143,7 @@ static void pmm_init() {
   heap.end   = ptr + HEAP_SIZE;
   INIT_HEAP_HEAD(HEAP_SIZE);
   printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
-  printf("display:\n");
-  display_space_lst();
-  printf("end of display\n");
+  
 }
 #endif
 

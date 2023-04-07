@@ -2,6 +2,32 @@
 #include <assert.h>
 #include <time.h>
 
+int main(){
+    pmm->init();
+    printf("hello\n");
+    //check();
+    random_test();
+    return 0;
+}
+
+struct alloc_tst{
+    int sz;
+    void* ptr;
+} cases[SCALE] = {
+    {}
+};
+typedef struct alloc_tst alloc_tst;
+
+#define END_SP(c) ((c).ptr + (c).sz)
+#define START_SP(c) ((c).ptr)
+#define ALLOC_FAIL(c) ((c).ptr == NULL)
+void do_all_alloc();
+void check_overlap();
+void check_in_heap();
+void check_align();
+
+void check();
+
 void print_cases(FILE* fp){
     assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){
@@ -15,6 +41,9 @@ void copy_cases_totmpt(){
     print_cases(fp);
     fclose(fp);
 }
+
+
+
 
 void swap(alloc_tst* c1, alloc_tst* c2){
     alloc_tst tmpt = *c1;
@@ -32,7 +61,9 @@ void sort_cases(){
     }
 }
 
-void do_alloc(){
+
+
+void do_all_alloc(){
     printf("SCALE : %d\n", SCALE);
     srand((unsigned int)time(NULL));
 
@@ -108,7 +139,7 @@ void free_all(){
     }
 }
 void check(){
-    do_alloc();
+    do_all_alloc();
     sort_cases();
     copy_cases_totmpt();
     check_overlap();
@@ -121,8 +152,3 @@ void check(){
 }
 
 
-int main(){
-    pmm->init();
-    check();
-    return 0;
-}
