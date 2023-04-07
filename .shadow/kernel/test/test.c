@@ -63,8 +63,6 @@ void sort_cases(){
     }
 }
 
-
-
 void do_all_alloc(){
     printf("SCALE : %d\n", SCALE);
     srand((unsigned int)time(NULL));
