@@ -1,5 +1,6 @@
 #include <common.h>
 
+#define PAINT 1
 const char IN_HEAP = 0xcc;
 const char OUT_HEAP = 0x0;
 
@@ -74,14 +75,16 @@ static void *kalloc(size_t size) {
     if(ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz) < FREE_SPACE_BEGIN(p) + HEAP_HEAD_SIZE){
       continue; 
     }
-    
     ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
     Heap_node* ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
 
+#ifdef PAINT
     check_paint(ret_nd, IN_HEAP);
     paint(ret_nd, OUT_HEAP);
+#endif
+
     break;
   }
   if(p == NULL){
@@ -94,7 +97,9 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
+#ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
+#endif
 
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
@@ -114,7 +119,9 @@ static void kfree(void *ptr) {
   else{
     pre->next = freed_nd;
   }
+#ifdef PAINT
   paint(freed_nd, IN_HEAP);
+#endif
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
