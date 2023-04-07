@@ -69,7 +69,7 @@ void do_all_alloc(){
 
     int cnt = 0;
     for(int i = 0; i < SCALE; i++){
-        cases[i].sz = rand() % alloc_sz;
+        cases[i].sz = rand() % MAX_ALLOC_SZ;
         cnt += ((cases[i].ptr = pmm->alloc(cases[i].sz)) != NULL);  
     }
     printf("successfully allocted: %d\n", cnt);
