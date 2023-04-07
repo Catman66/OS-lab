@@ -1,7 +1,12 @@
 #include"test.h"
 #include<memory.h>
 
-typedef enum{
+#define STK_SZ 10000
+
+extern void* STK[STK_SZ];
+extern int top;
+
+static typedef enum{
     ACT_ALLOC = 0, ACT_FREE = 1
 } ACT; 
 ACT rand_act(){

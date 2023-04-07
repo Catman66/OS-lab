@@ -22,10 +22,7 @@ void check_align();
 
 void check();
 
-#define STK_SZ 10000
 
-void* STK[STK_SZ];
-extern int top;
 
 #define EMPTY()         (top == -1)
 #define FULL()          (top == STK_SZ - 1)
