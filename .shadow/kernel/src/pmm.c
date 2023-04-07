@@ -1,5 +1,8 @@
 #include <common.h>
 
+const char IN_HEAP = 0xcc;
+const char OUT_HEAP = 0x0;
+
 struct Heap_node{
   uintptr_t size;
   struct Heap_node* next;
@@ -34,6 +37,18 @@ void merge_node(Heap_node* reslt, Heap_node* merged){
   reslt->next = merged->next;
 }
 
+void paint(Heap_node* nd, char val){
+  memset((void*)FREE_SPACE_BEGIN(nd), val, nd->size);
+}
+
+void check_paint(Heap_node* nd, uint8_t val){
+  for(char* p = FREE_SPACE_BEGIN(nd); p < FREE_SPACE_END(nd); p++){
+    if(*p != val){
+      assert(0);
+    }
+  }
+}
+
 uintptr_t make_round_sz(size_t sz){
   uintptr_t ret = 1;
   while(ret < sz){
@@ -41,6 +56,7 @@ uintptr_t make_round_sz(size_t sz){
   }
   return ret;
 }
+
 static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p;
@@ -63,12 +79,17 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
+  check_paint(ret, IN_HEAP);
+  paint(ret, OUT_HEAP);
   return (void*)ret;
 }
+
 
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
+  check_paint(freed_nd, OUT_HEAP);
+  paint(freed_nd, IN_HEAP);
 
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
