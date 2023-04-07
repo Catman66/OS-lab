@@ -4,8 +4,8 @@
 
 int main(){
     pmm->init();
-    printf("hello\n");
-    random_test();
+    //printf("hello\n");
+    check();
     return 0;
 }
 
