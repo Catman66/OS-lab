@@ -68,9 +68,10 @@ void random_test(){
                 break;
         }
         cnt_succ_act++;
-        if(cnt_succ_act % 1000000 == 0){
-            printf("1000000 succ acts\n");
-        }
+        printf("%d succ\n", cnt_succ_act);
+        // if(cnt_succ_act % 1000000 == 0){
+        //     printf("1000000 succ acts\n");
+        // }
     }
 }
 
