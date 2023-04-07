@@ -19,9 +19,7 @@ void sort_cases(){
     for(int i = 0; i < SCALE - 1; i++){
         for(int j = 0; j < SCALE - 1; j++){
             if(cases[j].ptr > cases[j+1].ptr){
-                alloc_tst tmpt = cases[j];
-                cases[j] = cases[j+1];
-                cases[j+1] = tmpt;
+                swap(&cases[j], &cases[j+1]);
             }
         }
     }
