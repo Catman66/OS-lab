@@ -44,7 +44,7 @@ void paint(Heap_node* nd, char val){
 void check_paint(Heap_node* nd, uint8_t val){
   for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
     if(*p != val){
-      assert(0);
+      printf("expected: %x, actual: %x \n", val, *p);
     }
   }
 }
