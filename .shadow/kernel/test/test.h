@@ -21,7 +21,6 @@ void do_alloc(STK* stk);
 void do_free(STK* stk);
 typedef enum{ ACT_ALLOC = 0, ACT_FREE = 1 } ACT; 
 
-ACT     rand_act()      {  return rand()%2; }
-size_t  rand_alloc_sz() {  return rand() % MAX_ALLOC_SZ + 1; }
-
+ACT     rand_act();
+size_t  rand_alloc_sz();
 
