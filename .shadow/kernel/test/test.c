@@ -9,10 +9,17 @@ void print_cases(FILE* fp){
     }
 }
 
-void copy_cases(){
+void copy_cases_totmpt(){
     FILE* fp = fopen("tmpt", "w");
+    assert(fp != NULL);
     print_cases(fp);
     fclose(fp);
+}
+
+void swap(alloc_tst* c1, alloc_tst* c2){
+    alloc_tst tmpt = *c1;
+    *c1 = *c2;
+    *c2 = tmpt;
 }
 
 void sort_cases(){
@@ -87,11 +94,7 @@ void check_align(){
     printf("check alignment passed\n");
 }
 
-void swap(alloc_tst* c1, alloc_tst* c2){
-    alloc_tst tmpt = *c1;
-    *c1 = *c2;
-    *c2 = tmpt;
-}
+
 void shuffle_cases(){
     for(int i = 0; i < SCALE; i++){
         int i1 = rand() % SCALE, i2 = rand()%SCALE;
@@ -107,6 +110,7 @@ void free_all(){
 void check(){
     do_alloc();
     sort_cases();
+    copy_cases_totmpt();
     check_overlap();
     check_in_heap();
     check_align();
