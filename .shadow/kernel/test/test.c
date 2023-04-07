@@ -27,8 +27,6 @@ void check_align();
 
 void check();
 
-
-
 void print_cases(FILE* fp){
     assert(fp != NULL);
     for(int i = 0; i < SCALE; i++){

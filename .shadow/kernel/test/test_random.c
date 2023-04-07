@@ -50,8 +50,8 @@ void do_free(){
 }
 
 void random_test(){
-    INIT_STK();
     while(1){
+        printf("hello\n");
         switch(rand_act()){
             case ACT_ALLOC:
                 do_alloc();
