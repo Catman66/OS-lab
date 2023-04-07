@@ -43,9 +43,7 @@ void do_alloc(){
     if(ptr == NULL){
         printf("alloc fails\n");
     }
-    else{
-        printf("alloc succ\n");
-        
+    else{        
         push_rand(ptr);
     }
 }
@@ -60,7 +58,6 @@ void do_free(){
 
 void random_test(){
     while(1){
-        printf("hello\n");
         switch(rand_act()){
             case ACT_ALLOC:
                 do_alloc();
