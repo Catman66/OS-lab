@@ -74,13 +74,14 @@ static void *kalloc(size_t size) {
     Heap_node* ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
+
+    check_paint(ret_nd, IN_HEAP);
+    paint(ret_nd, OUT_HEAP);
     break;
   }
   if(p == NULL){
     return NULL;
   }
-  check_paint(ret, IN_HEAP);
-  paint(ret, OUT_HEAP);
   return (void*)ret;
 }
 
