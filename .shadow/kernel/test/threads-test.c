@@ -5,7 +5,7 @@ void Tclient(int tid){
     STK stk;
     printf("hello from thread %d \n", tid);
     while(1){
-        printf("hello \n");
+        printf("hello in\n");
         switch (rand_act()){
             case ACT_ALLOC:
                 do_alloc(&stk);
@@ -14,6 +14,7 @@ void Tclient(int tid){
                 do_free(&stk);
                 break;
         }
+        printf("hello out\n");
     }
 }
 
