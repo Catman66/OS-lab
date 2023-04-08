@@ -19,7 +19,7 @@ void Tclient(int tid){
 }
 
 void threads_test(){
-    for(int i = 0; i < 1; i++){
+    for(int i = 0; i < 4; i++){
         create(Tclient);
     }
     join();
