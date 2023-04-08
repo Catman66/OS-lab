@@ -17,7 +17,7 @@ void Tclient(int tid){
                 do_free(&stk);
                 break;
         }
-        if(cnt % 100000 == 0){
+        if((++cnt) % 100000 == 0){
             printf("100000 acts done\n");
         }
     }
