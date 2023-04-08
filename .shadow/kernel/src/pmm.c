@@ -1,7 +1,6 @@
 #include <common.h>
 #include <pthread.h>
 
-
 // Mutex
 typedef pthread_mutex_t mutex_t;
 #define MUTEX_INIT() PTHREAD_MUTEX_INITIALIZER
@@ -9,7 +8,6 @@ void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
 void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
 
 mutex_t lk = MUTEX_INIT();
-
 
 #define PAINT 1
 const char IN_HEAP  = 0xcc;
@@ -79,7 +77,7 @@ static void *kalloc(size_t size) {
   Heap_node* p;
   uintptr_t ret;
   
-  //mutex_lock(&lk);
+  mutex_lock(&lk);
 
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
@@ -103,7 +101,7 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
-  //mutex_unlock(&lk);
+  mutex_unlock(&lk);
   return (void*)ret;
 }
 
@@ -115,7 +113,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
-  //mutex_lock(&lk);
+  mutex_lock(&lk);
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
     if(freed_nd < p){
@@ -134,7 +132,7 @@ static void kfree(void *ptr) {
   else{
     pre->next = freed_nd;
   }
-  //mutex_unlock(&lk);
+  mutex_unlock(&lk);
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
