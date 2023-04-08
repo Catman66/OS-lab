@@ -1,5 +1,5 @@
 #include <common.h>
-
+#include <thread.h>
 // Mutex
 typedef pthread_mutex_t mutex_t;
 #define MUTEX_INIT() PTHREAD_MUTEX_INITIALIZER
