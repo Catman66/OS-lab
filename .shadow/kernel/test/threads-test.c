@@ -1,6 +1,9 @@
 #include "test.h"
 #include "thread.h"
 
+
+int cnt = 0;
+
 void Tclient(int tid){
     STK stk = { .top = -1 };
     printf("hello from thread %d \n", tid);
@@ -14,7 +17,9 @@ void Tclient(int tid){
                 do_free(&stk);
                 break;
         }
-        //printf("hello out %d \n", tid);
+        if(cnt % 10000 == 0){
+            printf("10000 acts done\n");
+        }
     }
 }
 
