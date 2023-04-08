@@ -73,15 +73,14 @@ uintptr_t make_round_sz(size_t sz){
 }
 
 static void *kalloc(size_t size) {
-  printf("\nbefore alloc, alloc_cnt: %d \n", CNT_ALLOC);
-
-  display_space_lst();
+  
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p, * ret_nd;
   uintptr_t ret;
   
   mutex_lock(&lk);
-  printf("in\n");
+  printf("\nbefore alloc, alloc_cnt: %d \n", CNT_ALLOC);
+  display_space_lst();
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
       continue;
