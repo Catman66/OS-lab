@@ -1,59 +1,25 @@
 #include"test.h"
 #include<memory.h>
 
-#define STK_SZ 10000
+static STK stk01 = { .top = -1 };
 
-static void* STK[STK_SZ];
-int top = -1;
-
-#define EMPTY()         (top == -1)
-#define FULL()          (top == STK_SZ - 1)
-#define PUSH(ptr)       (STK[++top] = (ptr))
-#define POP()           (STK[top--])
-#define INIT_STK()      (top = -1)
-
-void push_rand(void* ptr){
-    if(EMPTY()){
-        PUSH(ptr);
+void do_alloc(STK* stk){
+    if(full(stk)){
         return;
     }
-    int idx = rand() % (top + 1);
-    STK[++top] = STK[idx];
-    STK[idx] = ptr;
-}
-
-typedef enum{
-    ACT_ALLOC = 0, ACT_FREE = 1
-} ACT; 
-ACT rand_act(){
-    return rand()%2;
-}
-
-#define max_alloc_sz 1024
-
-void do_alloc(){
-    if(FULL()){
-        return;
-    }
-    size_t sz = rand();
-    sz %= max_alloc_sz;
-    void* ptr = pmm->alloc(sz);
-    
+    void* ptr = pmm->alloc(rand_alloc_sz());
     if(ptr == NULL){
         printf("alloc fails\n");
     }
     else{      
-        //printf("allocated : %p\n", ptr);  
-        push_rand(ptr);
+        rand_push(stk, ptr);
     }
 }
-
-void do_free(){
-    if(EMPTY()){
+void do_free(STK* stk){
+    if(empty(stk)){
         return;
     }
-    void *freed = POP();
-    //printf("freeing %p\n", freed);
+    void *freed = pop(stk);
     pmm->free(freed);
 }
 
@@ -62,10 +28,10 @@ void random_test(){
     while(1){
         switch(rand_act()){
             case ACT_ALLOC:
-                do_alloc();
+                do_alloc(&stk01);
                 break;
             case ACT_FREE:
-                do_free();
+                do_free(&stk01);
                 break;
         }
         cnt_succ_act++;
@@ -76,5 +42,21 @@ void random_test(){
     }
 }
 
+bool empty(STK* stk){  return stk->top == -1; }
+bool full(STK* stk) {  return stk->top == STK_SZ - 1; }
+void rand_push(STK* stk, void* ptr){
+    if(empty(stk)){
+        stk->content[++(stk->top)] = ptr;
+        return;
+    }
+    int rand_idx = rand() % (stk->top + 1);
+    stk->content[++(stk->top)] = stk->content[rand_idx];
+    stk->content[rand_idx] = ptr;
+}
+void *pop(STK* stk){
+    return stk->content[stk->top--];
+}
 
+ACT     rand_act()      {  return rand()%2; }
+size_t  rand_alloc_sz() {  return rand() % MAX_ALLOC_SZ + 1; }
 

@@ -4,9 +4,10 @@
 
 int main(){
     pmm->init();
-    printf("hello\n");
+    //printf("hello\n");
     //check();
-    random_test();
+    //random_test();
+    threads_test();
     return 0;
 }
 
@@ -61,15 +62,13 @@ void sort_cases(){
     }
 }
 
-
-
 void do_all_alloc(){
     printf("SCALE : %d\n", SCALE);
     srand((unsigned int)time(NULL));
 
     int cnt = 0;
     for(int i = 0; i < SCALE; i++){
-        cases[i].sz = rand() % alloc_sz;
+        cases[i].sz = rand() % MAX_ALLOC_SZ;
         cnt += ((cases[i].ptr = pmm->alloc(cases[i].sz)) != NULL);  
     }
     printf("successfully allocted: %d\n", cnt);

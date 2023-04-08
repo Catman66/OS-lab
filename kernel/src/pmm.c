@@ -1,7 +1,15 @@
 #include <common.h>
+#include <pthread.h>
+// Mutex
+typedef pthread_mutex_t mutex_t;
+#define MUTEX_INIT() PTHREAD_MUTEX_INITIALIZER
+void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
+void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
+
+mutex_t lk = MUTEX_INIT();
 
 #define PAINT 1
-const char IN_HEAP = 0xcc;
+const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
 
 struct Heap_node{
@@ -15,19 +23,18 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->next = nxt;
 }
 
-#define HEAP_HEAD_SIZE (sizeof(void*) + sizeof(Heap_node*))
+#define HEAP_HEAD_SIZE        (sizeof(void*) + sizeof(Heap_node*))
+#define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
+#define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
+#define NODE(ptr)             ((Heap_node*)(ptr))
+#define INTP(nd)              ((uintptr_t)(nd))
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; \
 init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
 paint(HEAP_HEAD.next, IN_HEAP)
 
-
-#define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
-#define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
-#define NODE(ptr)             ((Heap_node*)(ptr))
-#define INTP(nd)              ((uintptr_t)(nd))
-
 void display_space_lst(){
+  printf("FREE_LIST: ");
   for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
     printf("[sz: %lx] ", p->size);
   }
@@ -49,7 +56,8 @@ void paint(Heap_node* nd, char val){
 void check_paint(Heap_node* nd, char val){
   for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
     if(*p != val){
-      printf("node: nd:%p,  expected: %x, actual: %x \n", nd, val, (int)(uint8_t)*p);
+      printf("===CHECK_PAINT ERROR node: %p,  expected: %x, actual: %x === \n", nd, (uint8_t)val, (uint8_t)*p);
+      print_context(p, p + HEAP_HEAD_SIZE);
       assert(0);
     }
   }
@@ -64,10 +72,13 @@ uintptr_t make_round_sz(size_t sz){
 }
 
 static void *kalloc(size_t size) {
+  
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
-  Heap_node* p;
+  Heap_node* p, * ret_nd;
   uintptr_t ret;
-
+  
+  mutex_lock(&lk);
+  
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
       continue;
@@ -76,10 +87,9 @@ static void *kalloc(size_t size) {
       continue; 
     }
     ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
-    Heap_node* ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
+    ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
-
 #ifdef PAINT
     check_paint(ret_nd, IN_HEAP);
     paint(ret_nd, OUT_HEAP);
@@ -90,6 +100,8 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
+
+  mutex_unlock(&lk);
   return (void*)ret;
 }
 
@@ -97,10 +109,12 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
+  mutex_lock(&lk);
+
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
-
+  
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
     if(freed_nd < p){
@@ -122,6 +136,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
+  mutex_unlock(&lk);
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
@@ -142,7 +157,7 @@ static void pmm_init() {
   heap.start = ptr;
   heap.end   = ptr + HEAP_SIZE;
   INIT_HEAP_HEAD(HEAP_SIZE);
-  printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
+  printf("===Got %d MiB heap: [%p, %p)===\n", HEAP_SIZE >> 20, heap.start, heap.end);
   
 }
 #endif
