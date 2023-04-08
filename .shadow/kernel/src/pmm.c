@@ -9,6 +9,8 @@ void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
 mutex_t lk = MUTEX_INIT();
 int CNT_ALLOC = 0;
 
+
+
 #define PAINT 1
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
@@ -116,13 +118,11 @@ static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   mutex_lock(&lk);
-  printf("\nfreeing ");
-  display_space_lst();
+  
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
   
- 
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
     if(freed_nd < p){
@@ -141,15 +141,10 @@ static void kfree(void *ptr) {
   else{
     pre->next = freed_nd;
   }
-  paint(freed_nd, IN_HEAP);
-  printf("end free ");
-  display_space_lst();
-  printf("\n");
-  mutex_unlock(&lk);
 #ifdef PAINT
-  
+  paint(freed_nd, IN_HEAP);
 #endif
-
+  mutex_unlock(&lk);
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
