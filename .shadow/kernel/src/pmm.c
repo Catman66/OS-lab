@@ -56,7 +56,10 @@ void check_paint(Heap_node* nd, char val){
   for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
     if(*p != val){
       printf("node: nd:%p,  expected: %x, actual: %x \n", nd, (uint8_t)val, (uint8_t)*p);
-      printf("contex: %p, %p\n", *(uintptr_t*)p, *(uintptr_t*)(p + sizeof(uintptr_t)));
+      uint8_t* tmpt = p;
+      for(int i = 0; i < HEAP_HEAD_SIZE; i++){
+        printf("%x ", *tmpt);
+      }
       assert(0);
     }
   }
