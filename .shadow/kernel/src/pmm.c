@@ -10,10 +10,10 @@ void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
 
 mutex_t lk = MUTEX_INIT();
 
-#define PAINT 1
-const char IN_HEAP = 0xcc;
-const char OUT_HEAP = 0x0;
 
+#define PAINT 1
+const char IN_HEAP  = 0xcc;
+const char OUT_HEAP = 0x0;
 
 struct Heap_node{
   uintptr_t size;
