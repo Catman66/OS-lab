@@ -1,23 +1,14 @@
 #include <common.h>
 
-typedef int spinlock_t;
-#define SPIN_INIT() 0
-void spin_lock(spinlock_t *lk) {
-  while (1) {
-    intptr_t value = atomic_xchg(lk, 1);
-    if (value == 0) {
-      break;
-    }
-  }
-}
-void spin_unlock(spinlock_t *lk) {
-  atomic_xchg(lk, 0);
-}
-spinlock_t lk = SPIN_INIT();
+//lock 
+extern void LOCK(lock_t* lk);
+extern void UNLOCK(lock_t* lk);
 
+//paint to debug
 #define PAINT 1
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
+
 
 struct Heap_node{
   uintptr_t size;
@@ -84,7 +75,7 @@ static void *kalloc(size_t size) {
   Heap_node* p, * ret_nd;
   uintptr_t ret;
   
-  spin_lock(&lk);
+  LOCK(&lk);
   
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
@@ -108,7 +99,7 @@ static void *kalloc(size_t size) {
     return NULL;
   }
 
-  spin_unlock(&lk);
+  UNLOCK(&lk);
   return (void*)ret;
 }
 
@@ -116,7 +107,7 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
-  spin_lock(&lk);
+  LOCK(&lk);
 
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
@@ -143,7 +134,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
-  spin_unlock(&lk);
+  UNLOCK(&lk);
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
