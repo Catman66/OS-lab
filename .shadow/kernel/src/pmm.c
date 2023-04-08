@@ -106,6 +106,7 @@ static void *kalloc(size_t size) {
   display_space_lst();
   printf("\n");
   CNT_ALLOC++;
+
   mutex_unlock(&lk);
   return (void*)ret;
 }
@@ -114,12 +115,14 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
-  
+  mutex_lock(&lk);
+  printf("\nfreeing ");
+  display_space_lst();
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
-  mutex_lock(&lk);
-  printf("freeing\n");
+  
+ 
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
     if(freed_nd < p){
@@ -138,10 +141,15 @@ static void kfree(void *ptr) {
   else{
     pre->next = freed_nd;
   }
+  paint(freed_nd, IN_HEAP);
+  printf("end free ");
+  display_space_lst();
+  printf("\n");
   mutex_unlock(&lk);
 #ifdef PAINT
-  paint(freed_nd, IN_HEAP);
+  
 #endif
+
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
