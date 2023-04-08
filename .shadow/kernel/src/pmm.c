@@ -60,7 +60,7 @@ void paint(Heap_node* nd, char val){
 void check_paint(Heap_node* nd, char val){
   for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
     if(*p != val){
-      printf("node: nd:%p,  expected: %x, actual: %x \n", nd, val, (uint8_t)*p);
+      printf("node: nd:%p,  expected: %x, actual: %x \n", nd, (uint8_t)val, (uint8_t)*p);
       assert(0);
     }
   }
