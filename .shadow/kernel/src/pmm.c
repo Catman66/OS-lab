@@ -1,12 +1,19 @@
 #include <common.h>
-#include <pthread.h>
-// Mutex
-typedef pthread_mutex_t mutex_t;
-#define MUTEX_INIT() PTHREAD_MUTEX_INITIALIZER
-void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
-void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
 
-mutex_t lk = MUTEX_INIT();
+typedef int spinlock_t;
+#define SPIN_INIT() 0
+void spin_lock(spinlock_t *lk) {
+  while (1) {
+    intptr_t value = atomic_xchg(lk, 1);
+    if (value == 0) {
+      break;
+    }
+  }
+}
+void spin_unlock(spinlock_t *lk) {
+  atomic_xchg(lk, 0);
+}
+spinlock_t lk = SPIN_INIT();
 
 #define PAINT 1
 const char IN_HEAP  = 0xcc;
@@ -57,7 +64,7 @@ void check_paint(Heap_node* nd, char val){
   for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
     if(*p != val){
       printf("===CHECK_PAINT ERROR node: %p,  expected: %x, actual: %x === \n", nd, (uint8_t)val, (uint8_t)*p);
-      print_context(p, p + HEAP_HEAD_SIZE);
+      //print_context(p, p + HEAP_HEAD_SIZE);
       assert(0);
     }
   }
@@ -77,7 +84,7 @@ static void *kalloc(size_t size) {
   Heap_node* p, * ret_nd;
   uintptr_t ret;
   
-  mutex_lock(&lk);
+  spin_lock(&lk);
   
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
@@ -101,7 +108,7 @@ static void *kalloc(size_t size) {
     return NULL;
   }
 
-  mutex_unlock(&lk);
+  spin_unlock(&lk);
   return (void*)ret;
 }
 
@@ -109,7 +116,7 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
-  mutex_lock(&lk);
+  spin_lock(&lk);
 
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
@@ -136,7 +143,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
-  mutex_unlock(&lk);
+  spin_unlock(&lk);
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
