@@ -7,9 +7,6 @@ void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
 void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
 
 mutex_t lk = MUTEX_INIT();
-int CNT_ALLOC = 0;
-
-
 
 #define PAINT 1
 const char IN_HEAP  = 0xcc;
@@ -81,8 +78,7 @@ static void *kalloc(size_t size) {
   uintptr_t ret;
   
   mutex_lock(&lk);
-  printf("\nbefore alloc, alloc_cnt: %d \n", CNT_ALLOC);
-  display_space_lst();
+  
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
       continue;
@@ -104,10 +100,6 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
-  printf("out, 0x%lx bytes allocated \n", ret_nd->size);
-  display_space_lst();
-  printf("\n");
-  CNT_ALLOC++;
 
   mutex_unlock(&lk);
   return (void*)ret;
@@ -118,7 +110,7 @@ static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   mutex_lock(&lk);
-  
+
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
