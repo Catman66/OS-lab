@@ -58,7 +58,7 @@ void check_paint(Heap_node* nd, char val){
       printf("node: nd:%p,  expected: %x, actual: %x \n", nd, (uint8_t)val, (uint8_t)*p);
       uint8_t* tmpt = p;
       for(int i = 0; i < HEAP_HEAD_SIZE; i++){
-        printf("%x ", *tmpt);
+        printf("%x ", *(tmpt++));
       }
       assert(0);
     }
