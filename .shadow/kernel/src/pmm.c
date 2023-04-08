@@ -92,7 +92,6 @@ static void *kalloc(size_t size) {
     ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
-
 #ifdef PAINT
     check_paint(ret_nd, IN_HEAP);
     paint(ret_nd, OUT_HEAP);
@@ -120,6 +119,7 @@ static void kfree(void *ptr) {
   check_paint(freed_nd, OUT_HEAP);
 #endif
   mutex_lock(&lk);
+  printf("freeing\n");
   Heap_node* p, *pre;
   for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
     if(freed_nd < p){
