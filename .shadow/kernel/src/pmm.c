@@ -1,5 +1,4 @@
 #include <common.h>
-#include <pthread.h>
 
 // Mutex
 typedef pthread_mutex_t mutex_t;
