@@ -104,6 +104,7 @@ static void *kalloc(size_t size) {
   }
   printf("out, 0x%lx bytes allocated \n", ret_nd->size);
   display_space_lst();
+  printf("\n");
   mutex_unlock(&lk);
   return (void*)ret;
 }
