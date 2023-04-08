@@ -1,5 +1,5 @@
 #include <common.h>
-
+#include <mylock.h>
 //lock 
 extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
