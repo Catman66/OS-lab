@@ -34,7 +34,7 @@ init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
 paint(HEAP_HEAD.next, IN_HEAP)
 
 void display_space_lst(){
-  printf("\nFREE_LIST: ")
+  printf("\nFREE_LIST: ");
   for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
     printf("[sz: %lx] ", p->size);
   }
