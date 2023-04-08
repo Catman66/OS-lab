@@ -1,16 +1,14 @@
 #include <common.h>
-#include <pthread.h>
-// Mutex
-typedef pthread_mutex_t mutex_t;
-#define MUTEX_INIT() PTHREAD_MUTEX_INITIALIZER
-void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
-void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
+#include <mylock.h>
+//lock 
+extern void LOCK(lock_t* lk);
+extern void UNLOCK(lock_t* lk);
 
-mutex_t lk = MUTEX_INIT();
-
+//paint to debug
 #define PAINT 1
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
+
 
 struct Heap_node{
   uintptr_t size;
@@ -77,7 +75,7 @@ static void *kalloc(size_t size) {
   Heap_node* p, * ret_nd;
   uintptr_t ret;
   
-  mutex_lock(&lk);
+  LOCK(&lk);
   
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
@@ -101,7 +99,7 @@ static void *kalloc(size_t size) {
     return NULL;
   }
 
-  mutex_unlock(&lk);
+  UNLOCK(&lk);
   return (void*)ret;
 }
 
@@ -109,7 +107,7 @@ static void *kalloc(size_t size) {
 static void kfree(void *ptr) {
   /*find the position*/
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
-  mutex_lock(&lk);
+  LOCK(&lk);
 
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
@@ -136,7 +134,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
-  mutex_unlock(&lk);
+  UNLOCK(&lk);
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
