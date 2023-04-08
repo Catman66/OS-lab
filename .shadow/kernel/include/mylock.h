@@ -1,4 +1,4 @@
-#include<common.h>
+#include<am.h>
 
 typedef int spinlock_t;
 #define SPIN_INIT() 0
