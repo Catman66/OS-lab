@@ -2,7 +2,7 @@
 #include "thread.h"
 
 void Tclient(int tid){
-    STK stk;
+    STK stk = { .top = -1 };
     printf("hello from thread %d \n", tid);
     while(1){
         printf("hello in %d \n", tid);
