@@ -72,6 +72,7 @@ uintptr_t make_round_sz(size_t sz){
 }
 
 static void *kalloc(size_t size) {
+  printf("\nbefore alloc: ");
   display_space_lst();
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p, * ret_nd;
