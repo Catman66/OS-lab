@@ -3,7 +3,7 @@
 #define SCALE           10
 #define MAX_ALLOC_SZ    1024
 #define STK_SZ          10000
-#define NUM_REPORT      10000
+#define NUM_REPORT      30000
 typedef struct{
     int top;
     void* content[STK_SZ];
@@ -13,7 +13,6 @@ bool    empty(STK* stk);
 bool    full(STK* stk);
 void    rand_push(STK* stk, void* ptr);
 void*   pop();
-
 
 void random_test();
 void threads_test();
