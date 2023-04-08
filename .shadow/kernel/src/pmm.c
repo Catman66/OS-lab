@@ -75,7 +75,7 @@ uintptr_t make_round_sz(size_t sz){
 
 static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
-  Heap_node* p;
+  Heap_node* p, * ret_nd;
   uintptr_t ret;
   
   mutex_lock(&lk);
@@ -88,7 +88,7 @@ static void *kalloc(size_t size) {
       continue; 
     }
     ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
-    Heap_node* ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
+    ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
 
@@ -102,7 +102,7 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
-  printf("out, %lx bytes allocated\n", size);
+  printf("out, 0x%lx bytes allocated\n", ret_nd->size);
   mutex_unlock(&lk);
   return (void*)ret;
 }
