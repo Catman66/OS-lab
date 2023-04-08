@@ -157,7 +157,7 @@ static void pmm_init() {
   heap.start = ptr;
   heap.end   = ptr + HEAP_SIZE;
   INIT_HEAP_HEAD(HEAP_SIZE);
-  printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
+  printf("===Got %d MiB heap: [%p, %p)===\n", HEAP_SIZE >> 20, heap.start, heap.end);
   
 }
 #endif
