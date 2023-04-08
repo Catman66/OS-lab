@@ -99,7 +99,7 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
-  printf("out, %ld bytes allocated\n", size);
+  printf("out, %lx bytes allocated\n", size);
   mutex_unlock(&lk);
   return (void*)ret;
 }
