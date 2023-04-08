@@ -7,6 +7,7 @@ void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
 void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
 
 mutex_t lk = MUTEX_INIT();
+int CNT_ALLOC = 0;
 
 #define PAINT 1
 const char IN_HEAP  = 0xcc;
@@ -72,7 +73,8 @@ uintptr_t make_round_sz(size_t sz){
 }
 
 static void *kalloc(size_t size) {
-  printf("\nbefore alloc: ");
+  printf("\nbefore alloc, alloc_cnt: %d \n", CNT_ALLOC);
+
   display_space_lst();
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p, * ret_nd;
@@ -105,6 +107,7 @@ static void *kalloc(size_t size) {
   printf("out, 0x%lx bytes allocated \n", ret_nd->size);
   display_space_lst();
   printf("\n");
+  CNT_ALLOC++;
   mutex_unlock(&lk);
   return (void*)ret;
 }
