@@ -6,7 +6,7 @@ int cnt = 0;
 void Tclient(int tid){
     STK stk = { .top = -1 };
     printf("hello from thread %d \n", tid);
-    while(1){
+    while(cnt < SCALE){
         //printf("hello in %d \n", tid);
         switch (rand_act()){
             case ACT_ALLOC:
