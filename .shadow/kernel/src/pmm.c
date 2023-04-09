@@ -5,7 +5,7 @@ extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
 
 //paint to debug
-#define PAINT 
+//#define PAINT 1
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
 
