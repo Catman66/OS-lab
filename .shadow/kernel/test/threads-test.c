@@ -17,7 +17,7 @@ void Tclient(int tid){
                 break;
         }
         //if((++cnt) % NUM_REPORT == 0){ printf("%d acts done\n", NUM_REPORT); }
-        if(cnt == SCALE){
+        if(++cnt == SCALE){
             break;
         }
     }
