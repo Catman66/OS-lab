@@ -1,7 +1,6 @@
 #include "test.h"
 #include "thread.h"
 
-
 int cnt = 0;
 
 void Tclient(int tid){
