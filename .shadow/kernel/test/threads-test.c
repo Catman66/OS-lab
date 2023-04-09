@@ -21,6 +21,8 @@ void Tclient(int tid){
             break;
         }
     }
+
+    printf("thread %d has finished its job\n", tid);
 }
 
 void threads_test(){
