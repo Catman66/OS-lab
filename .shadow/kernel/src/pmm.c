@@ -5,7 +5,7 @@ extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
 
 //paint to debug
-#define PAINT 1
+#define PAINT 
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
 
@@ -74,7 +74,6 @@ static void *kalloc(size_t size) {
   size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
   Heap_node* p, * ret_nd;
   uintptr_t ret;
-  
   LOCK(&lk);
   
   for(p = HEAP_HEAD.next; p != NULL; p=p->next){
