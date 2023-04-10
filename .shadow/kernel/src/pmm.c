@@ -95,7 +95,9 @@ uintptr_t make_round_sz(size_t sz){
   }
   return ret;
 }
+
 static void* locked_sub_alloc(int hp, int size){
+    assert(hp >= 0 && hp < NUM_SUB_HEAP);
     size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
     Heap_node* p, * ret_nd;
     uintptr_t ret;
