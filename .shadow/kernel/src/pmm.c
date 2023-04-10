@@ -46,17 +46,13 @@ int WHICH_HEAP(void* ptr){
 //lock 
 extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
-spinlock_t lk[NUM_SUB_HEAP] = { SPIN_INIT() , SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
+spinlock_t lk[NUM_SUB_HEAP] = { SPIN_INIT(), SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
 spinlock_t cnt_lk =  SPIN_INIT();
-
 
 //print --local debug mod
 //#define PAINT 1
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
-
-
-
 
 void display_space_lst(int hp){
   printf("FREE_LIST: ");
@@ -148,9 +144,12 @@ static void *kalloc(size_t size) {
 
 static void kfree(void *ptr) {
   /*find the position*/
+  
   int hp = WHICH_HEAP(ptr);
+  
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   LOCK(&lk[hp]);
+  printf("in\n");
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
@@ -176,6 +175,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
+  printf("out\n");
   UNLOCK(&lk[hp]);
 }
 
