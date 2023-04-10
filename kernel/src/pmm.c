@@ -115,6 +115,7 @@ static void* page_alloc(){
   }
   int idx = last_pg;
   present[last_pg] = 1;
+  pg_left--;
   UNLOCK(&pg_lk);
   pg_allocated = idx_to_pg(idx);
   //printf("alloc pg %d\n", idx);
@@ -174,6 +175,7 @@ void pg_free(void *ptr){
   assert(present[idx] == 1);
   LOCK(&pg_lk);
   present[idx] = 0;
+  pg_left++;
   UNLOCK(&pg_lk);
 }
 
