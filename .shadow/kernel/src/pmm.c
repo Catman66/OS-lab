@@ -117,7 +117,7 @@ static void* page_alloc(){
   present[last_pg] = 1;
   UNLOCK(&pg_lk);
   pg_allocated = idx_to_pg(idx);
-  printf("alloc pg %d\n", idx);
+  //printf("alloc pg %d\n", idx);
   return pg_allocated;
 }
 
@@ -171,7 +171,7 @@ static void *kalloc(size_t size) {
 
 void pg_free(void *ptr){
   int idx = ((INTP(ptr) - UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1]) >> 12) & ((1 << 12) - 1);
-  printf("pg free %d\n", idx);
+  //printf("pg free %d\n", idx);
   assert(present[idx] == 1);
   LOCK(&pg_lk);
   present[idx] = 0;
