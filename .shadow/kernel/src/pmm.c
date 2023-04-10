@@ -85,8 +85,6 @@ void check_paint(Heap_node* nd, char val){
   }
 }
 
-
-
 void check_free_list(){
   for(int i = 0; i < NUM_SUB_HEAP; i++){
     for(Heap_node* p = HEADS[i].next; p ; p = p->next){
@@ -149,6 +147,7 @@ static void *kalloc(size_t size) {
   void* alloced = locked_sub_alloc(hp, size);
   UNLOCK(&(lk[hp]));
 
+  check_free_list();
   return alloced;
 }
 
@@ -185,6 +184,7 @@ static void kfree(void *ptr) {
   paint(freed_nd, IN_HEAP_TAG);
 #endif
   UNLOCK(&(lk[hp]));
+  check_free_list();
 }
 
 void display_bounds(){
