@@ -181,7 +181,7 @@ static void pmm_init() {
 #else             // 测试代码的 pmm_init ()
   uintptr_t pmsize = HEAP_SIZE;
   char *ptr  = malloc(HEAP_SIZE);
-  heap = { .start = ptr, .end = ptr + pmsize};
+  heap = (Area){ .start = ptr, .end = ptr + pmsize};
 
 #endif
   INIT_HEAP_HEAD(pmsize);
