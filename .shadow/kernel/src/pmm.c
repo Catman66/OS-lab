@@ -39,7 +39,7 @@ int WHICH_HEAP(void* ptr){
       return i;
     }
   }
-  printf("which heap error, bounds error or ptr error\n");
+  printf("which heap error, ptr: %p\n", ptr);
   assert(0);
 }
 
