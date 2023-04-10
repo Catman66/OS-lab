@@ -6,10 +6,6 @@ typedef struct Heap_node{
   struct Heap_node* next;
 } Heap_node;
 
-void INIT_NODE(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
-  nd->size = sz;
-  nd->next = nxt;
-}
 
 #define HEAP_HEAD_SIZE        (sizeof(void*) + sizeof(Heap_node*))
 #define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
@@ -19,6 +15,10 @@ void INIT_NODE(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 
 static void INIT_HEADS();
 static void INIT_BOUNDS();
+void INIT_NODE(void* nd, uintptr_t sz, Heap_node* nxt){
+  NODE(nd)->size = sz - HEAP_HEAD_SIZE;
+  NODE(nd)->next = nxt;
+}
 
 //heap in my test
 #ifdef TEST
@@ -226,7 +226,7 @@ static void INIT_HEADS(){
   }
   //last sub heap 
   Heap_node* lst_hd = HEADS[NUM_SUB_HEAP - 1].next;
-  lst_hd->size = INTP(heap.end) - INTP(lst_hd);
+  lst_hd->size = INTP(heap.end) - FREE_SPACE_BEGIN(lst_hd);
 }
 
 void INIT_BOUNDS(){
