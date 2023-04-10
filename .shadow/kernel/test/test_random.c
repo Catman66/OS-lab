@@ -3,11 +3,29 @@
 
 static STK stk01 = { .top = -1 };
 
+static int cnt_pg = 0;
+
+
+//1/8 portion of alloc is in size page
+size_t alloc_sz(){
+    size_t sz;
+    if(cnt_pg >= 8){
+        cnt_pg = 0;
+        sz = 4096;
+    }
+    else{
+        cnt_pg++;
+        sz = rand_alloc_sz();
+    }
+    return sz;
+}
+
 void do_alloc(STK* stk){
     if(full(stk)){
         return;
     }
-    void* ptr = pmm->alloc(rand_alloc_sz());
+    
+    void* ptr = pmm->alloc(alloc_sz());
     if(ptr == NULL){
         printf("alloc fails\n");
     }

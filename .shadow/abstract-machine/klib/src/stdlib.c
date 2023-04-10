@@ -18,9 +18,6 @@ void srand(unsigned int seed) {
 int abs(int x) {
   return (x < 0 ? -x : x);
 }
-int64_t abs64(int64_t x){
-  return x < 0 ? -x : x;
-}
 
 int atoi(const char* nptr) {
   int x = 0;

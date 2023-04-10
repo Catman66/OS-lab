@@ -42,8 +42,8 @@ static int cnt = 0;
 uintptr_t UPPER_BOUNDS[NUM_SIMPLE_SUB_HP];
 Heap_node HEADS[NUM_SIMPLE_SUB_HP];
 
-int WHICH_SIMPLE_HEAP(void* ptr){
-  for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
+int WHICH_HEAP(void* ptr){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
     if(INTP(ptr) < UPPER_BOUNDS[i]){
       return i;
     }
@@ -55,7 +55,7 @@ int WHICH_SIMPLE_HEAP(void* ptr){
 //lock 
 extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
-spinlock_t lk[NUM_SIMPLE_SUB_HP] = { SPIN_INIT(), SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
+spinlock_t lk[NUM_SUB_HEAP] = { SPIN_INIT(), SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
 spinlock_t cnt_lk =  SPIN_INIT(), pg_lk = SPIN_INIT();
 
 //print --local debug mod
@@ -121,7 +121,7 @@ static void* page_alloc(){
 }
 
 static void* locked_sub_alloc(int hp, int size){
-    assert(hp >= 0 && hp < NUM_SIMPLE_SUB_HP);
+    assert(hp >= 0 && hp < NUM_SUB_HEAP);
     size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
     Heap_node* p, * ret_nd;
     uintptr_t ret;
@@ -151,14 +151,14 @@ static void* locked_sub_alloc(int hp, int size){
 }
 
 static void *kalloc(size_t size) {
-  if(size == PAGE_SIZE){
+  if(size == PAGE_SZ){
     return page_alloc();
   }
 
   int hp;
   LOCK(&cnt_lk);
   hp = cnt++;
-  cnt %= NUM_SIMPLE_SUB_HP;
+  cnt %= NUM_SUB_HEAP;
   UNLOCK(&cnt_lk);
 
   LOCK(&(lk[hp]));
@@ -168,21 +168,9 @@ static void *kalloc(size_t size) {
   return alloced;
 }
 
-void pg_free(void *ptr){
-  int idx = (INTP(ptr) >> 12) & ((1 << 12) - 1);
-  assert(present[idx] == 1);
-  LOCK(&pg_lk);
-  present[idx] = 0;
-  UNLOCK(&pg_lk);
-}
-
 static void kfree(void *ptr) {
-  if(INTP(ptr) >= UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1]){
-    pg_free(ptr);
-    return;
-  }
   /*find the position*/
-  int hp = WHICH_SIMPLE_HEAP(ptr);
+  int hp = WHICH_HEAP(ptr);
   
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   LOCK(&(lk[hp]));
@@ -240,23 +228,20 @@ MODULE_DEF(pmm) = {
 };
 
 static void INIT_HEADS(){
-  uintptr_t simple_heap_sz = INTP(heap.end) - INTP(heap.start),
-  sub_hp_sz = simple_heap_sz / NUM_SIMPLE_SUB_HP;
+  uintptr_t sub_hp_sz = sub_hp_sz = (INTP(heap.end) - INTP(heap.start)) / NUM_SUB_HEAP;
   void * nd1 = heap.start;
-  for(int i = 0;i < NUM_SIMPLE_SUB_HP; i++, nd1 += sub_hp_sz){
+  for(int i = 0;i < NUM_SUB_HEAP; i++, nd1 += sub_hp_sz){
     HEADS[i].next = nd1;
     INIT_NODE(nd1, sub_hp_sz, NULL);
   }
   //last sub heap 
-  Heap_node* lst_hd = HEADS[NUM_SIMPLE_SUB_HP - 1].next;
-  uintptr_t pg_area_start = ROUNDDOWN(INTP(heap.end) - NUM_PREPARED_PG * PAGE_SIZE, PAGE_SIZE);
-  assert(pg_area_start > FREE_SPACE_BEGIN(lst_hd));
-  lst_hd->size = pg_area_start - FREE_SPACE_BEGIN(lst_hd);
+  Heap_node* lst_hd = HEADS[NUM_SUB_HEAP - 1].next;
+  lst_hd->size = INTP(heap.end) - FREE_SPACE_BEGIN(lst_hd);
 }
 
 void INIT_BOUNDS(){
   Heap_node* nd1;
-  for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
     nd1 = HEADS[i].next;
     UPPER_BOUNDS[i] = FREE_SPACE_END(nd1);
   }
@@ -279,7 +264,7 @@ void display_space_lst(int hp){
 }
 
 void display_bounds(){
-  for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
     printf("%d:[%lx]  ", i, UPPER_BOUNDS[i]);
   }
   printf("\n");
@@ -287,7 +272,7 @@ void display_bounds(){
 
 
 void check_free_list(bool after_alloc){
-  for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
     for(Heap_node* p = HEADS[i].next; p ; p = p->next){
       if(IN_RANGE((void*)p, heap) && IN_RANGE((void*)(FREE_SPACE_END(p) - 1), heap)){
         continue;

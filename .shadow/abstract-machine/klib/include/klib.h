@@ -38,18 +38,6 @@ int    snprintf  (char *str, size_t size, const char *format, ...);
 int    vsprintf  (char *str, const char *format, va_list ap);
 int    vsnprintf (char *str, size_t size, const char *format, va_list ap);
 
-
-//helper of catman
-#define CONVERSION_BUFFER_SIZE 64
-typedef enum{ BASE_HEX = 16, BASE_DEC = 10 } itoa_BASE;
-typedef enum{ INT_s, OCT_INT_s, CHAR_s, STR_s, PTR_s, ERROT_s } Specification_t;
-
-void  puts(const char* msg);
-int   utoa(uint64_t n, char * out, itoa_BASE);
-int   itoa(int64_t n, char* out, itoa_BASE);
-char  itoc(int n);
-int64_t abs64(int64_t n);
-
 // assert.h
 #ifdef NDEBUG
   #define assert(ignore) ((void)0)
