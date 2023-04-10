@@ -91,7 +91,7 @@ void check_free_list(bool after_alloc){
         continue;
       }
       printf("heap node out of range after %s \n", after_alloc ? "alloc" : "free");
-      printf("node at %p:[last = %p, next = %p]", p,  (void*)FREE_SPACE_END(p), p->next);
+      printf("node at %p:[last = %p, next = %p]", p, (void*)FREE_SPACE_END(p), p->next);
       assert(0);
     }
   }
