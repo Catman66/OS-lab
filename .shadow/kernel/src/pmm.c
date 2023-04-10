@@ -1,45 +1,6 @@
 #include <common.h>
 #include <mylock.h>
 
-//heap in my test
-#ifdef TEST
-#define HEAP_SIZE 0x8000000 - 0x300000 
-Area heap = {};
-#endif
-
-//4 sub-heaps VS concurrency
-#define NUM_SUB_HEAP 4
-static int cnt = 0;
-void* UPPER_BOUNDS[NUM_SUB_HEAP];
-void INIT_BOUNDS(){
-  uintptr_t bd = heap.end, sub_hp_sz = ((uintptr_t)(heap.end) - (uintptr_t)(heap.start)) / NUM_SUB_HEAP;
-  for(int i = NUM_SUB_HEAP - 1; i >= 0; i--){ 
-    UPPER_BOUNDS[i] = bd, bd -= sub_hp_sz; 
-  }
-}
-int WHICH_HEAP(void* ptr){
-  for(int i = 0; i < NUM_SUB_HEAP; i++){
-    if(ptr < UPPER_BOUNDS[i]){
-      return i;
-    }
-  }
-  printf("which heap error, bounds error or ptr error\n");
-  assert(0);
-}
-
-//lock 
-extern void LOCK(lock_t* lk);
-extern void UNLOCK(lock_t* lk);
-spinlock_t lk[NUM_SUB_HEAP] = { SPIN_INIT() , SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
-spinlock_t cnt_lk =  SPIN_INIT();
-
-
-//print --local debug mod
-//#define PAINT 1
-const char IN_HEAP  = 0xcc;
-const char OUT_HEAP = 0x0;
-
-
 struct Heap_node{
   uintptr_t size;
   struct Heap_node* next;
@@ -60,6 +21,48 @@ void INIT_NODE(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 HEAP_HEAD.next = heap.start; \
 INIT_NODE(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
 paint(HEAP_HEAD.next, IN_HEAP)
+
+//heap in my test
+#ifdef TEST
+#define HEAP_SIZE 0x8000000 - 0x300000 
+Area heap = {};
+#endif
+
+//4 sub-heaps VS concurrency
+#define NUM_SUB_HEAP 4
+static int cnt = 0;
+uintptr_t UPPER_BOUNDS[NUM_SUB_HEAP];
+void INIT_BOUNDS(){
+  uintptr_t bd = (uintptr_t)heap.end, sub_hp_sz = ((uintptr_t)(heap.end) - (uintptr_t)(heap.start)) / NUM_SUB_HEAP;
+  for(int i = NUM_SUB_HEAP - 1; i >= 0; i--){ 
+    UPPER_BOUNDS[i] = bd, bd -= sub_hp_sz; 
+  }
+}
+int WHICH_HEAP(void* ptr){
+
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
+    if(INTP(ptr) < UPPER_BOUNDS[i]){
+      return i;
+    }
+  }
+  printf("which heap error, bounds error or ptr error\n");
+  assert(0);
+}
+
+//lock 
+extern void LOCK(lock_t* lk);
+extern void UNLOCK(lock_t* lk);
+spinlock_t lk[NUM_SUB_HEAP] = { SPIN_INIT() , SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
+spinlock_t cnt_lk =  SPIN_INIT();
+
+
+//print --local debug mod
+//#define PAINT 1
+const char IN_HEAP  = 0xcc;
+const char OUT_HEAP = 0x0;
+
+
+
 
 void display_space_lst(){
   printf("FREE_LIST: ");
