@@ -21,8 +21,6 @@ void spin_unlock(spinlock_t *lk) {
   atomic_xchg(lk, 0);
 }
 
-spinlock_t lk = SPIN_INIT();
-
 void LOCK(lock_t* lk){
     spin_lock(lk);
 }
