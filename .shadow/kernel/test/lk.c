@@ -1,5 +1,7 @@
 #include "common.h"
 
+typedef int lock_t;
+
 static inline int atomic_xchg(volatile int *addr, int newval) {
   int result;
   asm volatile ("lock xchg %0, %1":
