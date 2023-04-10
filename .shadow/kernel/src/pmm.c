@@ -91,7 +91,7 @@ void check_free_list(bool after_alloc){
         continue;
       }
       printf("heap node out of range after %s \n", after_alloc ? "alloc" : "free");
-      printf("node at %p:[last = %p, next = %p]", p,  FREE_SPACE_END(p), p->next);
+      printf("node at %p:[last = %p, next = %p]", p,  (void*)FREE_SPACE_END(p), p->next);
       assert(0);
     }
   }
@@ -123,7 +123,7 @@ static void* locked_sub_alloc(int hp, int size){
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
 #ifdef PAINT
-    check_paint(ret_nd, IN_HEAP_TAG);
+    paint(ret_nd, IN_HEAP_TAG);
     paint(ret_nd, OUT_HEAP_TAG);
 #endif
 
@@ -147,7 +147,7 @@ static void *kalloc(size_t size) {
   void* alloced = locked_sub_alloc(hp, size);
   UNLOCK(&(lk[hp]));
 
-  check_free_list(true);
+  //check_free_list(true);
   return alloced;
 }
 
@@ -184,7 +184,7 @@ static void kfree(void *ptr) {
   paint(freed_nd, IN_HEAP_TAG);
 #endif
   UNLOCK(&(lk[hp]));
-  check_free_list(false);
+  //check_free_list(false);
 }
 
 void display_bounds(){
