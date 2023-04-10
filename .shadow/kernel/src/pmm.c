@@ -172,12 +172,19 @@ static void kfree(void *ptr) {
   UNLOCK(&lk[hp]);
 }
 
+void display_bounds(){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
+    printf("%d:[%lx]  ", i, UPPER_BOUNDS[i]);
+  }
+  printf("\n");
+}
+
 static void pmm_init() {
-#ifndef TEST      // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
+#ifndef TEST   
   uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
   assert(pmsize >= HEAP_HEAD_SIZE);
   
-#else             // 测试代码的 pmm_init ()
+#else
   uintptr_t pmsize = HEAP_SIZE;
   char *ptr  = malloc(HEAP_SIZE);
   heap = (Area){ .start = ptr, .end = ptr + pmsize};
@@ -185,6 +192,7 @@ static void pmm_init() {
 #endif
   INIT_HEADS();
   INIT_BOUNDS();
+  display_bounds();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
   
 }
