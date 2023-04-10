@@ -16,10 +16,11 @@ void do_alloc(STK* stk){
     }
 }
 void do_free(STK* stk){
-    printf("freeing\n");
+    
     if(empty(stk)){
         return;
     }
+    printf("freeing\n");
     void *freed = pop(stk);
     pmm->free(freed);
     printf("end free\n");

@@ -19,7 +19,7 @@ void Tclient(int tid){
         if(++cnt1 == SCALE){
             break;
         }
-        if((cnt1) % NUM_REPORT == 0){ printf("%d acts done\n", NUM_REPORT); }
+        //if((cnt1) % NUM_REPORT == 0){ printf("%d acts done\n", NUM_REPORT); }
         
     }
     printf("thread %d has finished its job\n", tid);
