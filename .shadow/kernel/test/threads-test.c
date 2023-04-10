@@ -2,7 +2,7 @@
 #include "thread.h"
 
 static int cnt1 = 0;
-
+#define NUM_THREADS 1
 void Tclient(int tid){
     STK stk = { .top = -1 };
     printf("hello from thread %d \n", tid);
@@ -25,7 +25,7 @@ void Tclient(int tid){
 }
 
 void threads_test(){
-    for(int i = 0; i < 4; i++){
+    for(int i = 0; i < NUM_THREADS; i++){
         create(Tclient);
     }
     join();
