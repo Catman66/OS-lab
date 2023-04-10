@@ -132,11 +132,7 @@ static void *kalloc(size_t size) {
 
   
   LOCK(&(lk[hp]));
-  
-  printf("in\n");
   void* alloced = locked_sub_alloc(hp, size);
-  
-  printf("out\n");
   UNLOCK(&lk[hp]);
 
   return alloced;
