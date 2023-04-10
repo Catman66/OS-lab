@@ -39,7 +39,7 @@ int WHICH_HEAP(void* ptr){
       return i;
     }
   }
-  printf("which heap error, bounds error or ptr error\n");
+  printf("which heap error, ptr: %p\n", ptr);
   assert(0);
 }
 
@@ -208,6 +208,7 @@ static void pmm_init() {
   INIT_HEADS();
   INIT_BOUNDS();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+  //display_bounds();
 }
 
 MODULE_DEF(pmm) = {
@@ -232,7 +233,7 @@ void INIT_BOUNDS(){
   Heap_node* nd1;
   for(int i = 0; i < NUM_SUB_HEAP; i++){
     nd1 = HEADS[i].next;
-    UPPER_BOUNDS[i] = INTP(nd1) + nd1->size; 
+    UPPER_BOUNDS[i] = FREE_SPACE_END(nd1);
   }
 }
 /*
