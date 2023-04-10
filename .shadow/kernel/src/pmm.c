@@ -32,12 +32,7 @@ static int cnt = 0;
 
 uintptr_t UPPER_BOUNDS[NUM_SUB_HEAP];
 Heap_node HEADS[NUM_SUB_HEAP];
-void INIT_BOUNDS(){
-  uintptr_t bd = INTP(heap.end), sub_hp_sz = (INTP(heap.end) - INTP(heap.start)) / NUM_SUB_HEAP;
-  for(int i = NUM_SUB_HEAP - 1; i >= 0; i--){ 
-    UPPER_BOUNDS[i] = bd, bd -= sub_hp_sz; 
-  }
-}
+
 int WHICH_HEAP(void* ptr){
   for(int i = 0; i < NUM_SUB_HEAP; i++){
     if(INTP(ptr) < UPPER_BOUNDS[i]){
@@ -188,9 +183,10 @@ static void pmm_init() {
   heap = (Area){ .start = ptr, .end = ptr + pmsize};
 
 #endif
-  INIT_BOUNDS();
   INIT_HEADS();
+  INIT_BOUNDS();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+  
 }
 
 MODULE_DEF(pmm) = {
@@ -203,15 +199,22 @@ MODULE_DEF(pmm) = {
 
 
 static void INIT_HEADS(){
-  Heap_node* nd1;
-  for(int i = NUM_SUB_HEAP - 1; i >= 1; i--){
-    nd1 = HEADS[i].next = NODE(UPPER_BOUNDS[i-1]);
-    INIT_NODE(nd1, UPPER_BOUNDS[i] - UPPER_BOUNDS[i-1], NULL);
+  uintptr_t sub_hp_sz = sub_hp_sz = (INTP(heap.end) - INTP(heap.start)) / NUM_SUB_HEAP;
+  void * nd1 = heap.start;
+  for(int i = 0;i < NUM_SUB_HEAP; i++, nd1 += sub_hp_sz){
+    HEADS[i].next = nd1;
+    INIT_NODE(nd1, sub_hp_sz, NULL);
   }
-  nd1 = HEADS[0].next = NODE(heap.start);
-  INIT_NODE(nd1, UPPER_BOUNDS[0] - INTP(heap.start), NULL);
+  //last sub heap 
+  Heap_node* lst_hd = HEADS[NUM_SUB_HEAP - 1].next;
+  lst_hd->size = INTP(heap.end) - INTP(lst_hd);
 }
 
+void INIT_BOUNDS(){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
+    UPPER_BOUNDS[i] = INTP(HEADS[i].next) + HEADS[i].size; 
+  }
+}
 /*
 original version of pmm_init
 static void pmm_init() {
