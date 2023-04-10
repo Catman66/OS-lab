@@ -130,10 +130,9 @@ static void *kalloc(size_t size) {
   cnt %= NUM_SUB_HEAP;
   UNLOCK(&cnt_lk);
 
-  
   LOCK(&(lk[hp]));
   void* alloced = locked_sub_alloc(hp, size);
-  UNLOCK(&lk[hp]);
+  UNLOCK(&(lk[hp]));
 
   return alloced;
 }
@@ -144,7 +143,7 @@ static void kfree(void *ptr) {
   int hp = WHICH_HEAP(ptr);
   
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
-  LOCK(&lk[hp]);
+  LOCK(&(lk[hp]));
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
@@ -170,7 +169,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
-  UNLOCK(&lk[hp]);
+  UNLOCK(&(lk[hp]));
 }
 
 void display_bounds(){
@@ -194,7 +193,6 @@ static void pmm_init() {
   INIT_HEADS();
   INIT_BOUNDS();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
-  
 }
 
 MODULE_DEF(pmm) = {
