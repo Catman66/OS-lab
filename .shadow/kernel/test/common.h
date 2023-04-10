@@ -11,4 +11,3 @@
 void print_context(void* st, void* ed);
 
 typedef int lock_t;
-extern lock_t lk; 
