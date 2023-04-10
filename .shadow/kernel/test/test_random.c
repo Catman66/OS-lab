@@ -19,10 +19,8 @@ void do_free(STK* stk){
     if(empty(stk)){
         return;
     }
-    printf("freeing\n");
     void *freed = pop(stk);
     pmm->free(freed);
-    printf("end free\n");
 }
 
 int cnt_succ_act = 0;
