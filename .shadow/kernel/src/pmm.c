@@ -1,11 +1,22 @@
 #include <common.h>
 #include <mylock.h>
 
+//heap in my test
+#ifdef TEST
+#define HEAP_SIZE 0x8000000 - 0x300000 
+Area heap = {};
+#endif
+
 //4 sub-heaps VS concurrency
 #define NUM_SUB_HEAP 4
 static int cnt = 0;
 void* UPPER_BOUNDS[NUM_SUB_HEAP];
-
+void INIT_BOUNDS(){
+  uintptr_t bd = heap.end, sub_hp_sz = ((uintptr_t)(heap.end) - (uintptr_t)(heap.start)) / NUM_SUB_HEAP;
+  for(int i = NUM_SUB_HEAP - 1; i >= 0; i--){ 
+    UPPER_BOUNDS[i] = bd, bd -= sub_hp_sz; 
+  }
+}
 int WHICH_HEAP(void* ptr){
   for(int i = 0; i < NUM_SUB_HEAP; i++){
     if(ptr < UPPER_BOUNDS[i]){
@@ -168,10 +179,6 @@ static void kfree(void *ptr) {
 }
 
 
-#ifdef TEST
-#define HEAP_SIZE 0x8000000 - 0x300000 
-Area heap = {};
-#endif
 
 static void pmm_init() {
 #ifndef TEST      // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
@@ -185,6 +192,7 @@ static void pmm_init() {
 
 #endif
   INIT_HEAP_HEAD(pmsize);
+  INIT_BOUNDS();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
 }
 
