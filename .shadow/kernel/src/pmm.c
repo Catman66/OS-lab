@@ -3,7 +3,7 @@
 
 //4 sub-heaps VS concurrency
 #define NUM_SUB_HEAP 4
-int cnt = 0;
+static int cnt = 0;
 void* UPPER_BOUNDS[NUM_SUB_HEAP];
 
 int WHICH_HEAP(void* ptr){
