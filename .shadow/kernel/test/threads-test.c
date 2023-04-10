@@ -20,7 +20,6 @@ void Tclient(int tid){
             break;
         }
         //if((cnt1) % NUM_REPORT == 0){ printf("%d acts done\n", NUM_REPORT); }
-        
     }
     printf("thread %d has finished its job\n", tid);
 }
