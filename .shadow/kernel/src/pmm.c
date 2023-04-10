@@ -203,9 +203,6 @@ MODULE_DEF(pmm) = {
   .free  = kfree,
 };
 
-
-
-
 static void INIT_HEADS(){
   uintptr_t sub_hp_sz = sub_hp_sz = (INTP(heap.end) - INTP(heap.start)) / NUM_SUB_HEAP;
   void * nd1 = heap.start;
