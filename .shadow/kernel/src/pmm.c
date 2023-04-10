@@ -30,7 +30,7 @@ Heap_node* merge_node(Heap_node* reslt, Heap_node* merged){
 
 //heap in my test
 #ifdef TEST
-#define HEAP_SIZE 0x8000000 - 0x300000 
+#define HEAP_SIZE (1 << 29)
 Area heap = {};
 #endif
 
