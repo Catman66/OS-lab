@@ -3,4 +3,3 @@
 #include <klib-macros.h>
 
 typedef int lock_t;
-extern lock_t lk; 

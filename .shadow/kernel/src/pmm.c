@@ -1,8 +1,26 @@
 #include <common.h>
 #include <mylock.h>
+
+//4 sub-heaps VS concurrency
+#define NUM_SUB_HEAP 4
+int cnt = 0;
+void* UPPER_BOUNDS[NUM_SUB_HEAP];
+
+int WHICH_HEAP(void* ptr){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
+    if(ptr < UPPER_BOUNDS[i]){
+      return i;
+    }
+  }
+  printf("which heap error, bounds error or ptr error\n");
+  assert(0);
+}
+
 //lock 
 extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
+spinlock_t lk[NUM_SUB_HEAP] = { SPIN_INIT() , SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
+spinlock_t cnt_lk =  SPIN_INIT();
 
 
 //print --local debug mod
@@ -17,7 +35,7 @@ struct Heap_node{
 } HEAP_HEAD;
 typedef struct Heap_node Heap_node ;
 
-void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
+void INIT_NODE(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->size = sz;
   nd->next = nxt;
 }
@@ -29,7 +47,7 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 #define INTP(nd)              ((uintptr_t)(nd))
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; \
-init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
+INIT_NODE(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
 paint(HEAP_HEAD.next, IN_HEAP)
 
 void display_space_lst(){
@@ -69,15 +87,12 @@ uintptr_t make_round_sz(size_t sz){
   }
   return ret;
 }
+static void* locked_sub_alloc(int hp_i, int size){
+    size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
+    Heap_node* p, * ret_nd;
+    uintptr_t ret;
 
-static void *kalloc(size_t size) {
-  
-  size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
-  Heap_node* p, * ret_nd;
-  uintptr_t ret;
-  LOCK(&lk);
-  
-  for(p = HEAP_HEAD.next; p != NULL; p=p->next){
+    for(p = HEAP_HEAD.next; p != NULL; p=p->next){
     if(required_sz > p->size){
       continue;
     }
@@ -98,16 +113,31 @@ static void *kalloc(size_t size) {
   if(p == NULL){
     return NULL;
   }
-
-  UNLOCK(&lk);
   return (void*)ret;
 }
 
+static void *kalloc(size_t size) {
+  int hp;
+  LOCK(&cnt_lk);
+  hp = cnt++;
+  cnt %= NUM_SUB_HEAP;
+  UNLOCK(&cnt_lk);
+
+  
+  LOCK(&(lk[hp]));
+  void* alloced = locked_sub_alloc(hp, size);
+  UNLOCK(&lk[hp]);
+
+  return alloced;
+}
 
 static void kfree(void *ptr) {
   /*find the position*/
+  
+  int hp = WHICH_HEAP(ptr);
+
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
-  LOCK(&lk);
+  LOCK(&lk[hp]);
 
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
@@ -134,7 +164,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
-  UNLOCK(&lk);
+  UNLOCK(&lk[hp]);
 }
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
