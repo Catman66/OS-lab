@@ -193,7 +193,6 @@ static void pmm_init() {
 #endif
   INIT_HEADS();
   INIT_BOUNDS();
-  display_bounds();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
   
 }
