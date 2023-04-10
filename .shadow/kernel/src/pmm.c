@@ -111,6 +111,7 @@ static void* page_alloc(){
   void* pg_allocated = NULL;
   while(present[last_pg] != 0){
     last_pg++;
+    last_pg %= 4096;
   }
   int idx = last_pg;
   present[last_pg] = 1;
