@@ -170,11 +170,11 @@ static void *kalloc(size_t size) {
 
 void pg_free(void *ptr){
   int idx = (INTP(ptr) >> 12) & ((1 << 12) - 1);
+  printf("pg free %d\n", idx);
   assert(present[idx] == 1);
   LOCK(&pg_lk);
   present[idx] = 0;
   UNLOCK(&pg_lk);
-  printf("pg free %d\n", idx);
 }
 
 static void kfree(void *ptr) {
