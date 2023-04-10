@@ -166,28 +166,27 @@ static void kfree(void *ptr) {
 #endif
   UNLOCK(&lk[hp]);
 }
-#ifndef TEST
-// 框架代码中的 pmm_init (在 AbstractMachine 中运行)
 
-static void pmm_init() {
-  uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
-  assert(pmsize >= HEAP_HEAD_SIZE);
-  INIT_HEAP_HEAD(pmsize);
-  
-  printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
-}
-#else
-// 测试代码的 pmm_init ()
+
+#ifdef TEST
 #define HEAP_SIZE 0x8000000 - 0x300000 
 Area heap = {};
-static void pmm_init() {
-  char *ptr  = malloc(HEAP_SIZE);
-  heap.start = ptr;
-  heap.end   = ptr + HEAP_SIZE;
-  INIT_HEAP_HEAD(HEAP_SIZE);
-  printf("===Got %d MiB heap: [%p, %p)===\n", HEAP_SIZE >> 20, heap.start, heap.end);
-}
 #endif
+
+static void pmm_init() {
+#ifndef TEST      // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
+  uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
+  assert(pmsize >= HEAP_HEAD_SIZE);
+  
+#else             // 测试代码的 pmm_init ()
+  uintptr_t pmsize = HEAP_SIZE;
+  char *ptr  = malloc(HEAP_SIZE);
+  heap = { .start = ptr, .end = ptr + pmsize};
+
+#endif
+  INIT_HEAP_HEAD(pmsize);
+  printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+}
 
 MODULE_DEF(pmm) = {
   .init  = pmm_init,
