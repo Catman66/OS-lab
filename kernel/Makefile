@@ -19,9 +19,19 @@ include $(AM_HOME)/Makefile
 include ../Makefile.lab
 image: git
 
-test: git
+parse_time : time-record
+		
+
+test: git parse_time
 	@gcc $(shell find src/ -name "*.c")  \
 			$(shell find test/ -name "*.c") \
 			-Iframework -Itest -DTEST -lpthread \
 			-o build/test
-	@build/test 
+	@/usr/bin/time -o time-record -p ./build/test &&\
+	cat time-record | grep real | cut -f2 -d' ' > real.time &&\
+	cat time-record | grep sys | cut -f2 -d' '> sys.time &&\
+	cat time-record | grep user | cut -f2 -d' ' > user.time &&\
+	paste *.time >> ttime
+	
+
+

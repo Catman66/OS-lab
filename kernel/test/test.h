@@ -1,6 +1,6 @@
 #include"common.h"
 
-#define SCALE           10
+#define SCALE           2000000
 #define MAX_ALLOC_SZ    1024
 #define STK_SZ          10000
 #define NUM_REPORT      100000

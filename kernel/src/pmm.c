@@ -4,7 +4,8 @@
 extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
 
-//paint to debug
+
+//print --local debug mod
 //#define PAINT 1
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
@@ -14,9 +15,9 @@ struct Heap_node{
   uintptr_t size;
   struct Heap_node* next;
 } HEAP_HEAD;
-typedef struct Heap_node Heap_node;
+typedef struct Heap_node Heap_node ;
 
-void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
+void INIT_NODE(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->size = sz;
   nd->next = nxt;
 }
@@ -28,7 +29,7 @@ void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 #define INTP(nd)              ((uintptr_t)(nd))
 #define INIT_HEAP_HEAD(heap_sz) \
 HEAP_HEAD.next = heap.start; \
-init_heap_node(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
+INIT_NODE(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
 paint(HEAP_HEAD.next, IN_HEAP)
 
 void display_space_lst(){
@@ -155,7 +156,6 @@ static void pmm_init() {
   heap.end   = ptr + HEAP_SIZE;
   INIT_HEAP_HEAD(HEAP_SIZE);
   printf("===Got %d MiB heap: [%p, %p)===\n", HEAP_SIZE >> 20, heap.start, heap.end);
-  
 }
 #endif
 
