@@ -51,8 +51,8 @@ spinlock_t cnt_lk =  SPIN_INIT();
 
 //print --local debug mod
 //#define PAINT 1
-const char IN_HEAP  = 0xcc;
-const char OUT_HEAP = 0x0;
+const char IN_HEAP_TAG  = 0xcc;
+const char OUT_HEAP_TAG = 0x0;
 
 void display_space_lst(int hp){
   printf("FREE_LIST: ");
@@ -74,11 +74,26 @@ void paint(Heap_node* nd, char val){
   memset((void*)FREE_SPACE_BEGIN(nd), val, nd->size);
 }
 
+
 void check_paint(Heap_node* nd, char val){
   for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
     if(*p != val){
       printf("===CHECK_PAINT ERROR node: %p,  expected: %x, actual: %x === \n", nd, (uint8_t)val, (uint8_t)*p);
       //print_context(p, p + HEAP_HEAD_SIZE);
+      assert(0);
+    }
+  }
+}
+
+
+
+void check_free_list(){
+  for(int i = 0; i < NUM_SUB_HEAP; i++){
+    for(Heap_node* p = HEADS[i].next; p ; p = p->next){
+      if(IN_RANGE((void*)p, heap) && IN_RANGE((void*)(FREE_SPACE_END(p) - 1), heap)){
+        continue;
+      }
+      printf("heap node out of range\n");
       assert(0);
     }
   }
@@ -110,8 +125,8 @@ static void* locked_sub_alloc(int hp, int size){
     ret_nd->size = FREE_SPACE_END(p) - ret;
     p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
 #ifdef PAINT
-    check_paint(ret_nd, IN_HEAP);
-    paint(ret_nd, OUT_HEAP);
+    check_paint(ret_nd, IN_HEAP_TAG);
+    paint(ret_nd, OUT_HEAP_TAG);
 #endif
 
     break;
@@ -145,7 +160,7 @@ static void kfree(void *ptr) {
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   LOCK(&(lk[hp]));
 #ifdef PAINT
-  check_paint(freed_nd, OUT_HEAP);
+  check_paint(freed_nd, OUT_HEAP_TAG);
 #endif
   
   Heap_node* p, *pre;
@@ -167,7 +182,7 @@ static void kfree(void *ptr) {
     pre->next = freed_nd;
   }
 #ifdef PAINT
-  paint(freed_nd, IN_HEAP);
+  paint(freed_nd, IN_HEAP_TAG);
 #endif
   UNLOCK(&(lk[hp]));
 }
