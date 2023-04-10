@@ -96,7 +96,6 @@ uintptr_t make_round_sz(size_t sz){
 bool present[NUM_PREPARED_PG] = { 0 };
 int last_pg = 0;
 int pg_left = NUM_PREPARED_PG;
-INIT_PAGES();
 
 static void* idx_to_pg(int idx){
   assert(idx < NUM_PREPARED_PG);
@@ -117,6 +116,7 @@ static void* page_alloc(){
   present[last_pg] = 1;
   UNLOCK(&pg_lk);
   pg_allocated = idx_to_pg(idx);
+  printf("alloc pg %d\n", idx);
   return pg_allocated;
 }
 
@@ -174,6 +174,7 @@ void pg_free(void *ptr){
   LOCK(&pg_lk);
   present[idx] = 0;
   UNLOCK(&pg_lk);
+  printf("pg free %d\n", idx);
 }
 
 static void kfree(void *ptr) {
