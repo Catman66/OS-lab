@@ -219,8 +219,10 @@ static void INIT_HEADS(){
 }
 
 void INIT_BOUNDS(){
+  Heap_node* nd1;
   for(int i = 0; i < NUM_SUB_HEAP; i++){
-    UPPER_BOUNDS[i] = INTP(HEADS[i].next) + HEADS[i].size; 
+    nd1 = HEADS[i].next;
+    UPPER_BOUNDS[i] = INTP(nd1) + nd1->size; 
   }
 }
 /*
