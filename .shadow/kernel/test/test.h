@@ -3,7 +3,7 @@
 #define SCALE           2000000
 #define MAX_ALLOC_SZ    1024
 #define STK_SZ          10000
-#define NUM_REPORT      100000
+#define NUM_REPORT      100
 typedef struct{
     int top;
     void* content[STK_SZ];
