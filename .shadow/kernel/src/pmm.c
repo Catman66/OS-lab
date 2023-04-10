@@ -115,6 +115,7 @@ static void* page_alloc(){
   }
   int idx = last_pg;
   present[last_pg] = 1;
+  pg_left--;
   UNLOCK(&pg_lk);
   pg_allocated = idx_to_pg(idx);
   //printf("alloc pg %d\n", idx);
@@ -171,10 +172,10 @@ static void *kalloc(size_t size) {
 
 void pg_free(void *ptr){
   int idx = ((INTP(ptr) - UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1]) >> 12) & ((1 << 12) - 1);
-  //printf("pg free %d\n", idx);
   assert(present[idx] == 1);
   LOCK(&pg_lk);
   present[idx] = 0;
+  pg_left++;
   UNLOCK(&pg_lk);
 }
 
@@ -183,7 +184,6 @@ static void kfree(void *ptr) {
     pg_free(ptr);
     return;
   }
-  /*find the position*/
   int hp = WHICH_SIMPLE_HEAP(ptr);
   
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
@@ -215,8 +215,6 @@ static void kfree(void *ptr) {
 #endif
   UNLOCK(&(lk[hp]));
 }
-
-
 
 static void pmm_init() {
 #ifndef TEST   
