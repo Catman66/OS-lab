@@ -147,13 +147,11 @@ static void *kalloc(size_t size) {
   void* alloced = locked_sub_alloc(hp, size);
   UNLOCK(&(lk[hp]));
 
-  //check_free_list(true);
   return alloced;
 }
 
 static void kfree(void *ptr) {
   /*find the position*/
-  
   int hp = WHICH_HEAP(ptr);
   
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
@@ -184,7 +182,6 @@ static void kfree(void *ptr) {
   paint(freed_nd, IN_HEAP_TAG);
 #endif
   UNLOCK(&(lk[hp]));
-  //check_free_list(false);
 }
 
 void display_bounds(){
