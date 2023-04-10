@@ -1,7 +1,7 @@
 #include "test.h"
 #include "thread.h"
 
-int cnt = 0;
+static int cnt = 0;
 
 void Tclient(int tid){
     STK stk = { .top = -1 };
