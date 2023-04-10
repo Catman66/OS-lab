@@ -33,7 +33,7 @@ Area heap = {};
 static int cnt = 0;
 uintptr_t UPPER_BOUNDS[NUM_SUB_HEAP];
 void INIT_BOUNDS(){
-  uintptr_t bd = (uintptr_t)heap.end, sub_hp_sz = ((uintptr_t)(heap.end) - (uintptr_t)(heap.start)) / NUM_SUB_HEAP;
+  uintptr_t bd = INTP(heap.end), sub_hp_sz = (INTP(heap.end) - INTP(heap.start)) / NUM_SUB_HEAP;
   for(int i = NUM_SUB_HEAP - 1; i >= 0; i--){ 
     UPPER_BOUNDS[i] = bd, bd -= sub_hp_sz; 
   }
