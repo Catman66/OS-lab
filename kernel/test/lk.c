@@ -1,5 +1,7 @@
 #include "common.h"
 
+typedef int lock_t;
+
 static inline int atomic_xchg(volatile int *addr, int newval) {
   int result;
   asm volatile ("lock xchg %0, %1":
@@ -20,8 +22,6 @@ void spin_lock(spinlock_t *lk) {
 void spin_unlock(spinlock_t *lk) {
   atomic_xchg(lk, 0);
 }
-
-spinlock_t lk = SPIN_INIT();
 
 void LOCK(lock_t* lk){
     spin_lock(lk);
