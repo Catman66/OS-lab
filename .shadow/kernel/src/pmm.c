@@ -1,11 +1,10 @@
 #include <common.h>
 #include <mylock.h>
 
-struct Heap_node{
+typedef struct Heap_node{
   uintptr_t size;
   struct Heap_node* next;
-} HEAP_HEAD;
-typedef struct Heap_node Heap_node ;
+} Heap_node;
 
 void INIT_NODE(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->size = sz;
@@ -17,10 +16,9 @@ void INIT_NODE(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
 #define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
 #define NODE(ptr)             ((Heap_node*)(ptr))
 #define INTP(nd)              ((uintptr_t)(nd))
-#define INIT_HEAP_HEAD(heap_sz) \
-HEAP_HEAD.next = heap.start; \
-INIT_NODE(HEAP_HEAD.next, heap_sz - HEAP_HEAD_SIZE, NULL);\
-paint(HEAP_HEAD.next, IN_HEAP)
+
+static void INIT_HEADS();
+static void INIT_BOUNDS();
 
 //heap in my test
 #ifdef TEST
@@ -31,7 +29,9 @@ Area heap = {};
 //4 sub-heaps VS concurrency
 #define NUM_SUB_HEAP 4
 static int cnt = 0;
+
 uintptr_t UPPER_BOUNDS[NUM_SUB_HEAP];
+Heap_node HEADS[NUM_SUB_HEAP];
 void INIT_BOUNDS(){
   uintptr_t bd = INTP(heap.end), sub_hp_sz = (INTP(heap.end) - INTP(heap.start)) / NUM_SUB_HEAP;
   for(int i = NUM_SUB_HEAP - 1; i >= 0; i--){ 
@@ -39,7 +39,6 @@ void INIT_BOUNDS(){
   }
 }
 int WHICH_HEAP(void* ptr){
-
   for(int i = 0; i < NUM_SUB_HEAP; i++){
     if(INTP(ptr) < UPPER_BOUNDS[i]){
       return i;
@@ -64,9 +63,9 @@ const char OUT_HEAP = 0x0;
 
 
 
-void display_space_lst(){
+void display_space_lst(int hp){
   printf("FREE_LIST: ");
-  for(Heap_node* p = HEAP_HEAD.next; p ; p=p->next){
+  for(Heap_node* p = HEADS[hp].next; p ; p=p->next){
     printf("[sz: %lx] ", p->size);
   }
   printf("\n");
@@ -101,12 +100,12 @@ uintptr_t make_round_sz(size_t sz){
   }
   return ret;
 }
-static void* locked_sub_alloc(int hp_i, int size){
+static void* locked_sub_alloc(int hp, int size){
     size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
     Heap_node* p, * ret_nd;
     uintptr_t ret;
 
-    for(p = HEAP_HEAD.next; p != NULL; p=p->next){
+    for(p = HEADS[hp].next; p != NULL; p=p->next){
     if(required_sz > p->size){
       continue;
     }
@@ -147,18 +146,15 @@ static void *kalloc(size_t size) {
 
 static void kfree(void *ptr) {
   /*find the position*/
-  
   int hp = WHICH_HEAP(ptr);
-
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   LOCK(&lk[hp]);
-
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
   
   Heap_node* p, *pre;
-  for(pre = &HEAP_HEAD, p = HEAP_HEAD.next; p != NULL; pre = p, p = p->next){
+  for(pre = &HEADS[hp], p = HEADS[hp].next; p != NULL; pre = p, p = p->next){
     if(freed_nd < p){
       break;
     }
@@ -181,8 +177,6 @@ static void kfree(void *ptr) {
   UNLOCK(&lk[hp]);
 }
 
-
-
 static void pmm_init() {
 #ifndef TEST      // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
   uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
@@ -194,8 +188,8 @@ static void pmm_init() {
   heap = (Area){ .start = ptr, .end = ptr + pmsize};
 
 #endif
-  INIT_HEAP_HEAD(pmsize);
   INIT_BOUNDS();
+  INIT_HEADS();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
 }
 
@@ -204,6 +198,19 @@ MODULE_DEF(pmm) = {
   .alloc = kalloc,
   .free  = kfree,
 };
+
+
+
+
+static void INIT_HEADS(){
+  Heap_node* nd1;
+  for(int i = NUM_SUB_HEAP - 1; i >= 1; i--){
+    nd1 = HEADS[i].next = NODE(UPPER_BOUNDS[i-1]);
+    INIT_NODE(nd1, UPPER_BOUNDS[i] - UPPER_BOUNDS[i-1], NULL);
+  }
+  nd1 = HEADS[0].next = NODE(heap.start);
+  INIT_NODE(nd1, UPPER_BOUNDS[0] - INTP(heap.start), NULL);
+}
 
 /*
 original version of pmm_init
