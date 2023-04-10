@@ -16,7 +16,6 @@ void do_alloc(STK* stk){
     }
 }
 void do_free(STK* stk){
-    
     if(empty(stk)){
         return;
     }
