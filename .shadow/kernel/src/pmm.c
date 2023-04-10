@@ -4,16 +4,18 @@
 extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
 
+
 //print --local debug mod
 //#define PAINT 1
 const char IN_HEAP  = 0xcc;
 const char OUT_HEAP = 0x0;
 
-typedef struct {
+
+struct Heap_node{
   uintptr_t size;
-  Heap_node* next;
-} Heap_node;
-Heap_node HEAP_HEAD;
+  struct Heap_node* next;
+} HEAP_HEAD;
+typedef struct Heap_node Heap_node ;
 
 void init_heap_node(Heap_node* nd, uintptr_t sz, Heap_node* nxt){
   nd->size = sz;
