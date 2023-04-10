@@ -149,7 +149,6 @@ static void kfree(void *ptr) {
   
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   LOCK(&lk[hp]);
-  printf("in\n");
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP);
 #endif
@@ -175,7 +174,6 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP);
 #endif
-  printf("out\n");
   UNLOCK(&lk[hp]);
 }
 
