@@ -93,6 +93,8 @@ uintptr_t make_round_sz(size_t sz){
 //page route
 #define PAGE_SIZE 4096
 #define NUM_PREPARED_PG 8192
+//int NUM_PREPARED_PG = -1;
+
 bool present[NUM_PREPARED_PG] = { 0 };
 int last_pg = 0;
 int pg_left = NUM_PREPARED_PG;
@@ -114,7 +116,7 @@ static void* page_alloc(){
   void* pg_allocated = NULL;
   while(present[last_pg] != 0){
     last_pg++;
-    last_pg %= 4096;
+    last_pg %= NUM_PREPARED_PG;
   }
   int idx = last_pg;
   present[last_pg] = 1;
@@ -173,7 +175,6 @@ static void *kalloc(size_t size) {
 
   return alloced;
 }
-
 
 void pg_free(void *ptr){
   int idx = pg_to_idx(ptr);
