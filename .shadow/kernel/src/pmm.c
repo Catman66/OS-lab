@@ -102,15 +102,17 @@ bool  pg_tags[MAX_POSSIBLE_PRE_PG] = { 0 };
 bool* tag_hp_pg[NUM_PG_HP];
 
 void INIT_PG_HEAPS(uintptr_t st, uintptr_t ed){
+  PG_HP_SIZE = (ed - st) / PAGE_SIZE / NUM_PG_HP;
   for(int i = 0; i < NUM_PG_HP; i++){
     last_pg[i]  = 0;
     n_pg_left[i] = PG_HP_SIZE;
-    tag_hp_pg[i] = pg_tags + i * PG_HP_SIZE;
+    tag_hp_pg[i] = &pg_tags[i * PG_HP_SIZE];
   }
 }
 void DIVIDE_INIT(){
   uintptr_t sz_all_pghp = ROUNDDOWN((INTP(heap.end) - INTP(heap.start)) / 4, PAGE_SIZE * NUM_PG_HP);
   uintptr_t pghp_start = ROUNDDOWN(INTP(heap.end) - sz_all_pghp, PAGE_SIZE);
+  
   INIT_PG_HEAPS(pghp_start, INTP(heap.end));
   INIT_SIMPLE_HPS(INTP(heap.start), pghp_start);
 }
@@ -152,28 +154,28 @@ static void* pg_alloc(){
 }
 
 static void* locked_simple_alloc(int hp, int size){
-    assert(hp >= 0 && hp < NUM_SIMPLE_SUB_HP);
-    size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
-    Heap_node* p, * ret_nd;
-    uintptr_t ret;
+  assert(hp >= 0 && hp < NUM_SIMPLE_SUB_HP);
+  size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
+  Heap_node* p, * ret_nd;
+  uintptr_t ret;
 
-    for(p = HEADS[hp].next; p != NULL; p=p->next){
-    if(required_sz > p->size){
-      continue;
-    }
-    if(ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz) < FREE_SPACE_BEGIN(p) + HEAP_HEAD_SIZE){
-      continue; 
-    }
-    ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
-    ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
-    ret_nd->size = FREE_SPACE_END(p) - ret;
-    p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
+  for(p = HEADS[hp].next; p != NULL; p=p->next){
+  if(required_sz > p->size){
+    continue;
+  }
+  if(ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz) < FREE_SPACE_BEGIN(p) + HEAP_HEAD_SIZE){
+    continue; 
+  }
+  ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
+  ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
+  ret_nd->size = FREE_SPACE_END(p) - ret;
+  p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
 #ifdef PAINT
-    paint(ret_nd, IN_HEAP_TAG);
-    paint(ret_nd, OUT_HEAP_TAG);
+  paint(ret_nd, IN_HEAP_TAG);
+  paint(ret_nd, OUT_HEAP_TAG);
 #endif
 
-    break;
+  break;
   }
   if(p == NULL){
     return NULL;
