@@ -178,7 +178,7 @@ static void *kalloc(size_t size) {
 void pg_free(void *ptr){
   int idx = pg_to_idx(ptr);
   printf("free pg idx : %d\n", idx);
-  assert(present[idx] != 1);
+  assert(present[idx] == 1);
   LOCK(&pg_lk);
   present[idx] = 0;
   pg_left++;
