@@ -284,7 +284,8 @@ static void INIT_SIMPLE_HPS(uintptr_t st, uintptr_t ed){
     INIT_NODE(nd1, sub_hp_sz, NULL);
   }
   //last sub heap 
-  HEADS[NUM_SIMPLE_SUB_HP - 1].next->size = ed;
+  Heap_node* last_nd1 = HEADS[NUM_SIMPLE_SUB_HP - 1].next;
+  last_nd1->size = ed - FREE_SPACE_BEGIN(last_nd1);
 }
 
 void INIT_BOUNDS(){
