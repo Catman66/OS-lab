@@ -92,7 +92,7 @@ uintptr_t make_round_sz(size_t sz){
 
 //page route
 #define PAGE_SIZE 4096
-#define NUM_PREPARED_PG 4096
+#define NUM_PREPARED_PG 8192
 bool present[NUM_PREPARED_PG] = { 0 };
 int last_pg = 0;
 int pg_left = NUM_PREPARED_PG;
@@ -121,7 +121,7 @@ static void* page_alloc(){
   pg_left--;
   UNLOCK(&pg_lk);
   pg_allocated = idx_to_pg(idx);
-  printf("alloc pg %d\n", idx);
+  //printf("alloc pg %d\n", idx);
   return pg_allocated;
 }
 
@@ -177,7 +177,7 @@ static void *kalloc(size_t size) {
 
 void pg_free(void *ptr){
   int idx = pg_to_idx(ptr);
-  printf("free pg idx : %d\n", idx);
+  //printf("free pg idx : %d\n", idx);
   assert(present[idx] == 1);
   LOCK(&pg_lk);
   present[idx] = 0;
@@ -274,7 +274,6 @@ static void pmm_init() {
   printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
 }
 */
-
 //printer
 void display_space_lst(int hp){
   printf("FREE_LIST: ");
