@@ -87,26 +87,24 @@ uintptr_t make_round_sz(size_t sz){
 }
 
 //page route
-#define PAGE_SIZE           4096
-#define NUM_PG_HP           4
-#define MAX_POSSIBLE_PRE_PG (1 << 15) 
-#define PAGE_HEAP_START     (UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1])
-int     PG_HP_SIZE;
+#define   PAGE_SIZE           4096
+#define   NUM_PG_HP           4
+#define   MAX_POSSIBLE_PRE_PG (1 << 15) 
+#define   PAGE_HEAP_START     (UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1])
+uintptr_t PG_HP_SIZE;
 
-lock_t pgcnt_lk = SPIN_INIT();
-lock_t pg_lks[NUM_PG_HP];
-int   pgcnt = 0;
-int   last_pg[NUM_PG_HP];
-int   n_pg_left[NUM_PG_HP];
-bool  pg_tags[MAX_POSSIBLE_PRE_PG] = { 0 };
-bool* tag_hp_pg[NUM_PG_HP];
+lock_t st_lk = SPIN_INIT();
+static int pg_stack[MAX_POSSIBLE_PRE_PG];
+static int top = -1;
+#define   PUSH(i) (pg_stack[++top] = (i))
+#define   POP() (pg_stack[top--])
+#define   EMPTY() (top == -1)
+#define   FULL() (top == MAX_POSSIBLE_PRE_PG - 1)
 
 void INIT_PG_HEAPS(uintptr_t st, uintptr_t ed){
-  PG_HP_SIZE = (ed - st) / PAGE_SIZE / NUM_PG_HP;
-  for(int i = 0; i < NUM_PG_HP; i++){
-    last_pg[i]  = 0;
-    n_pg_left[i] = PG_HP_SIZE;
-    tag_hp_pg[i] = &pg_tags[i * PG_HP_SIZE];
+  int num_hp = (ed - st) / PAGE_SIZE;
+  for(int i = 0; i < num_hp; i++){
+    PUSH(i);
   }
 }
 void DIVIDE_INIT(){
@@ -116,42 +114,23 @@ void DIVIDE_INIT(){
   INIT_PG_HEAPS(pghp_start, INTP(heap.end));
   INIT_SIMPLE_HPS(INTP(heap.start), pghp_start);
 }
-#define ALLOCATED 1
-#define FREE      0
-static int locked_pg_alloc_in(int hp){
-  bool* tag_of = tag_hp_pg[hp];
-  int*  pg = &last_pg[hp];
-  while(tag_of[*pg] == ALLOCATED){
-    (*pg)++;
-    (*pg) %= PG_HP_SIZE;
-  }
-  tag_of[*pg] = ALLOCATED;
-  n_pg_left[hp]--;
-  return *pg;
-}
-int idx(int hp, int i){
-  return hp * PG_HP_SIZE + i;
-}
-void* to_pg(int hp, int i){
-  return (void*)(PAGE_HEAP_START + idx(hp, i) * PAGE_SIZE);
+
+void * idx_to_pg(int idx){
+  return (void*)(PAGE_HEAP_START + PAGE_SIZE * idx);
 }
 
 static void* pg_alloc(){
-  int hp;
-  LOCK(&pgcnt_lk);
-  hp = pgcnt;
-  pgcnt++, pgcnt %= NUM_PG_HP;
-  UNLOCK(&pgcnt_lk);
-
-  LOCK(&pg_lks[hp]);
-  if(n_pg_left[hp] == 0){
-    UNLOCK(&pg_lks[hp]);
+  int idx;
+  LOCK(&st_lk);
+  if(EMPTY()){
+    UNLOCK(&st_lk);
     return NULL;
   }
-  int idx_pg = locked_pg_alloc_in(hp);
-  UNLOCK(&pg_lks[hp]);
-  void * pg_allocated = to_pg(hp, idx_pg);
-  return pg_allocated;
+  else{
+    idx = POP();
+  }
+  UNLOCK(&st_lk);
+  return idx_to_pg(idx);
 }
 
 static void* locked_simple_alloc(int hp, int size){
@@ -209,15 +188,10 @@ int pg_to_idx(void *ptr){
 }
 
 void pg_free(void *ptr){
-  int idx = pg_to_idx(ptr), hp, pg;
-  hp = idx / PG_HP_SIZE, pg = idx % PG_HP_SIZE;
-  //printf("free pg idx : %d\n", idx);
-  assert(tag_hp_pg[hp][pg] == ALLOCATED);
-  LOCK(&pg_lks[hp]);
-  tag_hp_pg[hp][pg] = FREE;
-  n_pg_left[hp]++;
-  last_pg[hp] = pg;
-  UNLOCK(&pg_lks[hp]);
+  int idx = pg_to_idx(ptr);
+  LOCK(&st_lk);
+  PUSH(idx);  
+  UNLOCK(&st_lk);
 }
 
 static void kfree(void *ptr) {
