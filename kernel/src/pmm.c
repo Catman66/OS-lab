@@ -81,7 +81,6 @@ void check_paint(Heap_node* nd, char val){
   }
 }
 
-
 uintptr_t make_round_sz(size_t sz){
   uintptr_t ret = 1;
   while(ret < sz){
