@@ -92,7 +92,7 @@ uintptr_t make_round_sz(size_t sz){
 
 //page route
 #define PAGE_SIZE 4096
-#define NUM_PREPARED_PG 4096
+#define NUM_PREPARED_PG 8192
 bool present[NUM_PREPARED_PG] = { 0 };
 int last_pg = 0;
 int pg_left = NUM_PREPARED_PG;
