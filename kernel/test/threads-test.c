@@ -2,7 +2,7 @@
 #include "thread.h"
 
 static int cnt1 = 0;
-#define NUM_THREADS 4
+#define NUM_THREADS 1
 
 void Tclient(int tid){
     STK stk = { .top = -1 };
