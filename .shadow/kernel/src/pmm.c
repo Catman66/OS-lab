@@ -246,8 +246,8 @@ MODULE_DEF(pmm) = {
 };
 
 static void INIT_HEADS(){
-  uintptr_t simple_heap_sz = INTP(heap.end) - INTP(heap.start),
-  sub_hp_sz = simple_heap_sz / NUM_SIMPLE_SUB_HP;
+  uintptr_t simple_sum_sz = INTP(heap.end) - INTP(heap.start) - NUM_PREPARED_PG * PAGE_SIZE,
+  sub_hp_sz = simple_sum_sz / NUM_SIMPLE_SUB_HP;
   void * nd1 = heap.start;
   for(int i = 0;i < NUM_SIMPLE_SUB_HP; i++, nd1 += sub_hp_sz){
     HEADS[i].next = nd1;
