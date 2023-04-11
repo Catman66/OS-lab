@@ -6,14 +6,13 @@ typedef struct Heap_node{
   struct Heap_node* next;
 } Heap_node;
 
-
 #define HEAP_HEAD_SIZE        (sizeof(void*) + sizeof(Heap_node*))
 #define FREE_SPACE_END(nd)    ((uintptr_t)(nd) + HEAP_HEAD_SIZE + (nd)->size)
 #define FREE_SPACE_BEGIN(nd)  ((uintptr_t)(nd) + HEAP_HEAD_SIZE)
 #define NODE(ptr)             ((Heap_node*)(ptr))
 #define INTP(nd)              ((uintptr_t)(nd))
 
-static void INIT_HEADS();
+static void INIT_SIMPLE_HPS();
 static void INIT_BOUNDS();
 
 void INIT_NODE(void* nd, uintptr_t sz, Heap_node* nxt){
@@ -22,12 +21,10 @@ void INIT_NODE(void* nd, uintptr_t sz, Heap_node* nxt){
 }
 Heap_node* merge_node(Heap_node* reslt, Heap_node* merged){
   assert(FREE_SPACE_END(reslt) == INTP(merged));
-
   reslt->size += (merged->size + HEAP_HEAD_SIZE);
   reslt->next = merged->next;
   return reslt;
 }
-
 //heap in my test
 #ifdef TEST
 #define HEAP_SIZE (1 << 27)
@@ -41,7 +38,6 @@ static int cnt = 0;
 
 uintptr_t UPPER_BOUNDS[NUM_SIMPLE_SUB_HP];
 Heap_node HEADS[NUM_SIMPLE_SUB_HP];
-#define SIMPLE_HP_BOUND (UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1])
 
 int which_simple_heap(void* ptr){
   for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
@@ -56,8 +52,8 @@ int which_simple_heap(void* ptr){
 //lock 
 extern void LOCK(lock_t* lk);
 extern void UNLOCK(lock_t* lk);
-spinlock_t lk[NUM_SIMPLE_SUB_HP] = { SPIN_INIT(), SPIN_INIT(), SPIN_INIT(), SPIN_INIT() };
-spinlock_t cnt_lk =  SPIN_INIT(), pg_lk = SPIN_INIT();
+spinlock_t lk[NUM_SIMPLE_SUB_HP];
+spinlock_t cnt_lk = SPIN_INIT();
 
 //print --local debug mod
 //#define PAINT 1
@@ -91,65 +87,95 @@ uintptr_t make_round_sz(size_t sz){
 }
 
 //page route
-#define PAGE_SIZE 4096
-#define NUM_PREPARED_PG 8192
-//int NUM_PREPARED_PG = -1;
+#define PAGE_SIZE           4096
+#define NUM_PG_HP           4
+#define MAX_POSSIBLE_PRE_PG (1 << 15) 
+#define PAGE_HEAP_START     (UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1])
+int     PG_HP_SIZE;
 
-bool present[NUM_PREPARED_PG] = { 0 };
-int last_pg = 0;
-int pg_left = NUM_PREPARED_PG;
+lock_t pgcnt_lk = SPIN_INIT();
+lock_t pg_lks[NUM_PG_HP];
+int   pgcnt = 0;
+int   last_pg[NUM_PG_HP];
+int   n_pg_left[NUM_PG_HP];
+bool  pg_tags[MAX_POSSIBLE_PRE_PG] = { 0 };
+bool* tag_hp_pg[NUM_PG_HP];
 
-static void* idx_to_pg(int idx){
-  assert(idx < NUM_PREPARED_PG);
-  return (void*)(SIMPLE_HP_BOUND + idx * PAGE_SIZE);
+void INIT_PG_HEAPS(uintptr_t st, uintptr_t ed){
+  PG_HP_SIZE = (ed - st) / PAGE_SIZE / NUM_PG_HP;
+  for(int i = 0; i < NUM_PG_HP; i++){
+    last_pg[i]  = 0;
+    n_pg_left[i] = PG_HP_SIZE;
+    tag_hp_pg[i] = &pg_tags[i * PG_HP_SIZE];
+  }
 }
-static int pg_to_idx(void* ptr){
-    return ((INTP(ptr) - SIMPLE_HP_BOUND) >> 12 ) % NUM_PREPARED_PG;
+void DIVIDE_INIT(){
+  uintptr_t sz_all_pghp = ROUNDDOWN((INTP(heap.end) - INTP(heap.start)) / 4, PAGE_SIZE * NUM_PG_HP);
+  uintptr_t pghp_start = ROUNDDOWN(INTP(heap.end) - sz_all_pghp, PAGE_SIZE);
+  
+  INIT_PG_HEAPS(pghp_start, INTP(heap.end));
+  INIT_SIMPLE_HPS(INTP(heap.start), pghp_start);
+}
+#define ALLOCATED 1
+#define FREE      0
+static int locked_pg_alloc_in(int hp){
+  bool* tag_of = tag_hp_pg[hp];
+  int*  pg = &last_pg[hp];
+  while(tag_of[*pg] == ALLOCATED){
+    (*pg)++;
+    (*pg) %= PG_HP_SIZE;
+  }
+  tag_of[*pg] = ALLOCATED;
+  return *pg;
+}
+int idx(int hp, int i){
+  return hp * PG_HP_SIZE + i;
+}
+void* to_pg(int hp, int i){
+  return (void*)(PAGE_HEAP_START + idx(hp, i) * PAGE_SIZE);
 }
 
-static void* page_alloc(){
-  LOCK(&pg_lk);
-  if(pg_left == 0){
-    UNLOCK(&pg_lk);
+static void* pg_alloc(){
+  int hp;
+  LOCK(&pgcnt_lk);
+  hp = pgcnt;
+  pgcnt++, pgcnt %= NUM_PG_HP;
+  UNLOCK(&pgcnt_lk);
+
+  LOCK(&pg_lks[hp]);
+  if(n_pg_left[hp] == 0){
+    UNLOCK(&pg_lks[hp]);
     return NULL;
   }
-  void* pg_allocated = NULL;
-  while(present[last_pg] != 0){
-    last_pg++;
-    last_pg %= NUM_PREPARED_PG;
-  }
-  int idx = last_pg;
-  present[last_pg] = 1;
-  pg_left--;
-  UNLOCK(&pg_lk);
-  pg_allocated = idx_to_pg(idx);
-  //printf("alloc pg %d\n", idx);
+  int idx_pg = locked_pg_alloc_in(hp);
+  UNLOCK(&pg_lks[hp]);
+  void * pg_allocated = to_pg(hp, idx_pg);
   return pg_allocated;
 }
 
-static void* locked_sub_alloc(int hp, int size){
-    assert(hp >= 0 && hp < NUM_SIMPLE_SUB_HP);
-    size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
-    Heap_node* p, * ret_nd;
-    uintptr_t ret;
+static void* locked_simple_alloc(int hp, int size){
+  assert(hp >= 0 && hp < NUM_SIMPLE_SUB_HP);
+  size_t required_sz = size + HEAP_HEAD_SIZE, round_sz = make_round_sz(size);
+  Heap_node* p, * ret_nd;
+  uintptr_t ret;
 
-    for(p = HEADS[hp].next; p != NULL; p=p->next){
-    if(required_sz > p->size){
-      continue;
-    }
-    if(ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz) < FREE_SPACE_BEGIN(p) + HEAP_HEAD_SIZE){
-      continue; 
-    }
-    ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
-    ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
-    ret_nd->size = FREE_SPACE_END(p) - ret;
-    p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
+  for(p = HEADS[hp].next; p != NULL; p=p->next){
+  if(required_sz > p->size){
+    continue;
+  }
+  if(ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz) < FREE_SPACE_BEGIN(p) + HEAP_HEAD_SIZE){
+    continue; 
+  }
+  ret = ROUNDDOWN(FREE_SPACE_END(p) - size, round_sz);
+  ret_nd = (Heap_node*)(ret - HEAP_HEAD_SIZE);
+  ret_nd->size = FREE_SPACE_END(p) - ret;
+  p->size -= (ret_nd->size + HEAP_HEAD_SIZE);
 #ifdef PAINT
-    paint(ret_nd, IN_HEAP_TAG);
-    paint(ret_nd, OUT_HEAP_TAG);
+  paint(ret_nd, IN_HEAP_TAG);
+  paint(ret_nd, OUT_HEAP_TAG);
 #endif
 
-    break;
+  break;
   }
   if(p == NULL){
     return NULL;
@@ -157,12 +183,7 @@ static void* locked_sub_alloc(int hp, int size){
   return (void*)ret;
 }
 
-static void *kalloc(size_t size) {
-  void* alloced;
-  if(size == PAGE_SIZE && (alloced = page_alloc())){
-    return alloced;
-  }
-
+void* simple_alloc(size_t size){
   int hp;
   LOCK(&cnt_lk);
   hp = cnt++;
@@ -170,29 +191,39 @@ static void *kalloc(size_t size) {
   UNLOCK(&cnt_lk);
 
   LOCK(&(lk[hp]));
-  alloced = locked_sub_alloc(hp, size);
+  void * alloced = locked_simple_alloc(hp, size);
   UNLOCK(&(lk[hp]));
 
   return alloced;
 }
 
+static void *kalloc(size_t size) {
+  if(size == PAGE_SIZE){
+    return pg_alloc();
+  }
+  return simple_alloc(size);
+}
+int pg_to_idx(void *ptr){
+  return (INTP(ptr) - PAGE_HEAP_START) >> 12;
+}
+
 void pg_free(void *ptr){
-  int idx = pg_to_idx(ptr);
+  int idx = pg_to_idx(ptr), hp, pg;
+  hp = idx / PG_HP_SIZE, pg = idx % PG_HP_SIZE;
   //printf("free pg idx : %d\n", idx);
-  assert(present[idx] == 1);
-  LOCK(&pg_lk);
-  present[idx] = 0;
-  pg_left++;
-  UNLOCK(&pg_lk);
+  assert(tag_hp_pg[hp][pg] == ALLOCATED);
+  LOCK(&pg_lks[hp]);
+  tag_hp_pg[hp][pg] = FREE;
+  n_pg_left[hp]++;
+  UNLOCK(&pg_lks[hp]);
 }
 
 static void kfree(void *ptr) {
-  if(INTP(ptr) >=  SIMPLE_HP_BOUND){
+  if(INTP(ptr) >=  PAGE_HEAP_START){
     pg_free(ptr);
     return;
   }
   int hp = which_simple_heap(ptr);
-  
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   LOCK(&(lk[hp]));
 #ifdef PAINT
@@ -231,10 +262,11 @@ static void pmm_init() {
 #else
   uintptr_t pmsize = HEAP_SIZE;
   char *ptr  = malloc(HEAP_SIZE);
+  assert(ptr != NULL);
   heap = (Area){ .start = ptr, .end = ptr + pmsize};
-
+  
 #endif
-  INIT_HEADS();
+  DIVIDE_INIT();
   INIT_BOUNDS();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
   //display_bounds();
@@ -246,19 +278,16 @@ MODULE_DEF(pmm) = {
   .free  = kfree,
 };
 
-static void INIT_HEADS(){
-  uintptr_t simple_sum_sz = INTP(heap.end) - INTP(heap.start) - NUM_PREPARED_PG * PAGE_SIZE,
-  sub_hp_sz = simple_sum_sz / NUM_SIMPLE_SUB_HP;
+static void INIT_SIMPLE_HPS(uintptr_t st, uintptr_t ed){
+  uintptr_t sub_hp_sz = (INTP(ed) - INTP(st)) / NUM_SIMPLE_SUB_HP;
   void * nd1 = heap.start;
   for(int i = 0;i < NUM_SIMPLE_SUB_HP; i++, nd1 += sub_hp_sz){
     HEADS[i].next = nd1;
     INIT_NODE(nd1, sub_hp_sz, NULL);
   }
   //last sub heap 
-  Heap_node* lst_hd = HEADS[NUM_SIMPLE_SUB_HP - 1].next;
-  uintptr_t pg_area_start = ROUNDDOWN(INTP(heap.end) - NUM_PREPARED_PG * PAGE_SIZE, PAGE_SIZE);
-  assert(pg_area_start > FREE_SPACE_BEGIN(lst_hd));
-  lst_hd->size = pg_area_start - FREE_SPACE_BEGIN(lst_hd);
+  Heap_node* last_nd1 = HEADS[NUM_SIMPLE_SUB_HP - 1].next;
+  last_nd1->size = ed - FREE_SPACE_BEGIN(last_nd1);
 }
 
 void INIT_BOUNDS(){

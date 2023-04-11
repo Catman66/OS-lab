@@ -3,19 +3,11 @@
 
 static STK stk01 = { .top = -1 };
 
-static int cnt_pg = 0;
-
-
 //1/8 portion of alloc is in size page
 size_t alloc_sz(){
-    size_t sz;
-    if(cnt_pg >= 8){
-        cnt_pg = 0;
-        sz = 4096;
-    }
-    else{
-        cnt_pg++;
-        sz = rand_alloc_sz();
+    size_t sz = rand_alloc_sz();
+    if(sz % 8 == 0){
+        return 4096;
     }
     return sz;
 }
