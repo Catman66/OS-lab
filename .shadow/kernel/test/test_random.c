@@ -16,7 +16,6 @@ void do_alloc(STK* stk){
     if(full(stk)){
         return;
     }
-    
     void* ptr = pmm->alloc(alloc_sz());
     if(ptr == NULL){
         printf("alloc fails\n");

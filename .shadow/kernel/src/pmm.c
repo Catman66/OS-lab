@@ -126,6 +126,7 @@ static int locked_pg_alloc_in(int hp){
     (*pg) %= PG_HP_SIZE;
   }
   tag_of[*pg] = ALLOCATED;
+  n_pg_left[hp]--;
   return *pg;
 }
 int idx(int hp, int i){
