@@ -99,13 +99,13 @@ int   pgcnt = 0;
 int   last_pg[NUM_PG_HP];
 int   n_pg_left[NUM_PG_HP];
 bool  pg_tags[MAX_POSSIBLE_PRE_PG] = { 0 };
-bool* pg_hp_tags[NUM_PG_HP];
+bool* tag_hp_pg[NUM_PG_HP];
 
 void INIT_PG_HEAPS(uintptr_t st, uintptr_t ed){
   for(int i = 0; i < NUM_PG_HP; i++){
     last_pg[i]  = 0;
     n_pg_left[i] = PG_HP_SIZE;
-    pg_hp_tags[i] = pg_tags + i * PG_HP_SIZE;
+    tag_hp_pg[i] = pg_tags + i * PG_HP_SIZE;
   }
 }
 void DIVIDE_INIT(){
@@ -116,14 +116,14 @@ void DIVIDE_INIT(){
 }
 #define ALLOCATED 1
 #define FREE      0
-static int locked_pgalloc_in(int pg_hp){
-  bool* pg_tags = pg_hp_tags[pg_hp];
-  int*  pg = &last_pg[pg_hp];
-  while(pg_tags[*pg] == ALLOCATED){
+static int locked_pg_alloc_in(int hp){
+  bool* tag_of = tag_hp_pg[hp];
+  int*  pg = &last_pg[hp];
+  while(tag_of[*pg] == ALLOCATED){
     (*pg)++;
     (*pg) %= PG_HP_SIZE;
   }
-  pg_tags[*pg] = ALLOCATED;
+  tag_of[*pg] = ALLOCATED;
   return *pg;
 }
 int idx(int hp, int i){
@@ -134,20 +134,20 @@ void* to_pg(int hp, int i){
 }
 
 static void* pg_alloc(){
-  int pg_hp;
+  int hp;
   LOCK(&pgcnt_lk);
-  pg_hp = pgcnt;
+  hp = pgcnt;
   pgcnt++, pgcnt %= NUM_PG_HP;
   UNLOCK(&pgcnt_lk);
 
-  LOCK(&pg_lks[pg_hp]);
+  LOCK(&pg_lks[hp]);
   if(n_pg_left[pg_hp] == 0){
-    UNLOCK(&pg_lks[pg_hp]);
+    UNLOCK(&pg_lks[hp]);
     return NULL;
   }
-  int idx_pg = locked_pgalloc_in(pg_hp);
-  UNLOCK(&pg_lks[pg_hp]);
-  void * pg_allocated = to_pg(pg_hp, idx_pg);
+  int idx_pg = locked_pg_alloc_in(hp);
+  UNLOCK(&pg_lks[hp]);
+  void * pg_allocated = to_pg(hp, idx_pg);
   return pg_allocated;
 }
 
@@ -209,9 +209,9 @@ void pg_free(void *ptr){
   int idx = pg_to_idx(ptr), hp, pg;
   hp = idx / PG_HP_SIZE, pg = idx % PG_HP_SIZE;
   //printf("free pg idx : %d\n", idx);
-  assert(pg_hp_tags[hp][pg] == ALLOCATED);
+  assert(tag_hp_pg[hp][pg] == ALLOCATED);
   LOCK(&pg_lks[hp]);
-  pg_hp_tags[hp][pg] = FREE;
+  tag_hp_pg[hp][pg] = FREE;
   n_pg_left[hp]++;
   UNLOCK(&pg_lks[hp]);
 }
