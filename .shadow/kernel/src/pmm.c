@@ -41,8 +41,9 @@ static int cnt = 0;
 
 uintptr_t UPPER_BOUNDS[NUM_SIMPLE_SUB_HP];
 Heap_node HEADS[NUM_SIMPLE_SUB_HP];
+#define SIMPLE_HP_BOUND (UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1])
 
-int WHICH_SIMPLE_HEAP(void* ptr){
+int which_simple_heap(void* ptr){
   for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
     if(INTP(ptr) < UPPER_BOUNDS[i]){
       return i;
@@ -98,7 +99,10 @@ int pg_left = NUM_PREPARED_PG;
 
 static void* idx_to_pg(int idx){
   assert(idx < NUM_PREPARED_PG);
-  return (void*)(UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1] + idx * PAGE_SIZE);
+  return (void*)(SIMPLE_HP_BOUND + idx * PAGE_SIZE);
+}
+static int pg_to_idx(void* ptr){
+    return ((INTP(ptr) - SIMPLE_HP_BOUND) % NUM_PREPARED_PG) & ((1 << 12) - 1);
 }
 
 static void* page_alloc(){
@@ -170,8 +174,9 @@ static void *kalloc(size_t size) {
   return alloced;
 }
 
+
 void pg_free(void *ptr){
-  int idx = ((INTP(ptr) - UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1]) >> 12) & ((1 << 12) - 1);
+  int idx = pg_to_idx(ptr);
   assert(present[idx] == 1);
   LOCK(&pg_lk);
   present[idx] = 0;
@@ -180,11 +185,11 @@ void pg_free(void *ptr){
 }
 
 static void kfree(void *ptr) {
-  if(INTP(ptr) >= UPPER_BOUNDS[NUM_SIMPLE_SUB_HP - 1]){
+  if(INTP(ptr) >=  SIMPLE_HP_BOUND){
     pg_free(ptr);
     return;
   }
-  int hp = WHICH_SIMPLE_HEAP(ptr);
+  int hp = which_simple_heap(ptr);
   
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
   LOCK(&(lk[hp]));
