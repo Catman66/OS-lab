@@ -216,6 +216,7 @@ void pg_free(void *ptr){
   LOCK(&pg_lks[hp]);
   tag_hp_pg[hp][pg] = FREE;
   n_pg_left[hp]++;
+  last_pg[hp] = pg;
   UNLOCK(&pg_lks[hp]);
 }
 
