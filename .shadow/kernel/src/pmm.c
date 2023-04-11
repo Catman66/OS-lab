@@ -141,7 +141,7 @@ static void* pg_alloc(){
   UNLOCK(&pgcnt_lk);
 
   LOCK(&pg_lks[hp]);
-  if(n_pg_left[pg_hp] == 0){
+  if(n_pg_left[hp] == 0){
     UNLOCK(&pg_lks[hp]);
     return NULL;
   }
