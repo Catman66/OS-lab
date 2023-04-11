@@ -153,8 +153,9 @@ static void* locked_sub_alloc(int hp, int size){
 }
 
 static void *kalloc(size_t size) {
-  if(size == PAGE_SIZE){
-    return page_alloc();
+  void* alloced;
+  if(size == PAGE_SIZE && (alloced = page_alloc())){
+    return alloced;
   }
 
   int hp;
@@ -164,7 +165,7 @@ static void *kalloc(size_t size) {
   UNLOCK(&cnt_lk);
 
   LOCK(&(lk[hp]));
-  void* alloced = locked_sub_alloc(hp, size);
+  alloced = locked_sub_alloc(hp, size);
   UNLOCK(&(lk[hp]));
 
   return alloced;
