@@ -4,7 +4,6 @@
 static int cnt1 = 0;
 #define NUM_THREADS 4
 
-
 void Tclient(int tid){
     STK stk = { .top = -1 };
     printf("hello from thread %d \n", tid);

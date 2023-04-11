@@ -30,7 +30,9 @@ test: git time-record
 	cat time-record | grep real | cut -f2 -d' ' > real.time &&\
 	cat time-record | grep sys | cut -f2 -d' '> sys.time &&\
 	cat time-record | grep user | cut -f2 -d' ' > user.time &&\
-	paste *.time >> ttime
+	paste *.time >> ttime &&\
+	tail -5 ttime
+
 	
 
 
