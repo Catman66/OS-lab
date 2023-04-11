@@ -102,7 +102,7 @@ static void* idx_to_pg(int idx){
   return (void*)(SIMPLE_HP_BOUND + idx * PAGE_SIZE);
 }
 static int pg_to_idx(void* ptr){
-    return ((INTP(ptr) - SIMPLE_HP_BOUND) % NUM_PREPARED_PG) & ((1 << 12) - 1);
+    return ((INTP(ptr) - SIMPLE_HP_BOUND) >> 12 ) % NUM_PREPARED_PG;
 }
 
 static void* page_alloc(){
