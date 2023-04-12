@@ -33,7 +33,6 @@ Area heap = {};
 
 //4 sub-heaps VS concurrency
 #define NUM_SIMPLE_SUB_HP 4
-#define NUM_SUB_HEAP (NUM_SIMPLE_SUB_HP + 1)
 static int cnt = 0;
 
 uintptr_t UPPER_BOUNDS[NUM_SIMPLE_SUB_HP];
@@ -96,10 +95,10 @@ uintptr_t PG_HP_SIZE;
 lock_t st_lk = SPIN_INIT();
 static int pg_stack[MAX_POSSIBLE_PRE_PG];
 static int top = -1;
-#define   PUSH(i) (pg_stack[++top] = (i))
-#define   POP() (pg_stack[top--])
-#define   EMPTY() (top == -1)
-#define   FULL() (top == MAX_POSSIBLE_PRE_PG - 1)
+#define PUSH(i) (pg_stack[++top] = (i))
+#define POP()   (pg_stack[top--])
+#define EMPTY() (top == -1)
+#define FULL()  (top == MAX_POSSIBLE_PRE_PG - 1)
 
 void INIT_PG_HEAPS(uintptr_t st, uintptr_t ed){
   int num_hp = (ed - st) / PAGE_SIZE;
