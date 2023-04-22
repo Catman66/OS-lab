@@ -1,9 +1,11 @@
 #include<am.h>
 
-typedef int spinlock_t;
-#define SPIN_INIT() 0
+#ifndef _MY_LOCK_H_
+#define _MY_LOCK_H_
 
-void spin_lock(spinlock_t *lk) {
+typedef int lock_t;
+#define SPIN_INIT() 0
+void LOCK(lock_t *lk) {
   while (1) {
     int value = atomic_xchg(lk, 1);
     if (value == 0) {
@@ -11,14 +13,8 @@ void spin_lock(spinlock_t *lk) {
     }
   }
 }
-void spin_unlock(spinlock_t *lk) {
+void UNLOCK(lock_t *lk) {
   atomic_xchg(lk, 0);
 }
 
-void LOCK(lock_t* lk){
-    spin_lock(lk);
-}
-
-void UNLOCK(lock_t* lk){
-    spin_unlock(lk);
-}
+#endif

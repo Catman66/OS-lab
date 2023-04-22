@@ -49,12 +49,10 @@ int which_simple_heap(void* ptr){
 }
 
 //lock 
-extern void LOCK(lock_t* lk);
-extern void UNLOCK(lock_t* lk);
-spinlock_t lk[NUM_SIMPLE_SUB_HP];
-spinlock_t cnt_lk = SPIN_INIT();
+lock_t lk[NUM_SIMPLE_SUB_HP];
+lock_t cnt_lk = SPIN_INIT();
 
-//print --local debug mod
+
 //#define PAINT 1
 const char IN_HEAP_TAG  = 0xcc;
 const char OUT_HEAP_TAG = 0x0;
@@ -186,6 +184,15 @@ int pg_to_idx(void *ptr){
   return (INTP(ptr) - PAGE_HEAP_START) >> 12;
 }
 
+static void *kalloc_safe(size_t size) {
+  bool i = ienabled();
+  iset(false);
+  void *ret = kalloc(size);
+  if (i) iset(true);
+  return ret;
+}
+
+
 void pg_free(void *ptr){
   int idx = pg_to_idx(ptr);
   LOCK(&st_lk);
@@ -228,6 +235,12 @@ static void kfree(void *ptr) {
 #endif
   UNLOCK(&(lk[hp]));
 }
+static void kfree_safe(void *ptr) {
+  int i = ienabled();
+  iset(false);
+  kfree(ptr);
+  if (i) iset(true);
+}
 
 static void pmm_init() {
 #ifndef TEST   
@@ -249,8 +262,8 @@ static void pmm_init() {
 
 MODULE_DEF(pmm) = {
   .init  = pmm_init,
-  .alloc = kalloc,
-  .free  = kfree,
+  .alloc = kalloc_safe,
+  .free  = kfree_safe,
 };
 
 static void INIT_SIMPLE_HPS(uintptr_t st, uintptr_t ed){
@@ -308,3 +321,4 @@ void check_free_list(bool after_alloc){
     }
   }
 }
+
