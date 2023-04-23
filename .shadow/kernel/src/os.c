@@ -33,6 +33,7 @@ static Context *os_trap(Event ev, Context *context){
       if(ret_handle) next_ctx = ret_handle;
     }
   }
+  
   panic_on(!next_ctx, "returning NULL context");
   //panic_on(sane_context(next_ctx), "returning to invalid context");
   return next_ctx;
@@ -48,6 +49,7 @@ static void os_on_irq(int seq, int event, handler_t handler){
     }
   }
   pre->next = make_new_handler_node(handler, seq, event, NULL);
+  
 }
 
 MODULE_DEF(os) = {
