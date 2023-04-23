@@ -53,6 +53,7 @@ int ntoa(char* buf, int n, int base){
     n /= base;
   }
   reverse(buf_base, buf - buf_base);
+  *buf = '\0';
   return buf - buf_base;
 }
 int itoa(char * buf, int n){
