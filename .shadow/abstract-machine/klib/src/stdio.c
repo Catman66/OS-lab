@@ -7,7 +7,7 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 int printf(const char *fmt, ...) {
-  putstr("printf not printed\n");
+  putstr("printf not implemented\n");
   putstr(fmt);
   return 0;
 }
