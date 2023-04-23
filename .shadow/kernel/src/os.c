@@ -1,8 +1,11 @@
 #include <common.h>
 
+static void print_handlers();
+
 static void os_init() {
   pmm->init();
   kmt->init();
+  print_handlers();
 }
 
 static void os_run() {
@@ -49,7 +52,6 @@ static void os_on_irq(int seq, int event, handler_t handler){
     }
   }
   pre->next = make_new_handler_node(handler, seq, event, NULL);
-  
 }
 
 MODULE_DEF(os) = {
@@ -58,3 +60,10 @@ MODULE_DEF(os) = {
   .trap = os_trap,
   .on_irq = os_on_irq
 };
+
+static void print_handlers(){
+  for(Handler_node* p = Handlers.next; p; p = p->next){
+    printf("[irq: %d, ev: %d] ", p->seq, p->event);
+  }
+  printf("\n");
+}
