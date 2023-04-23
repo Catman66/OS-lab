@@ -17,12 +17,12 @@ typedef struct Handler_node{
     int event;
     struct Handler_node * next;
 } Handler_node;
-Handler_node Handlers;
 static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_node * nxt){
   Handler_node * made = pmm->alloc(sizeof(Handler_node));
   made->handler = h, made->seq = sq, made->event = ev, made->next = nxt;
   return made;
 }
+Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
 
 static Context *os_trap(Event ev, Context *context){
   Context* next_ctx = NULL;
