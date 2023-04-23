@@ -8,6 +8,7 @@
 
 int printf(const char *fmt, ...) {
   panic("printf Not implemented");
+
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
