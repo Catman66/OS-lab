@@ -6,15 +6,16 @@
 
 size_t strlen(const char *s) {
   const char * p;
-  for(p = s; p ; p++) ;
+  for(p = s; *p ; p++) ;
   return (p - s);
 }
 
 char *strcpy(char *dst, const char *src) {
-  for(const char * p = src; p; p++){
-    *(dst++) = *p;
+  const char* from = src;
+  for(char* to = dst; *from;){
+    *(to++) = *(from++);
   }
-  dst = '\0';
+  return dst;
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {

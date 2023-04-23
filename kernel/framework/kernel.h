@@ -11,6 +11,7 @@
   mod_##mod##_t __##mod##_obj
 
 typedef Context *(*handler_t)(Event, Context *);
+
 MODULE(os) {
   void (*init)();
   void (*run)();
