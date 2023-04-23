@@ -7,7 +7,9 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 int printf(const char *fmt, ...) {
-  panic("printf Not implemented");
+  putstr("printf not printed\n");
+  putstr(fmt);
+  return 0;
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
