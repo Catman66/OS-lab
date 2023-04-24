@@ -1,6 +1,6 @@
 #include <common.h>
 
-static void display_handlers();
+static void print_handlers();
 
 static void os_init() {
   pmm->init();
@@ -61,9 +61,10 @@ MODULE_DEF(os) = {
   .on_irq = os_on_irq
 };
 
-static void display_handlers(){
+static void print_handlers(){
+  printf("===handlers: ");
   for(Handler_node* p = Handlers.next; p; p = p->next){
     printf("[irq: %d, ev: %d] ", p->seq, p->event);
   }
-  printf("\n");
+  printf("===\n");
 }

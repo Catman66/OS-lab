@@ -16,6 +16,7 @@ char *strcpy(char *dst, const char *src) {
     *(to++) = *(from++);
   }
   return dst;
+  
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
