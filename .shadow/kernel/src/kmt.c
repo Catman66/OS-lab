@@ -4,22 +4,29 @@ typedef struct Context_node{
     Context* ctx;
     struct Context_node * next;
 } Context_node;
-Context_node CONTEXTS = { NULL, NULL}, *next_hand = &CONTEXTS;
+Context_node CONTEXTS_QUEUE_HEAD = { NULL, NULL}, * FRONT = &CONTEXTS_QUEUE_HEAD, *REAR = &CONTEXTS_QUEUE_HEAD;
 Context_node* make_ctx_node(Context* ctx, Context_node* nxt){
     Context_node* new_nd = pmm->alloc(sizeof(Context_node));
     new_nd->ctx = ctx, new_nd->next = nxt;
     return new_nd;
 }
+static void PUSH(Context* ctx){
+    REAR->next = make_ctx_node(ctx, REAR->next);
+    REAR = REAR->next;
+}
+static Context* POP(){
+    Context* popped = FRONT->next->ctx;
+    Context_node* deleted = FRONT->next;
+    FRONT->next = deleted->next;
+    pmm->free(deleted);
+    return popped;
+}
 
 #define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
-    Context * next_ctx = next_hand->ctx;
-    next_hand->ctx = ctx;
+    PUSH(ctx);
+    Context * next_ctx = POP();
 
-    next_hand = next_hand->next;
-    if(next_hand == NULL){
-        next_hand = CONTEXTS.next;
-    }
     return next_ctx;
 }
 
