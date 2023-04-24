@@ -62,6 +62,7 @@ MODULE_DEF(os) = {
 };
 
 static void print_handlers(){
+  printf("===handlers: ");
   for(Handler_node* p = Handlers.next; p; p = p->next){
     printf("[irq: %d, ev: %d] ", p->seq, p->event);
   }
