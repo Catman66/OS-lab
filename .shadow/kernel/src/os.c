@@ -37,8 +37,8 @@ static Context *os_trap(Event ev, Context *context){
       if(ret_handle) next_ctx = ret_handle;
     }
   }
-  
-  panic_on(!next_ctx, "returning NULL context");
+  panic_report(next_ctx == NULL, "trap ev-no: %d \n", ev.event);
+  //panic_on(!next_ctx, "returning NULL context");
   //panic_on(sane_context(next_ctx), "returning to invalid context");
   return next_ctx;
 }
