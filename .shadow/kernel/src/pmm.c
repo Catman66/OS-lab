@@ -58,7 +58,7 @@ const char IN_HEAP_TAG  = 0xcc;
 const char OUT_HEAP_TAG = 0x0;
 
 void display_space_lst(int hp);
-void display_bounds();
+void print_bounds();
 void check_free_list(bool after_alloc);
 
 void paint(Heap_node* nd, char val){
@@ -257,7 +257,7 @@ static void pmm_init() {
   DIVIDE_INIT();
   INIT_BOUNDS();
   printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
-  //display_bounds();
+  //print_bounds();
 }
 
 MODULE_DEF(pmm) = {
@@ -301,7 +301,7 @@ void display_space_lst(int hp){
   printf("\n");
 }
 
-void display_bounds(){
+void print_bounds(){
   for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
     printf("%d:[%lx]  ", i, UPPER_BOUNDS[i]);
   }

@@ -64,39 +64,39 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
     }
     fmt++;  //passs the '%'
     char * mov_from = buffer;
-    int len = 0, parse_off = 0;
+    int out_len = 0, parse_off = 0;
     CONVERSION_TYPE tp;
     parse_off = parse_type(fmt, &tp);
     fmt += parse_off;
     switch(tp){
       case INT_ct:
-        len = itoa(buffer, va_arg(ap, int));
+        out_len = itoa(buffer, va_arg(ap, int));
         break;
       case PTR_ct:
-        len = htoa(buffer, va_arg(ap, intptr_t));
+        out_len = htoa(buffer, va_arg(ap, intptr_t));
         break;
       case STR_ct:
         mov_from = va_arg(ap, char*);
-        len = strlen(mov_from);
+        out_len = strlen(mov_from);
         break;
       case LI_ct:
-        len = itoa(buffer, va_arg(ap, long int));
+        out_len = itoa(buffer, va_arg(ap, long int));
         break;
       case LLI_ct:
-        len = itoa(buffer, va_arg(ap, long long int));
+        out_len = itoa(buffer, va_arg(ap, long long int));
         break;
       case LU_ct:
-        len = itoa(buffer, va_arg(ap, unsigned long));
+        out_len = itoa(buffer, va_arg(ap, unsigned long));
         break;
       case LLU_ct:
-        len = itoa(buffer, va_arg(ap, unsigned long long));
+        out_len = itoa(buffer, va_arg(ap, unsigned long long));
         break;
       default:
         putch(*fmt);
         panic_on(0, " type not implemented\n");
     }
-    panic_on(out - dst + len > n, "too long string in my vsnprintf\n");
-    out += len;
+    panic_on(out - dst + out_len > n, "too long string in my vsnprintf\n");
+    out += out_len;
     strcpy(out, mov_from);
   }
   return out - dst;
