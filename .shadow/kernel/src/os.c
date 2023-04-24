@@ -27,6 +27,7 @@ static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_
 }
 Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
 
+
 static Context *os_trap(Event ev, Context *context){
   Context* next_ctx = NULL;
   for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
@@ -66,5 +67,5 @@ static void print_handlers(){
   for(Handler_node* p = Handlers.next; p; p = p->next){
     printf("[irq: %d, ev: %d] ", p->seq, p->event);
   }
-  printf("\n");
+  printf("===\n");
 }
