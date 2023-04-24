@@ -31,7 +31,7 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
   panic("Not implemented");
 }
 
-void reverse(char* buf, int len){
+static void reverse(char* buf, int len){
   for(int i = 0; i < len / 2; i++){
     buf[i] = buf[len - 1 - i];
   }
@@ -98,6 +98,5 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   }
   return out - dst;
 }
-
 
 #endif
