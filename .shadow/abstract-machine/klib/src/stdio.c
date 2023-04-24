@@ -33,7 +33,9 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
 
 static void reverse(char* buf, int len){
   for(int i = 0; i < len / 2; i++){
+    char tmpt = buf[i];
     buf[i] = buf[len - 1 - i];
+    buf[len-1 - i] = tmpt;
   }
 }
 char ntoc(int n){
@@ -96,9 +98,10 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         panic_on(0, " type not implemented\n");
     }
     panic_on(out - dst + out_len > n, "too long string in my vsnprintf\n");
-    out += out_len;
     strcpy(out, mov_from);
+    out += out_len;
   }
+  *out = '\0';
   return out - dst;
 }
 
