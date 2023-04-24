@@ -42,7 +42,68 @@ char ntoc(int n){
   }
   return n + 'a';
 }
-int ntoa(char* buf, int n, int base){
+int ntoa(char * buf, long long n, int base);
+int itoa(char * buf, long long n);
+int htoa(char * buf, long long n);
+
+typedef enum {
+  INT_ct, PTR_ct, UINT_ct, STR_ct, LI_ct, LU_ct, LLI_ct, LLU_ct
+} CONVERSION_TYPE;
+int parse_type(const char * fmt, CONVERSION_TYPE* tp);
+int parse_prefix_long(const char * fmt, CONVERSION_TYPE* tp);
+int parse_prefix_ll(const char * fmt, CONVERSION_TYPE * tp);
+
+int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
+  char buffer[CONVERSION_BUFFER_SIZE];
+  char * dst = out;
+  
+  while(out - dst < n && *fmt){
+    if(*fmt != '%'){
+      *(out++) = *(fmt++);
+      continue;
+    }
+    fmt++;  //passs the '%'
+    char * mov_from = buffer;
+    int len = 0, parse_off = 0;
+    CONVERSION_TYPE tp;
+    parse_off = parse_type(fmt, &tp);
+    fmt += parse_off;
+    switch(tp){
+      case INT_ct:
+        len = itoa(buffer, va_arg(ap, int));
+        break;
+      case PTR_ct:
+        len = htoa(buffer, va_arg(ap, intptr_t));
+        break;
+      case STR_ct:
+        mov_from = va_arg(ap, char*);
+        len = strlen(mov_from);
+        break;
+      case LI_ct:
+        len = itoa(buffer, va_arg(ap, long int));
+        break;
+      case LLI_ct:
+        len = itoa(buffer, va_arg(ap, long long int));
+        break;
+      case LU_ct:
+        len = itoa(buffer, va_arg(ap, unsigned long));
+        break;
+      case LLU_ct:
+        len = itoa(buffer, va_arg(ap, unsigned long long));
+        break;
+      default:
+        putch(*fmt);
+        panic_on(0, " type not implemented\n");
+    }
+    panic_on(out - dst + len > n, "too long string in my vsnprintf\n");
+    out += len;
+    strcpy(out, mov_from);
+  }
+  return out - dst;
+}
+
+int ntoa(char* buf, long long n, int base){
+  panic_on(n < 0, "htoa apply to a negative number\n");
   if(n == 0){
     *buf = '0';
     return 1;
@@ -56,47 +117,69 @@ int ntoa(char* buf, int n, int base){
   *buf = '\0';
   return buf - buf_base;
 }
-int itoa(char * buf, int n){
+int itoa(char * buf, long long n){
   return ntoa(buf, n, 10);
 }
-int htoa(char * buf, int n){
+int htoa(char * buf, long long n){
   *(buf++) = '0';
   *(buf++) = 'x';
   return 2 + ntoa(buf, n, 16);
 }
 
-int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
-  char buffer[CONVERSION_BUFFER_SIZE];
-  char * dst = out;
-  
-  while(out - dst < n && *fmt){
-    if(*fmt != '%'){
-      *(out++) = *(fmt++);
-      continue;
-    }
-    fmt++;
-    char * mov_from = NULL;
-    int len = 0;
-    switch(*(fmt++)){
-      case 'd':
-        len = itoa(buffer, va_arg(ap, int));
-        mov_from = buffer;
-        break;
-      case 'p':
-        len = htoa(buffer, va_arg(ap, intptr_t));
-        mov_from = buffer;
-      case 's':
-        mov_from = va_arg(ap, char*);
-        len = strlen(mov_from);
-      default:
-        putch(*fmt);
-        panic_on(0, " type not implemented\n");
-    }
-    panic_on(out - dst + len > n, "too long string in my vsnprintf\n");
-    out += len;
-    strcpy(out, mov_from);
+int parse_type(const char * fmt, CONVERSION_TYPE* tp){
+  int len = 0;
+  switch(*(fmt++)){
+    case 'd':
+    case 'i':
+      *tp = INT_ct;
+      return 1;
+    case 's':
+      *tp = STR_ct;
+      return 1;
+    case 'p':
+      *tp = PTR_ct;
+      return 1;
+    
+    case 'l':
+      if(*fmt != 'l'){
+        len += (1 + parse_prefix_long(fmt, tp));
+      } else {  //*fmt == l
+        len += (2 + parse_prefix_ll(fmt + 1, tp));
+      }
+      return len;
+    default:
+      putch(*(fmt - 1));
+      panic("not implemented type\n");
+      return -1;
   }
-  return out - dst;
+}
+int parse_prefix_long(const char * fmt, CONVERSION_TYPE* tp){
+  switch(*fmt){
+    case 'd':
+    case 'i':
+      *tp = LI_ct;
+      return 1;
+    case 'u':
+      *tp = LU_ct;
+      return 1;
+    default:
+      panic("parse with prefix long error type");
+      return -1;
+  }
+}
+int parse_prefix_ll(const char * fmt, CONVERSION_TYPE * tp){
+  switch(*fmt){
+    case 'd':
+    case 'i':
+      *tp = LLI_ct;
+      return 1;
+    case 'u':
+      *tp = LLU_ct;
+      return 1;
+    default:
+      panic("parse with prefix long error type");
+      return -1;
+  }
 }
 
 #endif
