@@ -6,6 +6,7 @@ static void os_init() {
   pmm->init();
   kmt->init();
   print_handlers();
+  printf("os init finished\n");
 }
 
 static void os_run() {

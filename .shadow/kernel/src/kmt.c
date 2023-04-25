@@ -16,6 +16,7 @@ Context* page_fault_handler(Event ev, Context* ctx){
 
 static void kmt_init(){
     os->on_irq(TIMER_SEQ, EVENT_IRQ_TIMER, timer_intr_handler);
+    printf("kmt init finished\n");
 }
 
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
