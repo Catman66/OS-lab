@@ -11,8 +11,6 @@ Context* timer_intr_handler(Event ev, Context* ctx){
 
 /// page fault handler
 Context* page_fault_handler(Event ev, Context* ctx){
-    
-
     return ctx;             // return to the original program
 }
 
