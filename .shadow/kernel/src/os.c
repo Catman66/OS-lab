@@ -10,6 +10,7 @@ static void os_init() {
 
 static void os_run() {
   iset(true);
+  printf("os started run, hello\n");
   while (1) ;
 }
 
@@ -26,7 +27,6 @@ static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_
   return made;
 }
 Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
-
 
 static Context *os_trap(Event ev, Context *context){
   Context* next_ctx = NULL;
