@@ -1,39 +1,42 @@
 #include <os.h>
 
-typedef struct Context_node{
-    Context* ctx;
-    struct Context_node * next;
-} Context_node;
-Context_node CONTEXTS_QUEUE_HEAD = { NULL, NULL}, * FRONT = &CONTEXTS_QUEUE_HEAD, *REAR = &CONTEXTS_QUEUE_HEAD;
-Context_node* make_ctx_node(Context* ctx, Context_node* nxt){
-    Context_node* new_nd = pmm->alloc(sizeof(Context_node));
-    new_nd->ctx = ctx, new_nd->next = nxt;
-    return new_nd;
-}
-static void PUSH(Context* ctx){
-    REAR->next = make_ctx_node(ctx, REAR->next);
-    REAR = REAR->next;
-}
-static Context* POP(){
-    Context* popped = FRONT->next->ctx;
-    Context_node* deleted = FRONT->next;
-    FRONT->next = deleted->next;
-    pmm->free(deleted);
-    return popped;
-}
+task_t* current = NULL;     //需要将context静态初始化好
 
 #define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
-    PUSH(ctx);
-    Context * next_ctx = POP();
+    current->ctx = ctx;
+    current = current->next;
+    return current->ctx;
+}
 
-    return next_ctx;
+/// page fault handler
+Context* page_fault_handler(Event ev, Context* ctx){
+    
+
+    return ctx;             // return to the original program
 }
 
 static void kmt_init(){
     os->on_irq(TIMER_SEQ, EVENT_IRQ_TIMER, timer_intr_handler);
 }
-// int  (*create)(task_t *task, const char *name, void (*entry)(void *arg), void *arg);
+
+static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
+    //创建一个新的线程
+    task->canary = CANARY;
+    task->stack = pmm->alloc(STACK_SIZE);
+    Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
+    task->ctx = kcontext(k_stk, entry, arg);
+    
+    //enter the circular queue
+    if(current == NULL){
+        current = task;             //thus ensure that current always 
+        task->next = task;
+    } else {
+        task->next = current->next;
+        current->next = task;
+    }
+    return 0;
+}
 // void (*teardown)(task_t *task);
 // void (*spin_init)(spinlock_t *lk, const char *name);
 // void (*spin_lock)(spinlock_t *lk);
@@ -43,7 +46,22 @@ static void kmt_init(){
 // void (*sem_signal)(sem_t *sem);
 
 MODULE_DEF(kmt) = {
- .init = kmt_init
+ .init = kmt_init,
+ .create = kmt_create
 };
 
 
+/*
+static void PUSH(* ctx){
+    REAR->next = make_ctx_node(ctx, REAR->next);
+    REAR = REAR->next;
+}
+static Context* POP(){
+    Context* popped = FRONT->next->ctx;
+    Task_node* deleted = FRONT->next;
+    FRONT->next = deleted->next;
+    pmm->free(deleted);
+    return popped;
+}
+
+*/
