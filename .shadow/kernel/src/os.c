@@ -5,7 +5,7 @@ static void print_handlers();
 const char * str = "abcdefg";
 void Tprint(void * s){
   while(1){
-    printf("%s\n", (const char *)s);
+    printf("%c\n", *(char*)s);
   }
 }
 
