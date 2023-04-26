@@ -21,7 +21,7 @@ bool check_tasks(){
 
 void save_context(Context* ctx){
     if(curr == NULL){   //first save 
-        return;
+        os_ctx = ctx;
     } else {
         curr->ctx = ctx;
         curr->stat = IN_INTR;
