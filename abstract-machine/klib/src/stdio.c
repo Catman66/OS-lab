@@ -9,15 +9,22 @@
 #define STR_BUFFER_SIZE 1024
 #define CONVERSION_BUFFER_SIZE 64
 
-int printf(const char *fmt, ...) {
-  va_list para_lst;
-  va_start(para_lst, fmt);
+
+
+int vprintf(const char *fmt, va_list ap) {
   char formated[STR_BUFFER_SIZE];
-  int len = vsnprintf(formated, STR_BUFFER_SIZE, fmt, para_lst);
-  va_end(para_lst);
+  int len = vsnprintf(formated, STR_BUFFER_SIZE, fmt, ap);
   putstr(formated);
   return len;
 }
+int printf(const char *fmt, ...) {
+  va_list para_lst;
+  va_start(para_lst, fmt);
+  int len = vprintf(fmt, para_lst);
+  va_end(para_lst);
+  return len;
+}
+
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   panic("Not implemented");
@@ -31,14 +38,13 @@ int snprintf(char *out, size_t n, const char *fmt, ...) {
   panic("Not implemented");
 }
 
+#define SWAP(tp, a, b) { tp t = (a); (a) = (b); (b) = t; }
 static void reverse(char* buf, int len){
   for(int i = 0; i < len / 2; i++){
-    char tmpt = buf[i];
-    buf[i] = buf[len - 1 - i];
-    buf[len-1 - i] = tmpt;
+    SWAP(char, buf[i], buf[len - 1 - i]);
   }
 }
-char ntoc(int n){
+static char ntoc(int n){
   if(n < 10){
     return '0' + n;
   }
@@ -103,6 +109,15 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   }
   *out = '\0';
   return out - dst;
+}
+
+void panic_report(bool cond, const char * fmt, ...){
+  if(cond){
+    va_list ap;
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    halt(1);
+  }
 }
 
 int ntoa(char* buf, long long n, int base){

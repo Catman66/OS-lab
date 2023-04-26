@@ -1,32 +1,38 @@
 #include <os.h>
 
-typedef struct Context_node{
-    Context* ctx;
-    struct Context_node * next;
-} Context_node;
-Context_node CONTEXTS = { NULL, NULL}, *next_hand = &CONTEXTS;
-Context_node* make_ctx_node(Context* ctx, Context_node* nxt){
-    Context_node* new_nd = pmm->alloc(sizeof(Context_node));
-    new_nd->ctx = ctx, new_nd->next = nxt;
-    return new_nd;
-}
+task_t* current = NULL;
 
 #define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
-    Context * next_ctx = next_hand->ctx;
-    next_hand->ctx = ctx;
+    current->ctx = ctx;
+    current = current->next;
+    return current->ctx;
+}
 
-    next_hand = next_hand->next;
-    if(next_hand == NULL){
-        next_hand = CONTEXTS.next;
-    }
-    return next_ctx;
+/// page fault handler
+Context* page_fault_handler(Event ev, Context* ctx){
+    return ctx;             // return to the original program
 }
 
 static void kmt_init(){
     os->on_irq(TIMER_SEQ, EVENT_IRQ_TIMER, timer_intr_handler);
+    printf("kmt init finished\n");
 }
-// int  (*create)(task_t *task, const char *name, void (*entry)(void *arg), void *arg);
+
+static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
+    //创建一个新的线程,首个线程不会有这个过程，有点棘手，current只能在中断调用的时候来
+    task->canary = CANARY;
+    task->stack = pmm->alloc(STACK_SIZE);
+    Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
+    task->ctx = kcontext(k_stk, entry, arg);
+    
+    ucontext(,)
+    //current 
+    assert(current != NULL);
+    task->next = current->next;
+    current->next = task;
+    return 0;
+}
 // void (*teardown)(task_t *task);
 // void (*spin_init)(spinlock_t *lk, const char *name);
 // void (*spin_lock)(spinlock_t *lk);
@@ -36,7 +42,22 @@ static void kmt_init(){
 // void (*sem_signal)(sem_t *sem);
 
 MODULE_DEF(kmt) = {
- .init = kmt_init
+ .init = kmt_init,
+ .create = kmt_create
 };
 
 
+/*
+static void PUSH(* ctx){
+    REAR->next = make_ctx_node(ctx, REAR->next);
+    REAR = REAR->next;
+}
+static Context* POP(){
+    Context* popped = FRONT->next->ctx;
+    Task_node* deleted = FRONT->next;
+    FRONT->next = deleted->next;
+    pmm->free(deleted);
+    return popped;
+}
+
+*/
