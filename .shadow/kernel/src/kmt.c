@@ -43,7 +43,6 @@ Context * sched(){
 
 #define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
-    save_context(ctx);
     curr->stat = RUNNABLE;
     return sched();
 }
@@ -76,7 +75,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
         tasks->next = task;
     }
     NTASK++;
-    check_tasks();
+    assert(check_tasks());
     return 0;
 }
 // void (*teardown)(task_t *task);
