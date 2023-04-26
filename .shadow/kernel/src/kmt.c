@@ -9,9 +9,9 @@ int NTASK = 0;
 bool check_tasks(){
     printf("checking tasks\n");
 
-    task_t * p = curr;
+    task_t * p = tasks;
     for(int i = 0;i < NTASK; i++){
-        panic_on(p == NULL, "error in check valid tasks\n");
+        panic_on(p == NULL, "error in check valid tasks: null ptr in\n");
         p = p->next;
     }
 
@@ -62,6 +62,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     //创建一个新的线程,首个线程不会有这个过程，有点棘手，current只能在中断调用的时候来
     task->canary = CANARY;
     task->stack = pmm->alloc(STACK_SIZE);
+    panic_on(task->stack == NULL, "fail to alloc stack \n");
     Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
