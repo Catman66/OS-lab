@@ -19,6 +19,15 @@ bool check_tasks(){
     return p == tasks;          //a circle of exact number N
 }
 
+void print_tasks(){
+    task_t* p = tasks;
+    for(int i = 0; i < NTASK; i++){
+        printf("[%s] ", p->name);
+        p = p->next;
+    }
+    printf("\n");
+}
+
 void save_context(Context* ctx){
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
@@ -30,9 +39,11 @@ void save_context(Context* ctx){
 
 Context * sched(){
     task_t * p = curr->next;
+    print_tasks();
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
             curr = p;
+            printf("the next task to be run: %s\n", curr->name);
             return p->ctx;
         }
     }
@@ -44,6 +55,7 @@ Context * sched(){
 #define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
     curr->stat = RUNNABLE;
+    //print_tasks();
     return sched();
 }
 

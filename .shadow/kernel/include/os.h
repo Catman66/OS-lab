@@ -5,6 +5,7 @@
 typedef enum{ RUNNING, RUNNABLE, IN_INTR} task_stat;
 
 struct task {
+  const char * name;
   Context * ctx;
   task_stat stat;
   struct task * next;
