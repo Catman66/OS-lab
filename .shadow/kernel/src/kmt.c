@@ -20,6 +20,7 @@ bool check_tasks(){
 }
 
 void print_tasks(){
+    printf("=== current tasks: ");
     task_t* p = tasks;
     for(int i = 0; i < NTASK; i++){
         printf("[%s] ", p->name);
