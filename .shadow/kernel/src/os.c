@@ -9,20 +9,32 @@ void Tprint(void * s){
   }
 }
 
+void Tprint0(void * a){
+  while(1){
+    printf("hello from a thread\n");
+  }
+}
+#define DEBUG_LOCAL0
+
 static void os_init() {
   pmm->init();
   kmt->init();
   print_handlers();
   printf("os init finished\n");
-//#ifdef DEBUG_LOCAL
+
+#ifdef DEBUG_LOCAL0
+  kmt->create(pmm->alloc(sizeof(task_t)), "worker", Tprint0, NULL);
+
+#endif
+#ifdef DEBUG_LOCAL1
   for(const char * p = str; *p; p++){
     kmt->create(pmm->alloc(sizeof(task_t)), "printer", Tprint, (void*)p);
   }  
-//#endif
+#endif
 }
 
 static void os_run() {
-  printf("os started run, hello\n");
+  printf("os-run executed, hello\n");
   iset(true);
   while (1) ;
 }
