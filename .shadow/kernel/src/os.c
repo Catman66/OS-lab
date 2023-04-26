@@ -14,7 +14,7 @@ void Tprint0(void * a){
     printf("hello from a thread\n");
   }
 }
-#define DEBUG_LOCAL0
+#define DEBUG_LOCAL1
 
 static void os_init() {
   pmm->init();
