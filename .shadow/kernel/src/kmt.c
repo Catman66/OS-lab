@@ -39,6 +39,9 @@ void save_context(Context* ctx){
 }
 
 Context * sched(){
+    if(curr == NULL){
+        curr = tasks;
+    }
     task_t * p = curr->next;
     print_tasks();
     for(int n = 0; n < NTASK; n++){
@@ -47,15 +50,19 @@ Context * sched(){
             printf("the next task to be run: %s\n", curr->name);
             return p->ctx;
         }
+        p = p->next;
     }
     //no threads to be sched 
     printf("no thrads to sched\n");
+    curr = NULL;
     return os_ctx;
 }
 
 #define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
-    curr->stat = RUNNABLE;
+    if(curr != NULL){
+        curr->stat = RUNNABLE;
+    }
     //print_tasks();
     return sched();
 }
