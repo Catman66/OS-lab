@@ -16,7 +16,7 @@ bool check_tasks(){
     }
 
     printf("check finished\n");
-    return p == curr;
+    return p == tasks;          //a circle of exact number N
 }
 
 void save_context(Context* ctx){
