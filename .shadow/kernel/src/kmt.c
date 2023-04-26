@@ -1,7 +1,7 @@
 #include <os.h>
 
-task_t* current[MAX_CPU], * tasks = NULL;
-Context * os_contexts[MAX_CPU];
+task_t* current[MAX_CPU], * tasks = NULL;   
+Context * os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
 int NTASK = 0;
@@ -21,7 +21,7 @@ bool check_tasks(){
 
 void save_context(Context* ctx){
     if(curr == NULL){   //first save 
-        os_ctx = ctx;
+        os_ctx = ctx;   //always runnable
     } else {
         curr->ctx = ctx;
         curr->stat = IN_INTR;

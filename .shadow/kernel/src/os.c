@@ -2,11 +2,23 @@
 #include <os.h>
 static void print_handlers();
 
+const char * str = "abcdefg";
+void Tprint(void * s){
+  while(1){
+    printf("%s\n", (const char *)s);
+  }
+}
+
 static void os_init() {
   pmm->init();
   kmt->init();
   print_handlers();
   printf("os init finished\n");
+//#ifdef DEBUG_LOCAL
+  for(const char * p = str; *p; p++){
+    kmt->create(pmm->alloc(sizeof(task_t)), "printer", Tprint, (void*)p);
+  }  
+//#endif
 }
 
 static void os_run() {
