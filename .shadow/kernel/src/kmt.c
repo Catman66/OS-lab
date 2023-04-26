@@ -79,7 +79,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
-
+    task->name = name;
     //current,当前处理器
     if(tasks == NULL){          //make a circle of one task
         tasks = task;
