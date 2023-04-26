@@ -1,13 +1,53 @@
 #include <os.h>
 
-task_t* current = NULL;     //需要将context静态初始化好
+task_t* current[MAX_CPU], * tasks = NULL;
+Context * os_contexts[MAX_CPU];
+#define os_ctx (os_contexts[cpu_current()])
+
+int NTASK = 0;
+
+bool check_tasks(){
+    printf("checking tasks\n");
+
+    task_t * p = curr;
+    for(int i = 0;i < NTASK; i++){
+        panic_on(p == NULL, "error in check valid tasks\n");
+        p = p->next;
+    }
+
+    printf("check finished\n");
+    return p == curr;
+}
+
+void save_context(Context* ctx){
+    if(curr == NULL){   //first save 
+        return;
+    } else {
+        curr->ctx = ctx;
+        curr->stat = IN_INTR;
+    }
+}
+
+Context * sched(){
+    task_t * p = curr->next;
+    for(int n = 0; n < NTASK; n++){
+        if(p->stat == RUNNABLE){
+            curr = p;
+            return p->ctx;
+        }
+    }
+    //no threads to be sched 
+    printf("no thrads to sched\n");
+    return os_ctx;
+}
 
 #define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
-    current->ctx = ctx;
-    current = current->next;
-    return current->ctx;
+    save_context(ctx);
+    curr->stat = RUNNABLE;
+    return sched();
 }
+
 
 /// page fault handler
 Context* page_fault_handler(Event ev, Context* ctx){
@@ -20,20 +60,23 @@ static void kmt_init(){
 }
 
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
-    //创建一个新的线程
+    //创建一个新的线程,首个线程不会有这个过程，有点棘手，current只能在中断调用的时候来
     task->canary = CANARY;
     task->stack = pmm->alloc(STACK_SIZE);
     Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
-    
-    //enter the circular queue
-    if(current == NULL){
-        current = task;             //thus ensure that current always 
-        task->next = task;
+    task->stat = RUNNABLE;
+
+    //current,当前处理器
+    if(tasks == NULL){          //make a circle of one task
+        tasks = task;
+        tasks->next = tasks;
     } else {
-        task->next = current->next;
-        current->next = task;
+        task->next = tasks->next;
+        tasks->next = task;
     }
+    NTASK++;
+    check_tasks();
     return 0;
 }
 // void (*teardown)(task_t *task);

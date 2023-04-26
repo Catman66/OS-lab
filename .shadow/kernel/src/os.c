@@ -1,5 +1,5 @@
 #include <common.h>
-
+#include <os.h>
 static void print_handlers();
 
 static void os_init() {
@@ -30,6 +30,7 @@ static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_
 Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
 
 static Context *os_trap(Event ev, Context *context){
+  save_context(context);
   Context* next_ctx = NULL;
   for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
     if(nd->event == ev.event || nd->event == EVENT_NULL){
@@ -41,11 +42,15 @@ static Context *os_trap(Event ev, Context *context){
   panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
   //panic_on(!next_ctx, "returning NULL context");
   //panic_on(sane_context(next_ctx), "returning to invalid context");
+  iset(true);       
+  //开中断，但是printf需要中断才能运行，缺页处理程序也需要开中断才能运行，这时候时钟来了怎么办
+  
   return next_ctx;
 }
 
 //push the handler in my handler list
 static void os_on_irq(int seq, int event, handler_t handler){
+  iset(false);      //关中断
   Handler_node* pre, *p;
   for(p = Handlers.next, pre = &Handlers; p; pre = p, p = p->next){
     if(p->seq > seq){

@@ -1,5 +1,8 @@
 #include <am.h>
 
+#ifndef _KERNEL_H_
+#define _KERNEL_H_
+
 #define MODULE(mod) \
   typedef struct mod_##mod##_t mod_##mod##_t; \
   extern mod_##mod##_t *mod; \
@@ -45,3 +48,5 @@ MODULE(dev) {
   void (*init)();
   device_t *(*lookup)(const char *name);
 };
+
+#endif
