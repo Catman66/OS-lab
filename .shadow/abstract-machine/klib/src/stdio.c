@@ -55,7 +55,7 @@ int itoa(char * buf, long long n);
 int htoa(char * buf, long long n);
 
 typedef enum {
-  INT_ct, PTR_ct, UINT_ct, STR_ct, LI_ct, LU_ct, LLI_ct, LLU_ct
+  CHAR_ct, INT_ct, PTR_ct, UINT_ct, STR_ct, LI_ct, LU_ct, LLI_ct, LLU_ct
 } CONVERSION_TYPE;
 int parse_type(const char * fmt, CONVERSION_TYPE* tp);
 int parse_prefix_long(const char * fmt, CONVERSION_TYPE* tp);
@@ -72,40 +72,45 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
     }
     fmt++;  //passs the '%'
     char * mov_from = buffer;
-    int out_len = 0, parse_off = 0;
+    int len_write_to_out = 0, parse_off = 0;
     CONVERSION_TYPE tp;
     parse_off = parse_type(fmt, &tp);
     fmt += parse_off;
     switch(tp){
+      case CHAR_ct:
+        len_write_to_out = 1;
+        *buffer = (char)va_arg(ap, int);
+        *(buffer+1) = '\0';
+        break;
       case INT_ct:
-        out_len = itoa(buffer, va_arg(ap, int));
+        len_write_to_out = itoa(buffer, va_arg(ap, int));
         break;
       case PTR_ct:
-        out_len = htoa(buffer, va_arg(ap, intptr_t));
+        len_write_to_out = htoa(buffer, va_arg(ap, intptr_t));
         break;
       case STR_ct:
         mov_from = va_arg(ap, char*);
-        out_len = strlen(mov_from);
+        len_write_to_out = strlen(mov_from);
         break;
       case LI_ct:
-        out_len = itoa(buffer, va_arg(ap, long int));
+        len_write_to_out = itoa(buffer, va_arg(ap, long int));
         break;
       case LLI_ct:
-        out_len = itoa(buffer, va_arg(ap, long long int));
+        len_write_to_out = itoa(buffer, va_arg(ap, long long int));
         break;
       case LU_ct:
-        out_len = itoa(buffer, va_arg(ap, unsigned long));
+        len_write_to_out = itoa(buffer, va_arg(ap, unsigned long));
         break;
       case LLU_ct:
-        out_len = itoa(buffer, va_arg(ap, unsigned long long));
+        len_write_to_out = itoa(buffer, va_arg(ap, unsigned long long));
         break;
       default:
         putch(*fmt);
         panic_on(0, " type not implemented\n");
     }
-    panic_on(out - dst + out_len > n, "too long string in my vsnprintf\n");
+    panic_on(out - dst + len_write_to_out > n, "too long string in my vsnprintf\n");
     strcpy(out, mov_from);
-    out += out_len;
+    out += len_write_to_out;
   }
   *out = '\0';
   return out - dst;
@@ -157,7 +162,9 @@ int parse_type(const char * fmt, CONVERSION_TYPE* tp){
     case 'p':
       *tp = PTR_ct;
       return 1;
-    
+    case 'c':
+      *tp = CHAR_ct;
+      return 1;
     case 'l':
       if(*fmt != 'l'){
         len += (1 + parse_prefix_long(fmt, tp));
