@@ -79,8 +79,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
     switch(tp){
       case CHAR_ct:
         len_write_to_out = 1;
-        *buffer = (char)va_arg(ap, int);
-        *(buffer+1) = '\0';
+        *buffer = (char)va_arg(ap, int), *(buffer+1) = '\0';
         break;
       case INT_ct:
         len_write_to_out = itoa(buffer, va_arg(ap, int));

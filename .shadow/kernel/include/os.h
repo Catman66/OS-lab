@@ -1,6 +1,7 @@
 #include <common.h>
 
 #define CANARY 0xa5a55a5a
+#define CANARY_ALIVE(t) (*(uint32_t*)((t)->stack) == CANARY)
 #define STACK_SIZE 8192
 typedef enum{ RUNNING, RUNNABLE, IN_INTR} task_stat;
 
@@ -9,8 +10,7 @@ struct task {
   Context * ctx;
   task_stat stat;
   struct task * next;
-  int canary;
-  uint8_t * stack;
+  uint8_t * stack;    
 };
 
 #define MAX_CPU 8

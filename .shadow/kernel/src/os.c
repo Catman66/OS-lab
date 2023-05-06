@@ -14,6 +14,7 @@ void Tprint0(void * a){
     printf("hello from a thread\n");
   }
 }
+
 #define DEBUG_LOCAL1
 
 static void os_init() {
@@ -24,7 +25,6 @@ static void os_init() {
 
 #ifdef DEBUG_LOCAL0
   kmt->create(pmm->alloc(sizeof(task_t)), "worker", Tprint0, NULL);
-
 #endif
 #ifdef DEBUG_LOCAL1
   for(const char * p = str; *p; p++){
@@ -63,12 +63,9 @@ static Context *os_trap(Event ev, Context *context){
       if(ret_handle) next_ctx = ret_handle;
     }
   }
-  panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
-  //panic_on(!next_ctx, "returning NULL context");
+  //panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
+  panic_on(!next_ctx, "returning NULL context");
   //panic_on(sane_context(next_ctx), "returning to invalid context");
-  iset(true);       
-  //开中断，但是printf需要中断才能运行，缺页处理程序也需要开中断才能运行，这时候时钟来了怎么办
-  
   return next_ctx;
 }
 
