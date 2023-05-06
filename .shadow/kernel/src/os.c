@@ -2,20 +2,9 @@
 #include <os.h>
 static void print_handlers();
 
-const char * str = "abcdefg";
-void Tprint(void * s){
-  while(1){
-    printf("%c\n", *(char*)s);
-  }
-}
+#define DEBUG_LOCAL0
 
-void Tprint0(void * a){
-  while(1){
-    printf("hello from a thread\n");
-  }
-}
-
-#define DEBUG_LOCAL1
+extern void test_sum();
 
 static void os_init() {
   pmm->init();
@@ -24,7 +13,7 @@ static void os_init() {
   printf("os init finished\n");
 
 #ifdef DEBUG_LOCAL0
-  kmt->create(pmm->alloc(sizeof(task_t)), "worker", Tprint0, NULL);
+  test_sum();
 #endif
 #ifdef DEBUG_LOCAL1
   for(const char * p = str; *p; p++){
