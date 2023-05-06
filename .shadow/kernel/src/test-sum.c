@@ -8,6 +8,9 @@ void Tsum(){
         s++;
     }
     printf("current sum : %d\n", s);
+    while(1){
+        ;
+    }
 }
 void test_sum(){
     for(int i = 0; i < NThread; i++){
