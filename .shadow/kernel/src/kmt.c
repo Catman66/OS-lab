@@ -5,7 +5,6 @@ spinlock_t task_lk;
 Context * os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
-
 #define LOCK(lk) kmt->spin_lock((lk))
 #define UNLOCK(lk) kmt->spin_unlock((lk))
 int NTASK = 0;
