@@ -95,9 +95,10 @@ static void sign_irqs(){
     os->on_irq(TIMER_SEQ, EVENT_IRQ_TIMER, timer_intr_handler);
 }
 static void kmt_init(){
+    printf("=== kmt init begin === \n");
     init_locks();
     sign_irqs();
-    printf("kmt init finished\n");
+    printf("=== kmt init finished ===\n");
 }
 
 //need to mod global tasklist
