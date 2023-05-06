@@ -6,7 +6,7 @@ static volatile int s = 0;
 void Tsum(){
     for(int i = 0; i < 10000; i++){
         s++;
-        printf("%d\n", s);
+        //printf("%d\n", s);
     }
     printf("current sum : %d\n", s);
     while(1){
