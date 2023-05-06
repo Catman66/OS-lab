@@ -31,7 +31,7 @@ void print_tasks(){
     LOCK(&task_lk);
     task_t* p = tasks;
     for(int i = 0; i < NTASK; i++){
-        printf("[%s, %s]", p->name, p->stat);
+        printf("[%s, %d]", p->name, p->stat);
         p = p->next;
     }
     UNLOCK(&task_lk);
