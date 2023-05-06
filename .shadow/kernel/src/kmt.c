@@ -97,6 +97,7 @@ static void sign_irqs(){
 static void kmt_init(){
     printf("=== kmt init begin === \n");
     init_locks();
+    printf("=== locks init finished ===\n");
     sign_irqs();
     printf("=== kmt init finished ===\n");
 }
