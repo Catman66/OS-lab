@@ -20,7 +20,7 @@ extern task_t* current[MAX_CPU];
 void save_context(Context* ctx);
 
 struct spinlock {
-  // TODO
+  int val;
 };
 
 struct semaphore {

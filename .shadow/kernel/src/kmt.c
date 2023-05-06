@@ -142,9 +142,19 @@ void kmt_teardown(task_t *task){
 
     pmm->free(task->stack);
 }
-// void (*spin_init)(spinlock_t *lk, const char *name);
-// void (*spin_lock)(spinlock_t *lk);
-// void (*spin_unlock)(spinlock_t *lk);
+#define HOLD 0
+#define NHOLD 1
+void kmt_spin_init(spinlock_t *lk, const char *name){
+    lk->val = HOLD;
+}
+void kmt_spin_lock(spinlock_t *lk){
+    while(atomic_xchg(&(lk->val), NHOLD) == HOLD){
+        ;
+    }
+}
+void kmt_spin_unlock(spinlock_t *lk){
+    atomic_xchg(&(lk->val), HOLD);
+}
 // void (*sem_init)(sem_t *sem, const char *name, int value);
 // void (*sem_wait)(sem_t *sem);
 // void (*sem_signal)(sem_t *sem);
@@ -152,7 +162,10 @@ void kmt_teardown(task_t *task){
 MODULE_DEF(kmt) = {
  .init = kmt_init,
  .create = kmt_create, 
- .teardown = kmt_teardown
+ .teardown = kmt_teardown,
+ .spin_init = kmt_spin_init,
+ .spin_lock = kmt_spin_lock,
+ .spin_unlock = kmt_spin_unlock
 };
 
 
