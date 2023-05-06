@@ -24,12 +24,14 @@ void check_link_structure(){
     printf("check finished\n");
 }
 
+
+
 void print_tasks(){
     printf("=== current tasks: ");
     LOCK(&task_lk);
     task_t* p = tasks;
     for(int i = 0; i < NTASK; i++){
-        printf("[%s] ", p->name);
+        printf("[%s, %s]", p->name, p->stat);
         p = p->next;
     }
     UNLOCK(&task_lk);
@@ -54,6 +56,7 @@ Context * schedule(){
         return os_ctx;
     }
     LOCK(&task_lk);
+    print_tasks();
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
