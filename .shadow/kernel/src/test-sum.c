@@ -7,6 +7,7 @@ void Tsum(){
     for(int i = 0; i < 10000; i++){
         s++;
     }
+    printf("current sum : %d\n", s);
 }
 void test_sum(){
     for(int i = 0; i < NThread; i++){
