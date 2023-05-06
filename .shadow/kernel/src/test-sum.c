@@ -5,9 +5,10 @@
 volatile int s = 0; 
 void Tsum(){
     for(int i = 0; i < 1000000; i++){
+        printf("current sum : %d\n", s);
         s++;
     }
-    printf("current sum : %d\n", s);
+    
     while(1){
         ;//yield();
     }
