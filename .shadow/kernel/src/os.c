@@ -13,7 +13,6 @@ static void os_init() {
   printf("os init finished\n");
 
 #ifdef DEBUG_LOCAL0
-  iset(true);
   test_sum();
 #endif
 #ifdef DEBUG_LOCAL1
