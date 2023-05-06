@@ -9,7 +9,7 @@ void Tsum(){
     }
     printf("current sum : %d\n", s);
     while(1){
-        ;
+        yield();
     }
 }
 void test_sum(){
