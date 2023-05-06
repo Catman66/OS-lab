@@ -56,7 +56,7 @@ Context * schedule(){
         return os_ctx;
     }
     LOCK(&task_lk);
-    print_tasks();
+    //print_tasks();
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
