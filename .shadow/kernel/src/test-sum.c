@@ -22,7 +22,9 @@ void Tsum(){
     printf("without lock, final sum: %d\n", s_nlk);
     for(int i = 0; i < ADDED; i++){
         kmt->spin_lock(&usr_lk);
-        s_lk++;
+        int tmpt = s_lk;
+        tmpt = handle_val(tmpt);
+        s_lk = tmpt;
         kmt->spin_unlock(&usr_lk);
     }
     printf("with lock, final sum: %d \n", s_lk);
