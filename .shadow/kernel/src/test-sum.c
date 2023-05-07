@@ -15,16 +15,12 @@ int handle_val(int v){
 
 void Tsum(void* name){
     for(int i = 0; i < ADDED; i++){
-        int tmpt = s_nlk;
-        tmpt = handle_val(tmpt);
-        s_nlk = tmpt;
+        s_nlk++;
     }
     printf("[%s]: without lock, final sum: %d, expected: %d\n",(const char*)name, s_nlk, NThread * ADDED);
     for(int i = 0; i < ADDED; i++){
         kmt->spin_lock(&usr_lk);
-        int tmpt = s_lk;
-        tmpt = handle_val(tmpt);
-        s_lk = tmpt;
+        s_lk++;
         kmt->spin_unlock(&usr_lk);
     }
     kmt->spin_lock(&usr_lk);
