@@ -4,7 +4,7 @@
 #define NThread 4
 #define ADDED 10000
 static volatile int s_nlk = 0, s_lk = 0;
-static int tool = 1; 
+static volatile int tool = 1; 
 extern spinlock_t usr_lk;
 int handle_val(volatile int v){
     for(int i = 0; i < 100; i ++){
