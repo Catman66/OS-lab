@@ -6,13 +6,19 @@
 static volatile int s_nlk = 0, s_lk = 0;
 static int tool = 1; 
 extern spinlock_t usr_lk;
-
+int handle_val(volatile int v){
+    for(int i = 0; i < 100; i ++){
+        tool += v;
+    }
+    return v + 1;
+}
 void Tsum(){
     printf("intr: %d\n", ienabled());
     printf("num cpu: %d\n", cpu_count());
     for(int i = 0; i < ADDED; i++){
-        s_nlk++;
-        tool = tool * 23;
+        int tmpt = s_nlk;
+        tmpt = handle_val(tmpt);
+        s_nlk = tmpt;
     }
     printf("without final sum: %d\n", s_nlk);
     for(int i = 0; i < ADDED; i++){
