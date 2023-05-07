@@ -11,6 +11,7 @@ static void os_init() {
   kmt->init();
   print_handlers();
   printf("os init finished\n");
+  printf("num cpu: %d\n", cpu_count());
 
 #ifdef DEBUG_LOCAL0
   test_sum();
