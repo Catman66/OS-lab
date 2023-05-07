@@ -3,9 +3,8 @@
 
 #define NThread 4
 #define ADDED 100000
-static int s_nlk = 0, s_lk = 0; 
+static volatile int s_nlk = 0, s_lk = 0; 
 extern spinlock_t usr_lk;
-
 
 void Tsum(){
     printf("intr: %d\n", ienabled());
