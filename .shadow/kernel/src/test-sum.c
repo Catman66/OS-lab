@@ -13,13 +13,13 @@ int handle_val(int v){
     return v + 1;
 }
 
-void Tsum(){
+void Tsum(void* name){
     for(int i = 0; i < ADDED; i++){
         int tmpt = s_nlk;
         tmpt = handle_val(tmpt);
         s_nlk = tmpt;
     }
-    printf("without lock, final sum: %d, expected: %d\n", s_nlk, NThread * ADDED);
+    printf("[%s]: without lock, final sum: %d, expected: %d\n",(const char*)name, s_nlk, NThread * ADDED);
     for(int i = 0; i < ADDED; i++){
         kmt->spin_lock(&usr_lk);
         int tmpt = s_lk;
@@ -33,8 +33,13 @@ void Tsum(){
     
     while(1);       //never return 
 }
+
+const char * thread_names[NThread] = {
+    "T1", "T2", "T3", "T4"
+};
+
 void test_sum(){
     for(int i = 0; i < NThread; i++){
-        kmt->create(pmm->alloc(sizeof(task_t)), "Tsum", Tsum, NULL);
+        kmt->create(pmm->alloc(sizeof(task_t)), thread_names[i], Tsum, (void*)thread_names[i]);
     }
 }
