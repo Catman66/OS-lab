@@ -147,8 +147,8 @@ void kmt_teardown(task_t *task){
 
     pmm->free(task->stack);
 }
-#define HOLD 0
-#define NHOLD 1
+#define HOLD 1
+#define NHOLD 0
 void kmt_spin_init(spinlock_t *lk, const char *name){
     lk->val = HOLD;
 }
