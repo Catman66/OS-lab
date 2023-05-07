@@ -3,7 +3,8 @@
 
 #define NThread 4
 #define ADDED 1000000
-static volatile int s_nlk = 0, s_lk = 0; 
+static volatile int s_nlk = 0, s_lk = 0;
+static int tool = 1; 
 extern spinlock_t usr_lk;
 
 void Tsum(){
@@ -11,6 +12,7 @@ void Tsum(){
     printf("num cpu: %d\n", cpu_count());
     for(int i = 0; i < ADDED; i++){
         s_nlk++;
+        tool = tool * 23;
     }
     printf("without final sum: %d\n", s_nlk);
     for(int i = 0; i < ADDED; i++){
