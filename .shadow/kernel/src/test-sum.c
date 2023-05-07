@@ -11,7 +11,6 @@ void Tsum(){
     printf("num cpu: %d\n", cpu_count());
     for(int i = 0; i < ADDED; i++){
         s_nlk++;
-        printf("%d ", s_nlk);
         if(i % 10 == 0){
             printf("\n");
         }
