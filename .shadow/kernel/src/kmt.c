@@ -147,13 +147,13 @@ void kmt_teardown(task_t *task){
 
     pmm->free(task->stack);
 }
-#define HOLD 1
-#define NHOLD 0
+#define HOLD 0
+#define NHOLD 1
 void kmt_spin_init(spinlock_t *lk, const char *name){
     lk->val = HOLD;
 }
 void kmt_spin_lock(spinlock_t *lk){
-    while(atomic_xchg(&(lk->val), NHOLD) == NHOLD){
+    while(atomic_xchg(&(lk->val), NHOLD)){
         ;
     }
 }
