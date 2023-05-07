@@ -4,7 +4,7 @@
 #define NThread 4
 static volatile int s = 0; 
 void Tsum(){
-    for(int i = 0; i < 1000000; i++){
+    for(int i = 0; i < 100000000; i++){
         s++;
     }
     printf("current sum : %d\n", s);
