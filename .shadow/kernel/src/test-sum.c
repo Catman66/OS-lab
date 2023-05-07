@@ -10,7 +10,7 @@ extern spinlock_t usr_lk;
 void Tsum(){
     printf("intr: %d\n", ienabled());
     printf("num cpu: %d\n", cpu_count());
-    for(int i = 0; i < ADDED * 10000; i++){
+    for(int i = 0; i < ADDED * 100; i++){
         
         s_nlk++;
     }
