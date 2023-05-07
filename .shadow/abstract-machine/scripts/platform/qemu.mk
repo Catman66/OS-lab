@@ -3,9 +3,9 @@
 LDFLAGS    += -N -Ttext-segment=0x00100000
 QEMU_FLAGS += -serial mon:stdio \
               -machine accel=tcg \
-              -smp "$(smp)" \
+              -smp 4 \
               -drive format=raw,file=$(IMAGE)
-
+#"$(smp)"
 build-arg: image
 	@( echo -n $(mainargs); ) | dd if=/dev/stdin of=$(IMAGE) bs=512 count=2 seek=1 conv=notrunc status=none
 
