@@ -12,6 +12,9 @@ void Tsum(){
     for(int i = 0; i < ADDED; i++){
         s_nlk++;
         printf("%d ", s_nlk);
+        if(i % 10 == 0){
+            printf("\n");
+        }
     }
     printf("without final sum: %d\n", s_nlk);
     for(int i = 0; i < ADDED; i++){
