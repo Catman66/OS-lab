@@ -11,9 +11,9 @@ void Tsum(){
     printf("intr: %d\n", ienabled());
     printf("num cpu: %d\n", cpu_count());
     for(int i = 0; i < ADDED; i++){
-        int old = s_nlk;
-        old = s_nlk + 1;
-        s_nlk = old;
+        for(int j = 0; j < 10; j++){
+            s_nlk++;
+        }
     }
     printf("without final sum: %d\n", s_nlk);
     for(int i = 0; i < ADDED; i++){
