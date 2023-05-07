@@ -18,6 +18,7 @@ void Tsum(){
         kmt->spin_unlock(&usr_lk);
     }
     printf("with lock, final sum: %d \n", s_lk);
+    while(1);
 }
 void test_sum(){
     for(int i = 0; i < NThread; i++){
