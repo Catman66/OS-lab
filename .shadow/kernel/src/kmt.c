@@ -153,9 +153,16 @@ void kmt_spin_init(spinlock_t *lk, const char *name){
     lk->val = HOLD;
 }
 void kmt_spin_lock(spinlock_t *lk){
-    while(atomic_xchg(&(lk->val), NHOLD)){
-        ;
+    while (1) {
+        intptr_t value = atomic_xchg(&(lk->val), 1);
+        if (value == 0) {
+        break;
+        }
     }
+    
+    // while(atomic_xchg(&(lk->val), NHOLD)){
+    //     ;
+    // }
 }
 void kmt_spin_unlock(spinlock_t *lk){
     atomic_xchg(&(lk->val), HOLD);
