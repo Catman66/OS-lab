@@ -14,6 +14,7 @@ int handle_val(int v){
 }
 
 void Tsum(void* name){
+    printf("num cpu: %d\n", cpu_count());
     for(int i = 0; i < ADDED; i++){
         int tmpt = s_nlk;
         tmpt = handle_val(tmpt);
