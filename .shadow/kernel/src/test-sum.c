@@ -10,6 +10,7 @@ extern spinlock_t usr_lk;
 void Tsum(){
     printf("intr: %d\n", ienabled());
     for(int i = 0; i < ADDED; i++){
+        s_nlk = s_nlk - 1;
         s_nlk = s_nlk + 2;
     }
     printf("without final sum: %d\n", s_nlk);
