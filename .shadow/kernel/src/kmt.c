@@ -152,8 +152,13 @@ void kmt_teardown(task_t *task){
 void kmt_spin_init(spinlock_t *lk, const char *name){
     lk->val = HOLD;
 }
+int PRE_INTR[MAX_CPU];
+#define pre_i (PRE_INTR[cpu_current()])
 void kmt_spin_lock(spinlock_t *lk){
+    int i = ienabled();
     iset(false);
+    pre_i = i;
+
     while (1) {
         intptr_t value = atomic_xchg(&(lk->val), NHOLD);
         if (value == HOLD) {
@@ -166,7 +171,7 @@ void kmt_spin_lock(spinlock_t *lk){
 }
 void kmt_spin_unlock(spinlock_t *lk){
     atomic_xchg(&(lk->val), HOLD);
-    iset(true);
+    iset(pre_i);
 }
 // void (*sem_init)(sem_t *sem, const char *name, int value);
 // void (*sem_wait)(sem_t *sem);
