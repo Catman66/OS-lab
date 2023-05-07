@@ -19,7 +19,7 @@ void Tsum(){
         tmpt = handle_val(tmpt);
         s_nlk = tmpt;
     }
-    printf("without lock, final sum: %d\n", s_nlk);
+    printf("without lock, final sum: %d, expected: %d\n", s_nlk, NThread * ADDED);
     for(int i = 0; i < ADDED; i++){
         kmt->spin_lock(&usr_lk);
         int tmpt = s_lk;
