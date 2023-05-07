@@ -58,6 +58,7 @@ Context * schedule(){
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
+    printf("one switch\n");
     task_t * p = curr->next;
     //print_tasks();
     for(int n = 0; n < NTASK; n++){
