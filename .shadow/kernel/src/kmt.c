@@ -24,8 +24,6 @@ void check_link_structure(){
     printf("check finished\n");
 }
 
-
-
 void print_tasks(){
     printf("=== current tasks: ");
     LOCK(&task_lk);
@@ -91,8 +89,11 @@ Context* timer_intr_handler(Event ev, Context* ctx){
 Context* page_fault_handler(Event ev, Context* ctx){
     return ctx;             // return to the original program
 }
+
+spinlock_t usr_lk;
 static void init_locks(){
     kmt->spin_init(&task_lk, "lock for task link");
+    kmt->spin_init(&usr_lk, "user lock");
 }
 static void sign_irqs(){
     os->on_irq(TIMER_SEQ, EVENT_IRQ_TIMER, timer_intr_handler);
