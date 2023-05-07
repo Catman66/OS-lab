@@ -30,7 +30,8 @@ void Tsum(){
     kmt->spin_lock(&usr_lk);
     printf("with lock, final sum: %d \n", s_lk);
     kmt->spin_unlock(&usr_lk);
-    while(1);
+    
+    while(1);       //never return 
 }
 void test_sum(){
     for(int i = 0; i < NThread; i++){
