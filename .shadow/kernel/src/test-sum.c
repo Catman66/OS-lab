@@ -6,7 +6,7 @@
 static volatile int s_nlk = 0, s_lk = 0;
 static volatile int tool = 1; 
 extern spinlock_t usr_lk;
-int handle_val(volatile int v){
+int handle_val(int v){
     for(int i = 0; i < 100; i ++){
         tool += v;
     }

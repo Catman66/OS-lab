@@ -150,7 +150,7 @@ void kmt_teardown(task_t *task){
 #define HOLD 0
 #define NHOLD 1
 void kmt_spin_init(spinlock_t *lk, const char *name){
-    lk->val = NHOLD;
+    lk->val = HOLD;
 }
 void kmt_spin_lock(spinlock_t *lk){
     while(atomic_xchg(&(lk->val), NHOLD) == NHOLD){
