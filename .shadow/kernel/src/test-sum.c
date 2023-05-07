@@ -27,7 +27,9 @@ void Tsum(){
         s_lk = tmpt;
         kmt->spin_unlock(&usr_lk);
     }
+    kmt->spin_lock(&usr_lk);
     printf("with lock, final sum: %d \n", s_lk);
+    kmt->spin_unlock(&usr_lk);
     while(1);
 }
 void test_sum(){
