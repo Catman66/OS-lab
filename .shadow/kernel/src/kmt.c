@@ -160,13 +160,14 @@ void kmt_spin_lock(spinlock_t *lk){
         break;
         }
     }
-    iset(true);
     // while(atomic_xchg(&(lk->val), NHOLD)){
     //     ;
     // }
 }
 void kmt_spin_unlock(spinlock_t *lk){
     atomic_xchg(&(lk->val), HOLD);
+    iset(true);
+
 }
 // void (*sem_init)(sem_t *sem, const char *name, int value);
 // void (*sem_wait)(sem_t *sem);
