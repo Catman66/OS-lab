@@ -3,7 +3,7 @@
 LDFLAGS    += -N -Ttext-segment=0x00100000
 QEMU_FLAGS += -serial mon:stdio \
               -machine accel=tcg \
-              -smp cpu=4 \
+              -smp cpus=4 \
               -drive format=raw,file=$(IMAGE)
 #"$(smp)"
 build-arg: image
