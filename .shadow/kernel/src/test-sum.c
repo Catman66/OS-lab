@@ -8,6 +8,7 @@ extern spinlock_t usr_lk;
 
 
 void Tsum(){
+    printf("intr: %d\n", ienabled());
     for(int i = 0; i < ADDED; i++){
         s_nlk = s_nlk + 2;
     }
