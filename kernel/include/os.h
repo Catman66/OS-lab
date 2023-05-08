@@ -42,8 +42,8 @@ struct semaphore {
 
 void panic_report(bool cond, const char * fmt, ...);
 
-#ifdef LOCAL_DEUBG
-    #define print_local print_local
+#ifdef LOCAL_DEBUG
+    #define print_local printf
 #else  
     extern int no_print(const char * fmt, ...);
     #define print_local no_print

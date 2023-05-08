@@ -50,7 +50,7 @@ Context * schedule(){
     }
     UNLOCK(&task_lk);
     //no threads to be sched 
-    print_local("no thrads to sched\n");
+    print_local("no threads to sched\n");
     curr = NULL;
     return os_ctx;
 }

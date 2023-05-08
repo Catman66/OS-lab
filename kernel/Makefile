@@ -7,7 +7,6 @@ INC_PATH       := include/ framework/
 
 export AM_HOME := $(PWD)/../abstract-machine
 
-
 #check if ARCH 已定义
 ifeq ($(ARCH),)
 export ARCH := x86_64-qemu
@@ -19,8 +18,6 @@ include $(AM_HOME)/Makefile
 #copy makefile in parent dir here
 include ../Makefile.lab
 image: git
-
-
 
 test: git time-record
 	@gcc $(shell find src/ -name "*.c")  \
