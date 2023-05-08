@@ -1,8 +1,9 @@
 #include <common.h>
 #include <os.h>
+
 static void print_handlers();
 
-#define DEBUG_LOCAL0
+//#define DEBUG_LOCAL0
 
 extern void test_sum();
 extern void test_pc_sem();

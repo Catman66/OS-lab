@@ -1,5 +1,14 @@
 #include <os.h>
 
+#ifdef LOCAL_DEUBG
+    #define print_local printf
+#else  
+    int no_print(const char * fmt, ...){
+        return 0;
+    }
+    #define print_local no_print
+#endif
+
 task_t* current[MAX_CPU], * tasks = NULL;   
 spinlock_t task_lk;
 Context * os_contexts[MAX_CPU];             //os idle thread context saved here
@@ -34,7 +43,7 @@ Context * schedule(){
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
-    //printf("one switch\n");
+    //print_local("one switch\n");
     task_t * p = curr->next;
     //print_tasks();
     for(int n = 0; n < NTASK; n++){
@@ -48,7 +57,7 @@ Context * schedule(){
     }
     UNLOCK(&task_lk);
     //no threads to be sched 
-    printf("no thrads to sched\n");
+    print_local("no thrads to sched\n");
     curr = NULL;
     return os_ctx;
 }
@@ -145,7 +154,6 @@ void kmt_spin_lock(spinlock_t *lk){
             break;
         }
     }
-
     curr->num_lock++;
 }
 void kmt_spin_unlock(spinlock_t *lk){
