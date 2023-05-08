@@ -49,6 +49,6 @@ MODULE(dev) {
   device_t *(*lookup)(const char *name);
 };
 
-#define DEBUG_LOCAL
+#define LOCAL_DEBUG
 
 #endif
