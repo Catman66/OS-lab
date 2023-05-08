@@ -1,7 +1,7 @@
 #include <os.h>
 
 #ifdef LOCAL_DEUBG
-    #define print_local printf
+    #define print_local print_local
 #else  
     int no_print(const char * fmt, ...){
         return 0;
@@ -88,11 +88,11 @@ static void sign_irqs(){
     os->on_irq(1, EVENT_YIELD, yield_handler);
 }
 static void kmt_init(){
-    printf("=== kmt init begin === \n");
+    print_local("=== kmt init begin === \n");
 
-    init_locks();       printf("=== locks init finished ===\n");
+    init_locks();       print_local("=== locks init finished ===\n");
 
-    sign_irqs();        printf("=== kmt init finished ===\n");
+    sign_irqs();        print_local("=== kmt init finished ===\n");
 }
 
 //need to mod global tasklist
@@ -224,7 +224,7 @@ MODULE_DEF(kmt) = {
 };
 
 void check_task_link_structure(){
-    printf("checking tasks\n");
+    print_local("checking tasks\n");
     kmt->spin_lock(&task_lk);
     
     task_t * p = tasks;
@@ -235,19 +235,19 @@ void check_task_link_structure(){
     panic_on(p != tasks, "error in task-link structure, num error\n");    //a circle of exact number N
     
     kmt->spin_unlock(&task_lk);
-    printf("check finished\n");
+    print_local("check finished\n");
 }
 
 void print_tasks(){
-    printf("=== current tasks: ");
+    print_local("=== current tasks: ");
     LOCK(&task_lk);
     task_t* p = tasks;
     for(int i = 0; i < NTASK; i++){
-        printf("[%s, %d]", p->name, p->stat);
+        print_local("[%s, %d]", p->name, p->stat);
         p = p->next;
     }
     UNLOCK(&task_lk);
-    printf("\n");
+    print_local("\n");
 }
 /*
 static void PUSH(* ctx){
