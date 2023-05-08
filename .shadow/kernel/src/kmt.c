@@ -170,10 +170,13 @@ void sem_enqueue_locked(sem_t* sem, task_t* tsk){
     tsk->stat = SLEEPING;
     sem->queue.next = make_new_semqueue_node(tsk, sem->queue.next);
 }
-void sem_rand_dequeue_locked(sem_t* sem){
+task_t* sem_rand_dequeue_locked(sem_t* sem){
     assert(SEM_EMPTY(sem->queue) == false);
-    sem->queue.next->p_task->stat = RUNNABLE;
-    sem->queue.next = sem->queue.next->next;
+    P_task_node * del = sem->queue.next;
+    task_t* ret = del->p_task;
+    sem->queue.next = del->next;
+    pmm->free(del);
+    return ret;
 }
 
 void kmt_sem_wait(sem_t *sem){
@@ -191,7 +194,7 @@ void kmt_sem_wait(sem_t *sem){
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
     if(sem->val < 0){
-        sem_rand_dequeue_locked(sem);
+        sem_rand_dequeue_locked(sem)->stat = RUNNABLE;
     }
     sem->val++;
     kmt_spin_unlock(&sem->lock);
