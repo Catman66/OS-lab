@@ -14,14 +14,10 @@ static void os_init() {
   print_local("os init finished\n");
   print_local("num cpu: %d\n", cpu_count());
 
-#ifdef DEBUG_LOCAL0
-  test_pc_sem();
+#ifdef LOCAL_DEBUG
+  dev->init();
 #endif
-#ifdef DEBUG_LOCAL1
-  for(const char * p = str; *p; p++){
-    kmt->create(pmm->alloc(sizeof(task_t)), "printer", Tprint, (void*)p);
-  }  
-#endif
+
 }
 
 static void os_run() {
