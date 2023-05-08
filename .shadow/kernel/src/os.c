@@ -11,8 +11,8 @@ static void os_init() {
   pmm->init();
   kmt->init();
   print_handlers();
-  printf("os init finished\n");
-  printf("num cpu: %d\n", cpu_count());
+  print_local("os init finished\n");
+  print_local("num cpu: %d\n", cpu_count());
 
 #ifdef DEBUG_LOCAL0
   test_pc_sem();
@@ -25,7 +25,7 @@ static void os_init() {
 }
 
 static void os_run() {
-  printf("os-run executed, hello\n");
+  print_local("os-run executed, hello\n");
   iset(true);
   while (1) ;
 }
@@ -81,9 +81,13 @@ MODULE_DEF(os) = {
 };
 
 static void print_handlers(){
-  printf("===handlers: ");
+  print_local("===handlers: ");
   for(Handler_node* p = Handlers.next; p; p = p->next){
-    printf("[irq: %d, ev: %d] ", p->seq, p->event);
+    print_local("[irq: %d, ev: %d] ", p->seq, p->event);
   }
-  printf("===\n");
+  print_local("===\n");
+}
+
+int no_print(const char * fmt, ...){
+    return 0;
 }

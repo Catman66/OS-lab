@@ -1,13 +1,6 @@
 #include <os.h>
 
-#ifdef LOCAL_DEUBG
-    #define print_local print_local
-#else  
-    int no_print(const char * fmt, ...){
-        return 0;
-    }
-    #define print_local no_print
-#endif
+
 
 task_t* current[MAX_CPU], * tasks = NULL;   
 spinlock_t task_lk;

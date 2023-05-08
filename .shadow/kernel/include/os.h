@@ -1,3 +1,6 @@
+#ifndef __OS_H__
+#define __OS_H__
+
 #include <common.h>
 
 #define CANARY 0xa5a55a5a
@@ -37,3 +40,11 @@ struct semaphore {
   P_task_node queue;
 };
 
+#ifdef LOCAL_DEUBG
+    #define print_local print_local
+#else  
+    extern int no_print(const char * fmt, ...);
+    #define print_local no_print
+#endif
+
+#endif
