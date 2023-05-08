@@ -1,18 +1,32 @@
 #include <common.h>
+#include <os.h>
 
 static void print_handlers();
 
+//#define DEBUG_LOCAL0
+
+extern void test_sum();
+extern void test_pc_sem();
 static void os_init() {
   pmm->init();
   kmt->init();
   print_handlers();
-  printf("os init finished\n");
+  print_local("os init finished\n");
+  print_local("num cpu: %d\n", cpu_count());
+
+#ifdef DEBUG_LOCAL0
+  test_pc_sem();
+#endif
+#ifdef DEBUG_LOCAL1
+  for(const char * p = str; *p; p++){
+    kmt->create(pmm->alloc(sizeof(task_t)), "printer", Tprint, (void*)p);
+  }  
+#endif
 }
 
 static void os_run() {
-  printf("os started run, hello\n");
+  print_local("os-run executed, hello\n");
   iset(true);
-  
   while (1) ;
 }
 
@@ -31,6 +45,7 @@ static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_
 Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
 
 static Context *os_trap(Event ev, Context *context){
+  save_context(context);
   Context* next_ctx = NULL;
   for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
     if(nd->event == ev.event || nd->event == EVENT_NULL){
@@ -47,6 +62,7 @@ static Context *os_trap(Event ev, Context *context){
 
 //push the handler in my handler list
 static void os_on_irq(int seq, int event, handler_t handler){
+  iset(false);      //关中断
   Handler_node* pre, *p;
   for(p = Handlers.next, pre = &Handlers; p; pre = p, p = p->next){
     if(p->seq > seq){
@@ -65,9 +81,13 @@ MODULE_DEF(os) = {
 };
 
 static void print_handlers(){
-  printf("===handlers: ");
+  print_local("===handlers: ");
   for(Handler_node* p = Handlers.next; p; p = p->next){
-    printf("[irq: %d, ev: %d] ", p->seq, p->event);
+    print_local("[irq: %d, ev: %d] ", p->seq, p->event);
   }
-  printf("===\n");
+  print_local("===\n");
+}
+
+int no_print(const char * fmt, ...){
+    return 0;
 }

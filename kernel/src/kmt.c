@@ -1,52 +1,247 @@
 #include <os.h>
 
-task_t* current = NULL;
 
-#define TIMER_SEQ 1
+
+task_t* current[MAX_CPU], * tasks = NULL;   
+spinlock_t task_lk;
+Context * os_contexts[MAX_CPU];             //os idle thread context saved here
+#define os_ctx (os_contexts[cpu_current()])
+
+#define LOCK(lk) kmt->spin_lock((lk))
+#define UNLOCK(lk) kmt->spin_unlock((lk))
+int NTASK = 0;
+
+void check_task_link_structure();
+void print_tasks();
+
+void save_context(Context* ctx){        //better not be interrupted
+    bool i = ienabled();
+    iset(false);
+    if(curr == NULL){   //first save 
+        os_ctx = ctx;   //always runnable
+    } else {    
+        curr->ctx = ctx;
+        curr->stat = IN_INTR;
+        panic_on(CANARY_ALIVE(curr) == false, "we lost the canary!!!\n");
+    }
+    iset(i);
+}
+
+Context * schedule(){
+    if(tasks == NULL){      //no tasks
+        return os_ctx;
+    }
+    LOCK(&task_lk);
+    //print_tasks();
+    if(curr == NULL){       //first useful schedule
+        curr = tasks;
+    }
+    //print_local("one switch\n");
+    task_t * p = curr->next;
+    //print_tasks();
+    for(int n = 0; n < NTASK; n++){
+        if(p->stat == RUNNABLE){
+            curr = p;
+            p->stat = RUNNING;
+            UNLOCK(&task_lk);
+            return p->ctx;
+        }
+        p = p->next;
+    }
+    UNLOCK(&task_lk);
+    //no threads to be sched 
+    print_local("no thrads to sched\n");
+    curr = NULL;
+    return os_ctx;
+}
+
 Context* timer_intr_handler(Event ev, Context* ctx){
-    current->ctx = ctx;
-    current = current->next;
-    return current->ctx;
+    if(curr != NULL){
+        curr->stat = RUNNABLE;
+    }
+    return schedule();
+}
+Context * yield_handler(Event ev, Context* ctx){
+    return schedule();
 }
 
 /// page fault handler
 Context* page_fault_handler(Event ev, Context* ctx){
+    panic("page fault not implemented yet\n");
     return ctx;             // return to the original program
 }
 
+spinlock_t usr_lk;
+static void init_locks(){
+    kmt->spin_init(&task_lk, "lock for task link");
+    kmt->spin_init(&usr_lk, "user lock");
+}
+static void sign_irqs(){
+    os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
+    os->on_irq(1, EVENT_YIELD, yield_handler);
+}
 static void kmt_init(){
-    os->on_irq(TIMER_SEQ, EVENT_IRQ_TIMER, timer_intr_handler);
-    printf("kmt init finished\n");
+    print_local("=== kmt init begin === \n");
+
+    init_locks();       print_local("=== locks init finished ===\n");
+
+    sign_irqs();        print_local("=== kmt init finished ===\n");
 }
 
+//need to mod global tasklist
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
-    //创建一个新的线程,首个线程不会有这个过程，有点棘手，current只能在中断调用的时候来
-    task->canary = CANARY;
     task->stack = pmm->alloc(STACK_SIZE);
+    panic_on(task->stack == NULL, "fail to alloc stack \n");
+    *(uint32_t*)task->stack = CANARY;       //in case stack overflow
     Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
-    
-    ucontext(,)
-    //current 
-    assert(current != NULL);
-    task->next = current->next;
-    current->next = task;
+    task->stat = RUNNABLE;
+    task->name = name;
+    task->num_lock = 0;
+
+    kmt->spin_lock(&task_lk);
+    if(tasks == NULL){          //make a circle of one task
+        tasks = task;
+        tasks->next = tasks;
+    } else {
+        task->next = tasks->next;
+        tasks->next = task;
+    }
+    NTASK++;
+    kmt->spin_unlock(&task_lk);
+    check_task_link_structure();
     return 0;
 }
-// void (*teardown)(task_t *task);
-// void (*spin_init)(spinlock_t *lk, const char *name);
-// void (*spin_lock)(spinlock_t *lk);
-// void (*spin_unlock)(spinlock_t *lk);
-// void (*sem_init)(sem_t *sem, const char *name, int value);
-// void (*sem_wait)(sem_t *sem);
-// void (*sem_signal)(sem_t *sem);
+static void kmt_teardown(task_t *task){
+    //remove from link
+    if(NTASK == 1){
+        NTASK = 0;
+        tasks = NULL;
+    }
+    task_t* pre = tasks, * p = tasks->next;
+    for(int n = 0; n < NTASK; n++){
+        if(p == task){
+            pre->next = p->next;
+            break;
+        }
+        pre = p, p = p->next;
+    }
 
+    pmm->free(task->stack);
+}
+#define HOLD 0
+#define NHOLD 1
+void kmt_spin_init(spinlock_t *lk, const char *name){
+    lk->val = HOLD;
+}
+int PRE_INTR[MAX_CPU];
+#define pre_i (PRE_INTR[cpu_current()])
+void kmt_spin_lock(spinlock_t *lk){
+    int i = ienabled();
+    iset(false);
+    pre_i = i;
+
+    while (1) {
+        intptr_t value = atomic_xchg(&(lk->val), NHOLD);
+        if (value == HOLD) {
+            break;
+        }
+    }
+    curr->num_lock++;
+}
+void kmt_spin_unlock(spinlock_t *lk){
+    curr->num_lock--;
+
+    atomic_xchg(&(lk->val), HOLD);
+    if(curr->num_lock == 0){
+        iset(pre_i);
+    }
+}
+
+void kmt_sem_init(sem_t *sem, const char *name, int value){
+    sem->desc = name;
+    sem->val = value;
+    kmt_spin_init(&(sem->lock), name);          
+    sem->queue.p_task = NULL, sem->queue.next = NULL;
+}
+
+P_task_node* make_new_semqueue_node(task_t* ctx, P_task_node* nxt){
+    P_task_node * new_nd = pmm->alloc(sizeof(P_task_node));
+    new_nd->p_task = ctx;
+    new_nd->next = nxt;
+    return new_nd;
+}
+void sem_enqueue_locked(sem_t* sem, task_t* tsk){
+    tsk->stat = SLEEPING;
+    sem->queue.next = make_new_semqueue_node(tsk, sem->queue.next);
+}
+task_t* sem_rand_dequeue_locked(sem_t* sem){
+    assert(SEM_EMPTY(sem->queue) == false);
+    P_task_node * del = sem->queue.next;
+    task_t* ret = del->p_task;
+    sem->queue.next = del->next;
+    pmm->free(del);
+    return ret;
+}
+
+void kmt_sem_wait(sem_t *sem){
+    kmt_spin_lock(&sem->lock);
+    sem->val --;
+    if(sem->val < 0){
+        curr->stat = SLEEPING;
+        sem_enqueue_locked(sem, curr);
+    } 
+    kmt_spin_unlock(&sem->lock);
+    if(curr->stat == SLEEPING){
+        yield();
+    }
+}
+void kmt_sem_signal(sem_t *sem){
+    kmt_spin_lock(&sem->lock);
+    if(sem->val < 0){
+        sem_rand_dequeue_locked(sem)->stat = RUNNABLE;
+    }
+    sem->val++;
+    kmt_spin_unlock(&sem->lock);
+}
 MODULE_DEF(kmt) = {
  .init = kmt_init,
- .create = kmt_create
+ .create = kmt_create, 
+ .teardown = kmt_teardown,
+ .spin_init = kmt_spin_init,
+ .spin_lock = kmt_spin_lock,
+ .spin_unlock = kmt_spin_unlock,
+ .sem_init = kmt_sem_init,
+ .sem_signal = kmt_sem_signal,
+ .sem_wait = kmt_sem_wait
 };
 
+void check_task_link_structure(){
+    print_local("checking tasks\n");
+    kmt->spin_lock(&task_lk);
+    
+    task_t * p = tasks;
+    for(int i = 0;i < NTASK; i++){
+        panic_on(p == NULL, "error in check valid tasks: null ptr\n");
+        p = p->next;
+    }
+    panic_on(p != tasks, "error in task-link structure, num error\n");    //a circle of exact number N
+    
+    kmt->spin_unlock(&task_lk);
+    print_local("check finished\n");
+}
 
+void print_tasks(){
+    print_local("=== current tasks: ");
+    LOCK(&task_lk);
+    task_t* p = tasks;
+    for(int i = 0; i < NTASK; i++){
+        print_local("[%s, %d]", p->name, p->stat);
+        p = p->next;
+    }
+    UNLOCK(&task_lk);
+    print_local("\n");
+}
 /*
 static void PUSH(* ctx){
     REAR->next = make_ctx_node(ctx, REAR->next);
