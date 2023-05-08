@@ -95,6 +95,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
+    task->num_lock = 0;
 
     kmt->spin_lock(&task_lk);
     if(tasks == NULL){          //make a circle of one task
@@ -144,13 +145,16 @@ void kmt_spin_lock(spinlock_t *lk){
             break;
         }
     }
-    // while(atomic_xchg(&(lk->val), NHOLD)){
-    //     ;
-    // }
+
+    curr->num_lock++;
 }
 void kmt_spin_unlock(spinlock_t *lk){
+    curr->num_lock--;
+
     atomic_xchg(&(lk->val), HOLD);
-    iset(pre_i);
+    if(curr->num_lock == 0){
+        iset(pre_i);
+    }
 }
 
 void kmt_sem_init(sem_t *sem, const char *name, int value){
