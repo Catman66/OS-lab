@@ -91,3 +91,18 @@ static void print_handlers(){
 int no_print(const char * fmt, ...){
     return 0;
 }
+#define STR_BUFFER_SIZE 1024
+int vprintf_os(const char *fmt, va_list ap) {
+  char formated[STR_BUFFER_SIZE];
+  int len = vsnprintf(formated, STR_BUFFER_SIZE, fmt, ap);
+  putstr(formated);
+  return len;
+}
+void panic_report(bool cond, const char * fmt, ...){
+  if(cond){
+    va_list ap;
+    va_start(ap, fmt);
+    vprintf_os(fmt, ap);
+    halt(1);
+  }
+}

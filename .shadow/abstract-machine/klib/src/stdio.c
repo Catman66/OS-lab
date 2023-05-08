@@ -9,14 +9,13 @@
 #define STR_BUFFER_SIZE 1024
 #define CONVERSION_BUFFER_SIZE 64
 
-
-
 int vprintf(const char *fmt, va_list ap) {
   char formated[STR_BUFFER_SIZE];
   int len = vsnprintf(formated, STR_BUFFER_SIZE, fmt, ap);
   putstr(formated);
   return len;
 }
+
 int printf(const char *fmt, ...) {
   va_list para_lst;
   va_start(para_lst, fmt);
@@ -115,14 +114,7 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   return out - dst;
 }
 
-void panic_report(bool cond, const char * fmt, ...){
-  if(cond){
-    va_list ap;
-    va_start(ap, fmt);
-    vprintf(fmt, ap);
-    halt(1);
-  }
-}
+
 
 int ntoa(char* buf, long long n, int base){
   panic_on(n < 0, "htoa apply to a negative number\n");
