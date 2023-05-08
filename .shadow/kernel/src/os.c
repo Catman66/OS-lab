@@ -52,13 +52,11 @@ static Context *os_trap(Event ev, Context *context){
   }
   panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
   //panic_on(!next_ctx, "returning NULL context");
-  //panic_on(sane_context(next_ctx), "returning to invalid context");
   return next_ctx;
 }
 
 //push the handler in my handler list
 static void os_on_irq(int seq, int event, handler_t handler){
-  iset(false);      //关中断
   Handler_node* pre, *p;
   for(p = Handlers.next, pre = &Handlers; p; pre = p, p = p->next){
     if(p->seq > seq){
