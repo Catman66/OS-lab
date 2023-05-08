@@ -14,7 +14,7 @@ static void os_init() {
   printf("num cpu: %d\n", cpu_count());
 
 #ifdef DEBUG_LOCAL0
-  test_sum();
+  test_pc_sem();
 #endif
 #ifdef DEBUG_LOCAL1
   for(const char * p = str; *p; p++){
