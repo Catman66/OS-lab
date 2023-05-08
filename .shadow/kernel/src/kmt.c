@@ -9,32 +9,8 @@ Context * os_contexts[MAX_CPU];             //os idle thread context saved here
 #define UNLOCK(lk) kmt->spin_unlock((lk))
 int NTASK = 0;
 
-void check_link_structure(){
-    printf("checking tasks\n");
-    kmt->spin_lock(&task_lk);
-    
-    task_t * p = tasks;
-    for(int i = 0;i < NTASK; i++){
-        panic_on(p == NULL, "error in check valid tasks: null ptr\n");
-        p = p->next;
-    }
-    panic_on(p != tasks, "error in task-link structure, num error\n");    //a circle of exact number N
-    
-    kmt->spin_unlock(&task_lk);
-    printf("check finished\n");
-}
-
-void print_tasks(){
-    printf("=== current tasks: ");
-    LOCK(&task_lk);
-    task_t* p = tasks;
-    for(int i = 0; i < NTASK; i++){
-        printf("[%s, %d]", p->name, p->stat);
-        p = p->next;
-    }
-    UNLOCK(&task_lk);
-    printf("\n");
-}
+void check_task_link_structure();
+void print_tasks();
 
 void save_context(Context* ctx){        //better not be interrupted
     bool i = ienabled();
@@ -77,17 +53,19 @@ Context * schedule(){
     return os_ctx;
 }
 
-#define TIMER_SEQ 1
 Context* timer_intr_handler(Event ev, Context* ctx){
     if(curr != NULL){
         curr->stat = RUNNABLE;
     }
     return schedule();
 }
-
+Context * yield_handler(Event ev, Context* ctx){
+    return schedule();
+}
 
 /// page fault handler
 Context* page_fault_handler(Event ev, Context* ctx){
+    panic("page fault not implemented yet\n");
     return ctx;             // return to the original program
 }
 
@@ -97,14 +75,15 @@ static void init_locks(){
     kmt->spin_init(&usr_lk, "user lock");
 }
 static void sign_irqs(){
-    os->on_irq(TIMER_SEQ, EVENT_IRQ_TIMER, timer_intr_handler);
+    os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
+    os->on_irq(1, EVENT_YIELD, yield_handler);
 }
 static void kmt_init(){
     printf("=== kmt init begin === \n");
-    init_locks();
-    printf("=== locks init finished ===\n");
-    sign_irqs();
-    printf("=== kmt init finished ===\n");
+
+    init_locks();       printf("=== locks init finished ===\n");
+
+    sign_irqs();        printf("=== kmt init finished ===\n");
 }
 
 //need to mod global tasklist
@@ -127,7 +106,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     }
     NTASK++;
     kmt->spin_unlock(&task_lk);
-    check_link_structure();
+    check_task_link_structure();
     return 0;
 }
 static void kmt_teardown(task_t *task){
@@ -229,7 +208,32 @@ MODULE_DEF(kmt) = {
  .sem_wait = kmt_sem_wait
 };
 
+void check_task_link_structure(){
+    printf("checking tasks\n");
+    kmt->spin_lock(&task_lk);
+    
+    task_t * p = tasks;
+    for(int i = 0;i < NTASK; i++){
+        panic_on(p == NULL, "error in check valid tasks: null ptr\n");
+        p = p->next;
+    }
+    panic_on(p != tasks, "error in task-link structure, num error\n");    //a circle of exact number N
+    
+    kmt->spin_unlock(&task_lk);
+    printf("check finished\n");
+}
 
+void print_tasks(){
+    printf("=== current tasks: ");
+    LOCK(&task_lk);
+    task_t* p = tasks;
+    for(int i = 0; i < NTASK; i++){
+        printf("[%s, %d]", p->name, p->stat);
+        p = p->next;
+    }
+    UNLOCK(&task_lk);
+    printf("\n");
+}
 /*
 static void PUSH(* ctx){
     REAR->next = make_ctx_node(ctx, REAR->next);
