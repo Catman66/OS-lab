@@ -130,7 +130,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     check_link_structure();
     return 0;
 }
-void kmt_teardown(task_t *task){
+static void kmt_teardown(task_t *task){
     //remove from link
     if(NTASK == 1){
         NTASK = 0;
@@ -173,17 +173,60 @@ void kmt_spin_unlock(spinlock_t *lk){
     atomic_xchg(&(lk->val), HOLD);
     iset(pre_i);
 }
-// void (*sem_init)(sem_t *sem, const char *name, int value);
-// void (*sem_wait)(sem_t *sem);
-// void (*sem_signal)(sem_t *sem);
 
+void kmt_sem_init(sem_t *sem, const char *name, int value){
+    sem->desc = name;
+    sem->val = value;
+    kmt_spin_init(&(sem->lock), name);          
+    sem->queue.p_task = NULL, sem->queue.next = NULL;
+}
+
+P_task_node* make_new_semqueue_node(task_t* ctx, P_task_node* nxt){
+    P_task_node * new_nd = pmm->alloc(sizeof(P_task_node));
+    new_nd->p_task = ctx;
+    new_nd->next = nxt;
+    return new_nd;
+}
+void sem_enqueue_locked(sem_t* sem, task_t* tsk){
+    tsk->stat = SLEEPING;
+    sem->queue.next = make_new_semqueue_node(tsk, sem->queue.next);
+}
+void sem_rand_dequeue_locked(sem_t* sem){
+    assert(SEM_EMPTY(sem->queue) == false);
+    sem->queue.next->p_task->stat = RUNNABLE;
+    sem->queue.next = sem->queue.next->next;
+}
+
+void kmt_sem_wait(sem_t *sem){
+    kmt_spin_lock(&sem->lock);
+    sem->val --;
+    if(sem->val < 0){
+        curr->stat = SLEEPING;
+        sem_enqueue_locked(sem, curr);
+    } 
+    kmt->spin_unlock(&sem->lock);
+    if(curr->stat == SLEEPING){
+        yield();
+    }
+}
+void kmt_sem_signal(sem_t *sem){
+    kmt_spin_lock(&sem->lock);
+    if(sem->val < 0){
+        sem_rand_dequeue_locked(sem);
+    }
+    sem->val++;
+    kmt_spin_unlock(&sem->lock);
+}
 MODULE_DEF(kmt) = {
  .init = kmt_init,
  .create = kmt_create, 
  .teardown = kmt_teardown,
  .spin_init = kmt_spin_init,
  .spin_lock = kmt_spin_lock,
- .spin_unlock = kmt_spin_unlock
+ .spin_unlock = kmt_spin_unlock,
+ .sem_init = kmt_sem_init,
+ .sem_signal = kmt_sem_signal,
+ .sem_wait = kmt_sem_wait
 };
 
 

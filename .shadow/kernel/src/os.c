@@ -25,7 +25,6 @@ static void os_init() {
 
 static void os_run() {
   printf("os-run executed, hello\n");
-  
   iset(true);
   while (1) ;
 }

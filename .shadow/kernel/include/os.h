@@ -3,7 +3,7 @@
 #define CANARY 0xa5a55a5a
 #define CANARY_ALIVE(t) (*(uint32_t*)((t)->stack) == CANARY)
 #define STACK_SIZE 8192
-typedef enum{ RUNNING = 0, RUNNABLE = 1, IN_INTR = 2} task_stat;
+typedef enum{ RUNNING, RUNNABLE, IN_INTR, SLEEPING } task_stat;
 
 struct task {
   const char * name;
@@ -20,9 +20,18 @@ extern task_t* current[MAX_CPU];
 void save_context(Context* ctx);
 
 struct spinlock {
+  const char * desc;
   int val;
 };
 
+typedef struct P_task_node {
+  task_t* p_task;
+  struct P_task_node * next;
+} P_task_node;
+#define SEM_EMPTY(head) ((head).next == NULL)
 struct semaphore {
-  // TODO
+  const char * desc;
+  int val;
+  spinlock_t lock;
+  P_task_node queue;
 };
