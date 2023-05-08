@@ -13,11 +13,9 @@ static void os_init() {
   print_handlers();
   print_local("os init finished\n");
   print_local("num cpu: %d\n", cpu_count());
-
 #ifdef LOCAL_DEBUG
   dev->init();
 #endif
-
 }
 
 static void os_run() {
