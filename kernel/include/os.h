@@ -40,6 +40,8 @@ struct semaphore {
   P_task_node queue;
 };
 
+void panic_report(bool cond, const char * fmt, ...);
+
 #ifdef LOCAL_DEUBG
     #define print_local print_local
 #else  
