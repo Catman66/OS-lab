@@ -36,7 +36,6 @@ Context * schedule(){
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
-    printf("one sched\n");
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
@@ -58,7 +57,7 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     if(curr != NULL && curr->stat == RUNNING){
         curr->stat = RUNNABLE;
     }
-    printf("timer intr\n");
+    //printf("timer intr\n");
     return schedule();
 }
 Context * yield_handler(Event ev, Context* ctx){
