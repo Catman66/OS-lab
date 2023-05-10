@@ -7,11 +7,11 @@ sem_t fill, empty;
 #define V kmt->sem_signal
 
 #define NUM_PARE 5000
-void Tproduce() {
+void Tproduce(void * p_c) {
   int i = 0;
   while (i++ < NUM_PARE) {
     P(&empty);
-    printf("(");
+    printf("(%c", *(char*)p_c);
     V(&fill);
   }
   printf("finished \n");
@@ -34,8 +34,8 @@ void test_pc_sem(){
   kmt->sem_init(&fill, "fill", 0);
   kmt->sem_init(&empty, "empty", 2);
   for(int i = 0; i < NThread; i++){
-      kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, NULL);
-      kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, NULL);
+      kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, "abcdefgijkl" + i);
+      kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, "abcdefgh" + i);
   }
 }
 
