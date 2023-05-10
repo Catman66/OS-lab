@@ -216,6 +216,7 @@ void kmt_sem_wait(sem_t *sem){
         for(P_task_node* p = sem->front; p; p = p->next){
             printf("[%d]", p->p_task->id);
         }
+        print_local("\n");
     } 
     kmt_spin_unlock(&sem->lock);
     
