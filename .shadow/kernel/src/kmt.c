@@ -159,8 +159,8 @@ void kmt_spin_lock(spinlock_t *lk){
 }
 void kmt_spin_unlock(spinlock_t *lk){
     n_lk--;
-
     __sync_synchronize();
+
     atomic_xchg(&(lk->val), HOLD);
     if(n_lk == 0){
         iset(pre_i);
