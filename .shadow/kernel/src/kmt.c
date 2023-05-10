@@ -21,7 +21,6 @@ void save_context(Context* ctx){        //better not be interrupted
         os_ctx = ctx;   //always runnable
     } else {    
         curr->ctx = ctx;
-        curr->stat = IN_INTR;
         panic_on(CANARY_ALIVE(curr) == false, "we lost the canary!!!\n");
     }
     iset(i);
@@ -36,9 +35,8 @@ Context * schedule(){
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
-    //print_local("one switch\n");
+    curr->stat = RUNNABLE;
     task_t * p = curr->next;
-    //print_tasks();
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
             curr = p;
@@ -62,6 +60,7 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     return schedule();
 }
 Context * yield_handler(Event ev, Context* ctx){
+    //return to original
     return schedule();
 }
 

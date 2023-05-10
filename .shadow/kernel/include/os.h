@@ -6,7 +6,7 @@
 #define CANARY 0xa5a55a5a
 #define CANARY_ALIVE(t) (*(uint32_t*)((t)->stack) == CANARY)
 #define STACK_SIZE 8192
-typedef enum{ RUNNING, RUNNABLE, IN_INTR, SLEEPING } task_stat;
+typedef enum{ RUNNING, RUNNABLE, SLEEPING } task_stat;
 
 struct task {
   const char * name;
