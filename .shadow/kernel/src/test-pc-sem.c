@@ -28,7 +28,9 @@ void Tconsume(void * pc) {
     V(&empty);
   }
   printf("finished\n");
-  while(1) ;
+  while(1) {
+    printf("after finish\n");
+  }
 }
 
 void test_pc_sem(){
