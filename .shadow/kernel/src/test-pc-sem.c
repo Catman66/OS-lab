@@ -18,11 +18,11 @@ void Tproduce(void * p_c) {
   while(1) ;
 }
 
-void Tconsume() {
+void Tconsume(void * pc) {
   int i = 0;
   while (i++ < NUM_PARE) {
     P(&fill);
-    printf(")");
+    printf(")%c", *(char*)pc);
     V(&empty);
   }
   printf("finished\n");
