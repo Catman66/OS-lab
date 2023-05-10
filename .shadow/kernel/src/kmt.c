@@ -1,10 +1,12 @@
 #include <os.h>
 
-
-
 task_t* current[MAX_CPU], * tasks = NULL;   
 spinlock_t task_lk;
-Context * os_contexts[MAX_CPU];             //os idle thread context saved here
+
+int NLOCK[MAX_CPU];
+#define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
+
+Context *   os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
 #define LOCK(lk) kmt->spin_lock((lk))
@@ -71,6 +73,9 @@ Context* page_fault_handler(Event ev, Context* ctx){
 
 spinlock_t usr_lk;
 static void init_locks(){
+    for(int i = 0; i < MAX_CPU; i++){
+        NLOCK[i] = 0;
+    }
     kmt->spin_init(&task_lk, "lock for task link");
     kmt->spin_init(&usr_lk, "user lock");
 }
@@ -90,7 +95,7 @@ static void kmt_init(){
 
     sign_irqs();        print_local("=== kmt init finished ===\n");
 
-    init_tasks();       
+    init_tasks();          
 }
 
 //need to mod global tasklist
@@ -152,14 +157,14 @@ void kmt_spin_lock(spinlock_t *lk){
             break;
         }
     }
-    curr->num_lock++;
+    n_lk++;
 }
 void kmt_spin_unlock(spinlock_t *lk){
-    curr->num_lock--;
+    n_lk--;
 
     atomic_xchg(&(lk->val), HOLD);
-    panic_report(curr->num_lock < 0, "invalid num-lock: %d, curr : %p\n", curr->num_lock, curr);
-    if(curr->num_lock == 0){
+    panic_report(n_lk < 0, "invalid num-lock: %d, curr : %p\n", curr->num_lock, curr);
+    if(n_lk == 0){
         iset(pre_i);
     }
 }
