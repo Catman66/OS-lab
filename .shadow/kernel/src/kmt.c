@@ -93,7 +93,11 @@ static void kmt_init(){
 
     sign_irqs();        print_local("=== kmt init finished ===\n");
 
-    init_tasks();          
+    init_tasks();     
+
+    printf("lets yield\n");
+    yield();
+    printf("after yield\n");
 }
 
 //need to mod global tasklist
