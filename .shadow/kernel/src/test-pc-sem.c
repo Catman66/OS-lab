@@ -2,7 +2,7 @@
 #include <os.h>
 
 sem_t fill, empty;
-#define NThread 1
+#define NThread 4
 #define P kmt->sem_wait
 #define V kmt->sem_signal
 
