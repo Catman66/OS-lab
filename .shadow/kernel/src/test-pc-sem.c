@@ -6,8 +6,10 @@ sem_t fill, empty;
 #define P kmt->sem_wait
 #define V kmt->sem_signal
 
+#define NUM_PARE 100000
 void Tproduce() {
-  while (1) {
+  int i = 0;
+  while (i++ < NUM_PARE) {
     P(&empty);
     printf("(");
     V(&fill);
@@ -15,7 +17,8 @@ void Tproduce() {
 }
 
 void Tconsume() {
-  while (1) {
+  int i = 0;
+  while (i++ < NUM_PARE) {
     P(&fill);
     printf(")");
     V(&empty);
