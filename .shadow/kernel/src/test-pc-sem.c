@@ -7,16 +7,16 @@ sem_t fill, empty;
 #define V kmt->sem_signal
 
 #define NUM_PARE 50
-void Tproduce(void * p_c) {
+void Tproduce(void * pc) {
   int i = 0;
   while (i++ < NUM_PARE) {
     P(&empty);
-    printf("(%c", *(char*)p_c);
+    printf("(%c", *(char*)pc);
     V(&fill);
   }
   printf("finished \n");
   while(1) {
-    printf("after finish\n");
+    printf("after %c finish\n", *(char *)pc);
   }
 }
 
@@ -29,7 +29,7 @@ void Tconsume(void * pc) {
   }
   printf("finished\n");
   while(1) {
-    printf("after finish\n");
+    printf("after %c finish\n", *(char*)pc);
   }
 }
 
