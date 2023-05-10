@@ -13,6 +13,11 @@ void Tsum(void* name){
         s_nlk++;
         //kmt->spin_unlock(&lk);
     }
+    for(int i = 0; i < ADDED; i++){
+        kmt->spin_lock(&lk);
+        s_lk++;
+        kmt->spin_unlock(&lk);
+    }
     printf("%s finished, res:%d\n", (const char *)name, s_nlk);
     while(1){
         ;
