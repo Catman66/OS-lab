@@ -14,6 +14,7 @@ void Tproduce() {
     printf("(");
     V(&fill);
   }
+  while(1) ;
 }
 
 void Tconsume() {
@@ -23,14 +24,16 @@ void Tconsume() {
     printf(")");
     V(&empty);
   }
+  while(1) ;
 }
 
 void test_pc_sem(){
-    kmt->sem_init(&fill, "fill", 0);
-    kmt->sem_init(&empty, "empty", 2);
-    for(int i = 0; i < NThread; i++){
-        kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, NULL);
-        kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, NULL);
-    }
+  
+  kmt->sem_init(&fill, "fill", 0);
+  kmt->sem_init(&empty, "empty", 2);
+  for(int i = 0; i < NThread; i++){
+      kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, NULL);
+      kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, NULL);
+  }
 }
 
