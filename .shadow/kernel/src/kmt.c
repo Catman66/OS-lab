@@ -222,7 +222,7 @@ void kmt_sem_wait(sem_t *sem){
     if(sem->val < 0){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
-        //locked_print(sem);
+        locked_print(sem);
     } 
     kmt_spin_unlock(&sem->lock);
     
