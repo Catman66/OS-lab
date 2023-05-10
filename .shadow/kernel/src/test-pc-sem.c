@@ -6,7 +6,7 @@ sem_t fill, empty;
 #define P kmt->sem_wait
 #define V kmt->sem_signal
 
-#define NUM_PARE 50
+#define NUM_PARE 1000
 void Tproduce(void * pc) {
   char c = *(char*)pc;
   int i = 0;

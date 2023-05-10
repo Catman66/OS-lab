@@ -177,9 +177,9 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->front = sem->rear = NULL;
 }
 
-P_task_node* make_new_semqueue_node(task_t* ctx, P_task_node* nxt){
+P_task_node* make_new_semqueue_node(task_t* tsk, P_task_node* nxt){
     P_task_node * new_nd = pmm->alloc(sizeof(P_task_node));
-    new_nd->p_task = ctx;
+    new_nd->p_task = tsk;
     new_nd->next = nxt;
     return new_nd;
 }
