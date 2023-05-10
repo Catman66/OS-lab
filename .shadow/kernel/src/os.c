@@ -18,12 +18,12 @@ static void os_init() {
 #ifdef LOCAL_DEBUG
   //dev->init();
   //test_starvation();
-  test_pc_sem();
+  //test_pc_sem();
 #endif
 }
 
 static void os_run() {
-  print_local("os-run executed, hello, n_cpu: %d\n", cpu_count());
+  //print_local("os-run executed, hello, n_cpu: %d\n", cpu_count());
   iset(true);
   while (1) ;
 }
