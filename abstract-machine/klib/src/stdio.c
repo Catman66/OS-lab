@@ -114,9 +114,11 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   return out - dst;
 }
 
-
-
 int ntoa(char* buf, long long n, int base){
+  if(n < 0){
+    *buf = '-';
+    return 1 + ntoa(buf+1, -n, base);
+  }
   panic_on(n < 0, "htoa apply to a negative number\n");
   if(n == 0){
     *buf = '0';
