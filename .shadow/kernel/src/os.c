@@ -18,7 +18,7 @@ static void os_init() {
 #ifdef LOCAL_DEBUG
   //dev->init();
   //test_starvation();
-  //test_pc_sem();
+  test_pc_sem();
 #endif
 }
 
