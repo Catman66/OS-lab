@@ -38,7 +38,7 @@ Context * schedule(){
     }
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
-        if(p->stat == RUNNABLE){
+        if(p->stat == RUNNABLE && p->id % cpu_count() == cpu_current()){
             curr = p;
             p->stat = RUNNING;
             UNLOCK(&task_lk);
