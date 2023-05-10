@@ -8,6 +8,7 @@ static void print_handlers();
 extern void test_sum();
 extern void test_pc_sem();
 extern void test_starvation();
+extern void test_sched();
 
 static void os_init() {
   pmm->init();
@@ -17,8 +18,9 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 #ifdef LOCAL_DEBUG
   //dev->init();
+  test_sched();
   //test_starvation();
-  test_pc_sem();
+  //test_pc_sem();
 #endif
 }
 

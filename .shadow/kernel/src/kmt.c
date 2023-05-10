@@ -33,6 +33,7 @@ Context * schedule(){
         return os_ctx;
     }
     LOCK(&task_lk);
+    
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
@@ -41,8 +42,8 @@ Context * schedule(){
         if(p->stat == RUNNABLE){
             curr = p;
             p->stat = RUNNING;
-            UNLOCK(&task_lk);
             printf("cpu[%d] return to task[%d]\n", cpu_current(), curr->id);
+            UNLOCK(&task_lk);
             return p->ctx;
         }
         p = p->next;
