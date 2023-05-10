@@ -226,7 +226,7 @@ void kmt_sem_wait(sem_t *sem){
     } 
     kmt_spin_unlock(&sem->lock);
     
-    printf("%d", pre_i);
+    printf("%d\n", pre_i);
     assert(ienabled());
     if(curr->stat == SLEEPING){
         yield();
