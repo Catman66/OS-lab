@@ -158,7 +158,7 @@ void kmt_spin_unlock(spinlock_t *lk){
     curr->num_lock--;
 
     atomic_xchg(&(lk->val), HOLD);
-    assert(curr->num_lock >= 0);
+    panic_report(curr->num_lock < 0, "invalid num-lock: %d\n", curr->num_lock);
     if(curr->num_lock == 0){
         iset(pre_i);
     }
