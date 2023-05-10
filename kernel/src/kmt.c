@@ -1,10 +1,12 @@
 #include <os.h>
 
-
-
 task_t* current[MAX_CPU], * tasks = NULL;   
 spinlock_t task_lk;
-Context * os_contexts[MAX_CPU];             //os idle thread context saved here
+
+int NLOCK[MAX_CPU];
+#define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
+
+Context *   os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
 #define LOCK(lk) kmt->spin_lock((lk))
@@ -31,11 +33,9 @@ Context * schedule(){
         return os_ctx;
     }
     LOCK(&task_lk);
-    //print_tasks();
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
-    curr->stat = RUNNABLE;
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
@@ -60,8 +60,7 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     return schedule();
 }
 Context * yield_handler(Event ev, Context* ctx){
-    //return to original
-    return schedule();
+    return timer_intr_handler(ev, ctx);
 }
 
 /// page fault handler
@@ -72,6 +71,9 @@ Context* page_fault_handler(Event ev, Context* ctx){
 
 spinlock_t usr_lk;
 static void init_locks(){
+    for(int i = 0; i < MAX_CPU; i++){
+        NLOCK[i] = 0;
+    }
     kmt->spin_init(&task_lk, "lock for task link");
     kmt->spin_init(&usr_lk, "user lock");
 }
@@ -79,12 +81,19 @@ static void sign_irqs(){
     os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
     os->on_irq(1, EVENT_YIELD, yield_handler);
 }
+static void init_tasks(){
+    for(int i = 0; i < MAX_CPU; i++){
+        current[i] = NULL;
+    }
+}
 static void kmt_init(){
     print_local("=== kmt init begin === \n");
 
     init_locks();       print_local("=== locks init finished ===\n");
 
     sign_irqs();        print_local("=== kmt init finished ===\n");
+
+    init_tasks();          
 }
 
 //need to mod global tasklist
@@ -146,13 +155,14 @@ void kmt_spin_lock(spinlock_t *lk){
             break;
         }
     }
-    curr->num_lock++;
+    n_lk++;
 }
 void kmt_spin_unlock(spinlock_t *lk){
-    curr->num_lock--;
+    n_lk--;
 
     atomic_xchg(&(lk->val), HOLD);
-    if(curr->num_lock == 0){
+    panic_report(n_lk < 0, "invalid num-lock: %d, curr : %p\n", curr->num_lock, curr);
+    if(n_lk == 0){
         iset(pre_i);
     }
 }
