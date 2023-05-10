@@ -1,42 +1,26 @@
 #include <os.h>
 #include<common.h>
 
-#define NThread 4
-#define ADDED 100000
+#define NThread 8
+#define ADDED 10000
 static volatile int s_nlk = 0, s_lk = 0;
-static volatile int tool = 1; 
-extern spinlock_t usr_lk;
-int handle_val(int v){
-    for(int i = 0; i < 100; i ++){
-        tool += v;
-    }
-    return v + 1;
-}
+
+static spinlock_t lk;
 
 void Tsum(void* name){
-    printf("num cpu: %d\n", cpu_count());
-    for(int i = 0; i < ADDED; i++){
-        int tmpt = s_nlk;
-        tmpt = handle_val(tmpt);
-        s_nlk = tmpt;
+    for(int i = 0; i < 100; i ++){
+        kmt->spin_lock(&lk);
+        s_nlk++;
+        kmt->spin_unlock(&lk);
     }
-    printf("[%s]: without lock, final sum: %d, expected: %d\n",(const char*)name, s_nlk, NThread * ADDED);
-    for(int i = 0; i < ADDED; i++){
-        kmt->spin_lock(&usr_lk);
-        int tmpt = s_lk;
-        tmpt = handle_val(tmpt);
-        s_lk = tmpt;
-        kmt->spin_unlock(&usr_lk);
+    printf("%s finished, res:%d\n", s_nlk);
+    while(1){
+        ;
     }
-    kmt->spin_lock(&usr_lk);
-    printf("with lock, final sum: %d \n", s_lk);
-    kmt->spin_unlock(&usr_lk);
-    
-    while(1);       //never return 
 }
 
 const char * thread_names[NThread] = {
-    "T1", "T2", "T3", "T4"
+    "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"
 };
 
 void test_sum(){
