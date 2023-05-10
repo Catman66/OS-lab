@@ -42,7 +42,7 @@ Context * schedule(){
         if(p->stat == RUNNABLE){
             curr = p;
             p->stat = RUNNING;
-            printf("cpu[%d] return to task[%d]\n", cpu_current(), curr->id);
+            printf("[%d][%d][%d][%d]\n", current[0]->id, current[1]->id, current[2]->id, current[3]->id);
             UNLOCK(&task_lk);
             return p->ctx;
         }
