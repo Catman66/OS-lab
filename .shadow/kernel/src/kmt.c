@@ -95,9 +95,6 @@ static void kmt_init(){
 
     init_tasks();     
 
-    printf("lets yield\n");
-    yield();
-    printf("after yield\n");
 }
 
 //need to mod global tasklist
@@ -138,7 +135,6 @@ static void kmt_teardown(task_t *task){
         }
         pre = p, p = p->next;
     }
-
     pmm->free(task->stack);
 }
 #define HOLD 0
@@ -153,11 +149,8 @@ void kmt_spin_lock(spinlock_t *lk){
     iset(false);
     pre_i = i;
 
-    while (1) {
-        intptr_t value = atomic_xchg(&(lk->val), NHOLD);
-        if (value == HOLD) {
-            break;
-        }
+    while (atomic_xchg(&(lk->val), NHOLD) == NHOLD) {
+        yield();            // fail to lock and sleep
     }
     __sync_synchronize();
     n_lk++;
