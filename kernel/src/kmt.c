@@ -1,7 +1,7 @@
 #include <os.h>
 
 task_t* current[MAX_CPU], * tasks = NULL;   
-spinlock_t task_lk;
+spinlock_t task_lk, print_lk;
 
 int NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
@@ -33,21 +33,22 @@ Context * schedule(){
         return os_ctx;
     }
     LOCK(&task_lk);
+    
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
-        if(p->stat == RUNNABLE && p->id % cpu_count() == cpu_current()){
+        if(p->stat == RUNNABLE){
             curr = p;
             p->stat = RUNNING;
+            //printf("[%d][%d][%d][%d]\n", current[0]->id, current[1]->id, current[2]->id, current[3]->id);
             UNLOCK(&task_lk);
             return p->ctx;
         }
         p = p->next;
     }
     UNLOCK(&task_lk);
-    //no threads to be sched 
     print_local("no threads to sched\n");
     curr = NULL;
     return os_ctx;
@@ -76,6 +77,7 @@ static void init_locks(){
     }
     kmt->spin_init(&task_lk, "lock for task link");
     kmt->spin_init(&usr_lk, "user lock");
+    kmt->spin_init(&print_lk, "print-lock");
 }
 static void sign_irqs(){
     os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
@@ -93,7 +95,9 @@ static void kmt_init(){
 
     sign_irqs();        print_local("=== kmt init finished ===\n");
 
-    init_tasks();     
+    init_tasks(); 
+
+    printf("num of tasks current: %d\n", NTASK);    
 
 }
 
@@ -118,7 +122,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     }
     NTASK++;
     kmt->spin_unlock(&task_lk);
-    check_task_link_structure();
+    //check_task_link_structure();
     return 0;
 }
 static void kmt_teardown(task_t *task){
@@ -147,8 +151,9 @@ int PRE_INTR[MAX_CPU];
 void kmt_spin_lock(spinlock_t *lk){
     int i = ienabled();
     iset(false);
-    pre_i = i;
-
+    if(n_lk == 0){
+        pre_i = i;
+    }
     while (atomic_xchg(&(lk->val), NHOLD) == NHOLD) {
         //curr->stat = SLEEPING;
         //yield();            // fail to lock and sleep
@@ -159,8 +164,8 @@ void kmt_spin_lock(spinlock_t *lk){
 }
 void kmt_spin_unlock(spinlock_t *lk){
     n_lk--;
-
     __sync_synchronize();
+
     atomic_xchg(&(lk->val), HOLD);
     if(n_lk == 0){
         iset(pre_i);
@@ -174,9 +179,9 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->front = sem->rear = NULL;
 }
 
-P_task_node* make_new_semqueue_node(task_t* ctx, P_task_node* nxt){
+P_task_node* make_new_semqueue_node(task_t* tsk, P_task_node* nxt){
     P_task_node * new_nd = pmm->alloc(sizeof(P_task_node));
-    new_nd->p_task = ctx;
+    new_nd->p_task = tsk;
     new_nd->next = nxt;
     return new_nd;
 }
@@ -188,7 +193,7 @@ void sem_enqueue_locked(sem_t* sem, task_t* tsk){
         sem->rear = sem->rear->next;
     }
 }
-task_t* sem_rand_dequeue_locked(sem_t* sem){
+task_t* sem_dequeue_locked(sem_t* sem){
     assert(SEM_NONE_WAITING(sem) == false);
     assert(sem->val < 0);
     task_t *        ret = sem->front->p_task;
@@ -203,14 +208,27 @@ task_t* sem_rand_dequeue_locked(sem_t* sem){
     return ret;
 }
 
+void locked_print(sem_t* sem){
+    kmt->spin_lock(&print_lk);
+    for(P_task_node* p = sem->front; p; p = p->next){
+            printf("[%d]", p->p_task->id);
+        }
+    print_local("\n");
+    kmt->spin_unlock(&print_lk);
+}
+
 void kmt_sem_wait(sem_t *sem){
     kmt_spin_lock(&sem->lock);
     sem->val --;
     if(sem->val < 0){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
+        locked_print(sem);
     } 
     kmt_spin_unlock(&sem->lock);
+    
+    //printf("%d\n", pre_i);
+    assert(ienabled());
     if(curr->stat == SLEEPING){
         yield();
     }
@@ -218,7 +236,7 @@ void kmt_sem_wait(sem_t *sem){
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
     if(sem->val < 0){
-        sem_rand_dequeue_locked(sem)->stat = RUNNABLE;
+        sem_dequeue_locked(sem)->stat = RUNNABLE;
     }
     sem->val++;
     kmt_spin_unlock(&sem->lock);

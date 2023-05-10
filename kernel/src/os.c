@@ -8,8 +8,10 @@ static void print_handlers();
 extern void test_sum();
 extern void test_pc_sem();
 extern void test_starvation();
+extern void test_sched();
 
 static void os_init() {
+  printf("\nthis is cpu[%d]\n", cpu_current());
   pmm->init();
   kmt->init();
   print_handlers();
@@ -17,13 +19,15 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 #ifdef LOCAL_DEBUG
   //dev->init();
+  //test_sum();
+  //test_sched();
   //test_starvation();
   test_pc_sem();
 #endif
 }
 
 static void os_run() {
-  print_local("os-run executed, hello\n");
+  print_local("os-run executed, hello, n_cpu: %d\n", cpu_count());
   iset(true);
   while (1) ;
 }
@@ -54,8 +58,6 @@ static Context *os_trap(Event ev, Context *context){
     }
   }
   panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
-  //panic_on(!next_ctx, "returning NULL context");
-  //print_local("before ret: if:%d \n", ienabled());
   return next_ctx;
 }
 

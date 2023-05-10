@@ -1,0 +1,21 @@
+#include <os.h>
+#include <common.h>
+
+void Tsilent(void* arg){
+    int i = 0;
+    while(1){
+        i++;
+    }
+    printf("%d\n", i);
+}
+
+void test_sched(){
+    for(int i = 0; i < 8; i++){
+        kmt->create(task_alloc(), "T", Tsilent, NULL);
+    }
+}
+
+
+task_t* task_alloc(){
+    return pmm->alloc(sizeof(task_t));
+}
