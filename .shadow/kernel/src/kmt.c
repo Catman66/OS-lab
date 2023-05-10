@@ -1,7 +1,7 @@
 #include <os.h>
 
 task_t* current[MAX_CPU], * tasks = NULL;   
-spinlock_t task_lk;
+spinlock_t task_lk, print_lk;
 
 int NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
@@ -77,6 +77,7 @@ static void init_locks(){
     }
     kmt->spin_init(&task_lk, "lock for task link");
     kmt->spin_init(&usr_lk, "user lock");
+    kmt->spin_init(&print_lk, "print-lock");
 }
 static void sign_irqs(){
     os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
@@ -206,17 +207,22 @@ task_t* sem_dequeue_locked(sem_t* sem){
     return ret;
 }
 
+void locked_print(sem_t* sem){
+    kmt->spin_lock(&print_lk);
+    for(P_task_node* p = sem->front; p; p = p->next){
+            printf("[%d]", p->p_task->id);
+        }
+    print_local("\n");
+    kmt->spin_unlock(&print_lk);
+}
+
 void kmt_sem_wait(sem_t *sem){
     kmt_spin_lock(&sem->lock);
     sem->val --;
     if(sem->val < 0){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
-        
-        for(P_task_node* p = sem->front; p; p = p->next){
-            printf("[%d]", p->p_task->id);
-        }
-        print_local("\n");
+        locked_print(sem);
     } 
     kmt_spin_unlock(&sem->lock);
     
