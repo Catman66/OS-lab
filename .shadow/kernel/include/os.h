@@ -37,8 +37,10 @@ struct semaphore {
   const char * desc;
   int val;
   spinlock_t lock;
-  P_task_node queue;
+  P_task_node * front, * rear;
 };
+#define SEM_NONE_WAITING(s) ((s)->front == NULL)
+#define SEM_ONE_WAITING(s) ((s)->front == (s)->rear)
 
 void panic_report(bool cond, const char * fmt, ...);
 
