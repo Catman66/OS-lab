@@ -78,12 +78,19 @@ static void sign_irqs(){
     os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
     os->on_irq(1, EVENT_YIELD, yield_handler);
 }
+static void init_tasks(){
+    for(int i = 0; i < MAX_CPU; i++){
+        current[i] = NULL;
+    }
+}
 static void kmt_init(){
     print_local("=== kmt init begin === \n");
 
     init_locks();       print_local("=== locks init finished ===\n");
 
     sign_irqs();        print_local("=== kmt init finished ===\n");
+
+    init_tasks();       
 }
 
 //need to mod global tasklist
