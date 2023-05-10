@@ -172,15 +172,21 @@ P_task_node* make_new_semqueue_node(task_t* ctx, P_task_node* nxt){
     return new_nd;
 }
 void sem_enqueue_locked(sem_t* sem, task_t* tsk){
-    tsk->stat = SLEEPING;
     sem->queue.next = make_new_semqueue_node(tsk, sem->queue.next);
 }
 task_t* sem_rand_dequeue_locked(sem_t* sem){
     assert(SEM_EMPTY(sem->queue) == false);
-    P_task_node * del = sem->queue.next;
-    task_t* ret = del->p_task;
-    sem->queue.next = del->next;
-    pmm->free(del);
+    assert(sem->val < 0);
+    int off = rand() % (-sem->val);
+    
+    P_task_node * pre = &sem->queue, *p = sem->queue.next;
+    for(int i = 0; i < off; i++){
+        pre = pre->next;
+    }
+    p = pre->next;
+    task_t * ret = p->p_task;
+    pre->next = p->next;
+    pmm->free(p);
     return ret;
 }
 
