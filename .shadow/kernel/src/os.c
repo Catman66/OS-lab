@@ -43,7 +43,7 @@ static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_
 Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
 
 static Context *os_trap(Event ev, Context *context){
-  print_local("enter trap, if:%d \n", ienabled());
+  //print_local("enter trap, if:%d \n", ienabled());
   save_context(context);
   Context* next_ctx = NULL;
   for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
@@ -55,7 +55,7 @@ static Context *os_trap(Event ev, Context *context){
   }
   panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
   //panic_on(!next_ctx, "returning NULL context");
-  print_local("before ret: if:%d \n", ienabled());
+  //print_local("before ret: if:%d \n", ienabled());
   return next_ctx;
 }
 
