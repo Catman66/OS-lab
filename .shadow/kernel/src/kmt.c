@@ -151,8 +151,9 @@ int PRE_INTR[MAX_CPU];
 void kmt_spin_lock(spinlock_t *lk){
     int i = ienabled();
     iset(false);
-    pre_i = i;
-
+    if(n_lk == 0){
+        pre_i = i;
+    }
     while (atomic_xchg(&(lk->val), NHOLD) == NHOLD) {
         //curr->stat = SLEEPING;
         //yield();            // fail to lock and sleep
