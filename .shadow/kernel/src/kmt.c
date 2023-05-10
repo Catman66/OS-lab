@@ -31,10 +31,10 @@ Context * schedule(){
         return os_ctx;
     }
     LOCK(&task_lk);
-    //print_tasks();
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
+    printf("one sched\n");
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
