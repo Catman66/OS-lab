@@ -16,7 +16,7 @@ void Tproduce(void * pc) {
   }
   printf("finished \n");
   while(1) {
-    printf("after %c finish\n", *(char *)pc);
+    //printf("after %c finish\n", *(char *)pc);
   }
 }
 
@@ -29,7 +29,7 @@ void Tconsume(void * pc) {
   }
   printf("finished\n");
   while(1) {
-    printf("after %c finish\n", *(char*)pc);
+    //printf("after %c finish\n", *(char*)pc);
   }
 }
 
