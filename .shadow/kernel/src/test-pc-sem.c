@@ -14,6 +14,7 @@ void Tproduce() {
     printf("(");
     V(&fill);
   }
+  printf("finished \n");
   while(1) ;
 }
 
@@ -24,6 +25,7 @@ void Tconsume() {
     printf(")");
     V(&empty);
   }
+  printf("finished\n");
   while(1) ;
 }
 
