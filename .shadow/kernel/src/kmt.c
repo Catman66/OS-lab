@@ -176,6 +176,7 @@ void sem_enqueue_locked(sem_t* sem, task_t* tsk){
         sem->front = sem->rear = make_new_semqueue_node(tsk, NULL);
     } else {
         sem->rear->next = make_new_semqueue_node(tsk, NULL);
+        sem->rear = sem->rear->next;
     }
 }
 task_t* sem_rand_dequeue_locked(sem_t* sem){
