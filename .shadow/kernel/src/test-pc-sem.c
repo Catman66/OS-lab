@@ -41,8 +41,8 @@ void test_pc_sem(){
   kmt->sem_init(&empty, "empty", 3);
   
   for(int i = 0; i < NThread; i++){
-      kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, "abcdefgijkl" + i);
-      kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, "abcdefgh" + i);
+      kmt->create(task_alloc(), "producer", Tproduce, "abcdefgijkl" + i);
+      kmt->create(task_alloc(), "consumer", Tconsume, "abcdefgh" + i);
   }
   printf("init pc-test finished\n");
 }
