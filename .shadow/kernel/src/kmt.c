@@ -150,6 +150,7 @@ void kmt_spin_lock(spinlock_t *lk){
     pre_i = i;
 
     while (atomic_xchg(&(lk->val), NHOLD) == NHOLD) {
+        curr->stat = SLEEPING;
         yield();            // fail to lock and sleep
     }
     __sync_synchronize();
