@@ -56,6 +56,7 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     if(curr != NULL && curr->stat == RUNNING){
         curr->stat = RUNNABLE;
     }
+    printf("timer intr\n");
     return schedule();
 }
 Context * yield_handler(Event ev, Context* ctx){
