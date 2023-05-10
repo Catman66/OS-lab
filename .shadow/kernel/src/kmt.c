@@ -35,7 +35,6 @@ Context * schedule(){
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
-    curr->stat = RUNNABLE;
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
@@ -60,8 +59,7 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     return schedule();
 }
 Context * yield_handler(Event ev, Context* ctx){
-    //return to original
-    return schedule();
+    return timer_intr_handler(ev, ctx);
 }
 
 /// page fault handler
