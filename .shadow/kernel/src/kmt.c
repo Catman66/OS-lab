@@ -155,11 +155,13 @@ void kmt_spin_lock(spinlock_t *lk){
             break;
         }
     }
+    __sync_synchronize();
     n_lk++;
 }
 void kmt_spin_unlock(spinlock_t *lk){
     n_lk--;
 
+    __sync_synchronize();
     atomic_xchg(&(lk->val), HOLD);
     panic_report(n_lk < 0, "invalid num-lock: %d, curr : %p\n", curr->num_lock, curr);
     if(n_lk == 0){
