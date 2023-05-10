@@ -8,12 +8,12 @@ static volatile int s_nlk = 0, s_lk = 0;
 static spinlock_t lk;
 
 void Tsum(void* name){
-    for(int i = 0; i < 100; i ++){
-        kmt->spin_lock(&lk);
+    for(int i = 0; i < ADDED; i ++){
+        //kmt->spin_lock(&lk);
         s_nlk++;
-        kmt->spin_unlock(&lk);
+        //kmt->spin_unlock(&lk);
     }
-    printf("%s finished, res:%d\n", *(const char *)name, s_nlk);
+    printf("%s finished, res:%d\n", (const char *)name, s_nlk);
     while(1){
         ;
     }
@@ -24,6 +24,7 @@ const char * thread_names[NThread] = {
 };
 
 void test_sum(){
+    kmt->spin_init(&lk, "sum-lock");
     for(int i = 0; i < NThread; i++){
         kmt->create(pmm->alloc(sizeof(task_t)), thread_names[i], Tsum, (void*)thread_names[i]);
     }
