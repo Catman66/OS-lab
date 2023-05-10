@@ -11,12 +11,14 @@ void Tsum(void* name){
     for(int i = 0; i < ADDED; i ++){
         s_nlk++;
     }
+    const char * n = name;
+    printf("%s finish nlk: %d\n", n, s_nlk);
     for(int i = 0; i < ADDED; i++){
         kmt->spin_lock(&lk);
         s_lk++;
         kmt->spin_unlock(&lk);
     }
-    printf("%s finished, s_nlk: %d, s_lk: %d\n", (const char *)name, s_nlk, s_lk);
+    printf("%s finish lk: %d\n", n, s_lk);
     while(1){
         ;
     }
