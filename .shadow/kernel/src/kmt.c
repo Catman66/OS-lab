@@ -212,6 +212,10 @@ void kmt_sem_wait(sem_t *sem){
     if(sem->val < 0){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
+        
+        for(P_task_node* p = sem->front; p; p = p->next){
+            printf("[%d]", p->p_task->id);
+        }
     } 
     kmt_spin_unlock(&sem->lock);
     
