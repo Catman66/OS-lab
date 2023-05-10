@@ -38,7 +38,7 @@ Context * schedule(){
     }
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
-        if(p->stat == RUNNABLE){
+        if(p->stat == RUNNABLE && p->id % cpu_count() == cpu_current()){
             curr = p;
             p->stat = RUNNING;
             UNLOCK(&task_lk);
@@ -106,9 +106,9 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
-    task->num_lock = 0;
 
     kmt->spin_lock(&task_lk);
+    task->id = NTASK;
     if(tasks == NULL){          //make a circle of one task
         tasks = task;
         tasks->next = tasks;
@@ -162,7 +162,6 @@ void kmt_spin_unlock(spinlock_t *lk){
 
     __sync_synchronize();
     atomic_xchg(&(lk->val), HOLD);
-    panic_report(n_lk < 0, "invalid num-lock: %d, curr : %p\n", curr->num_lock, curr);
     if(n_lk == 0){
         iset(pre_i);
     }
