@@ -21,8 +21,7 @@ void save_context(Context* ctx){        //better not be interrupted
         os_ctx = ctx;   //always runnable
     } else {    
         curr->ctx = ctx;
-        curr->stat = IN_INTR;
-        panic_on(CANARY_ALIVE(curr) == false, "we lost the canary!!!\n");
+        panic_on(CANARY_ALIVE(curr) == false, "We lost the canary!!!\n");
     }
     iset(i);
 }
@@ -36,9 +35,8 @@ Context * schedule(){
     if(curr == NULL){       //first useful schedule
         curr = tasks;
     }
-    //print_local("one switch\n");
+    curr->stat = RUNNABLE;
     task_t * p = curr->next;
-    //print_tasks();
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
             curr = p;
@@ -56,12 +54,13 @@ Context * schedule(){
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
-    if(curr != NULL){
+    if(curr != NULL && curr->stat == RUNNING){
         curr->stat = RUNNABLE;
     }
     return schedule();
 }
 Context * yield_handler(Event ev, Context* ctx){
+    //return to original
     return schedule();
 }
 
@@ -162,7 +161,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->desc = name;
     sem->val = value;
     kmt_spin_init(&(sem->lock), name);          
-    sem->queue.p_task = NULL, sem->queue.next = NULL;
+    sem->front = sem->rear = NULL;
 }
 
 P_task_node* make_new_semqueue_node(task_t* ctx, P_task_node* nxt){
@@ -172,21 +171,25 @@ P_task_node* make_new_semqueue_node(task_t* ctx, P_task_node* nxt){
     return new_nd;
 }
 void sem_enqueue_locked(sem_t* sem, task_t* tsk){
-    sem->queue.next = make_new_semqueue_node(tsk, sem->queue.next);
+    if(SEM_NONE_WAITING(sem)){
+        sem->front = sem->rear = make_new_semqueue_node(tsk, NULL);
+    } else {
+        sem->rear->next = make_new_semqueue_node(tsk, NULL);
+        sem->rear = sem->rear->next;
+    }
 }
 task_t* sem_rand_dequeue_locked(sem_t* sem){
-    assert(SEM_EMPTY(sem->queue) == false);
+    assert(SEM_NONE_WAITING(sem) == false);
     assert(sem->val < 0);
-    int off = rand() % (-sem->val);
-    
-    P_task_node * pre = &sem->queue, *p = sem->queue.next;
-    for(int i = 0; i < off; i++){
-        pre = pre->next;
+    task_t *        ret = sem->front->p_task;
+    P_task_node *   del = sem->front;
+
+    if(SEM_ONE_WAITING(sem)){
+        sem->front = sem->rear = NULL;
+    } else {
+        sem->front = sem->front->next;
     }
-    p = pre->next;
-    task_t * ret = p->p_task;
-    pre->next = p->next;
-    pmm->free(p);
+    pmm->free(del);
     return ret;
 }
 
