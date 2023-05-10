@@ -94,7 +94,9 @@ static void kmt_init(){
 
     sign_irqs();        print_local("=== kmt init finished ===\n");
 
-    init_tasks();     
+    init_tasks(); 
+
+    printf("num of tasks current: %d\n", NTASK);    
 
 }
 
