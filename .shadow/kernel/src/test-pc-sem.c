@@ -15,7 +15,9 @@ void Tproduce(void * p_c) {
     V(&fill);
   }
   printf("finished \n");
-  while(1) ;
+  while(1) {
+    printf("after finish\n");
+  }
 }
 
 void Tconsume(void * pc) {
