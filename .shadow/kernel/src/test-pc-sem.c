@@ -38,7 +38,7 @@ void Tconsume(void * pc) {
 void test_pc_sem(){
   printf("initiating pc-test\n");
   kmt->sem_init(&fill, "fill", 0);
-  kmt->sem_init(&empty, "empty", 2);
+  kmt->sem_init(&empty, "empty", 3);
   
   for(int i = 0; i < NThread; i++){
       kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, "abcdefgijkl" + i);
