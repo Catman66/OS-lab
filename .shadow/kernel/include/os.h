@@ -9,12 +9,12 @@
 typedef enum{ RUNNING, RUNNABLE, SLEEPING } task_stat;
 
 struct task {
+  int id;
   const char * name;
   Context * ctx;
   task_stat stat;
   struct task * next;
   uint8_t * stack;   
-  int num_lock;
 };
 
 #define MAX_CPU 16
