@@ -49,6 +49,11 @@ Context * schedule(){
     UNLOCK(&task_lk);
     //no threads to be sched 
     print_local("no threads to sched\n");
+    p = tasks;
+    for(int i = 0; i < NTASK; i++){
+        printf("[id:%d, stat:%d] ", p->id, p->stat);
+    }
+    printf("\n");
     curr = NULL;
     return os_ctx;
 }
