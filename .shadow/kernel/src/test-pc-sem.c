@@ -6,7 +6,7 @@ sem_t fill, empty;
 #define P kmt->sem_wait
 #define V kmt->sem_signal
 
-#define NUM_PARE 100000
+#define NUM_PARE 1000
 void Tproduce() {
   int i = 0;
   while (i++ < NUM_PARE) {
