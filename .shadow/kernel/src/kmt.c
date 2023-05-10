@@ -151,6 +151,7 @@ void kmt_spin_unlock(spinlock_t *lk){
     curr->num_lock--;
 
     atomic_xchg(&(lk->val), HOLD);
+    assert(curr->num_lock >= 0);
     if(curr->num_lock == 0){
         iset(pre_i);
     }
