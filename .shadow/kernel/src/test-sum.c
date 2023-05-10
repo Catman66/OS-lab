@@ -2,7 +2,7 @@
 #include<common.h>
 
 #define NThread 8
-#define ADDED 10000
+#define ADDED 100000
 static volatile int s_nlk = 0, s_lk = 0;
 
 static spinlock_t lk;
