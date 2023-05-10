@@ -8,26 +8,28 @@ sem_t fill, empty;
 
 #define NUM_PARE 50
 void Tproduce(void * pc) {
+  char c = *(char*)pc;
   int i = 0;
   while (i++ < NUM_PARE) {
     P(&empty);
     printf("(%c", *(char*)pc);
     V(&fill);
   }
-  printf("finished \n");
+  printf("producer %c finished \n", c);
   while(1) {
     //printf("after %c finish\n", *(char *)pc);
   }
 }
 
 void Tconsume(void * pc) {
+  char c = *(char*)pc;
   int i = 0;
   while (i++ < NUM_PARE) {
     P(&fill);
     printf(")%c", *(char*)pc);
     V(&empty);
   }
-  printf("finished\n");
+  printf("consumer %c finished\n", c);
   while(1) {
     //printf("after %c finish\n", *(char*)pc);
   }

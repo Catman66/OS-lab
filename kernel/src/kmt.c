@@ -93,7 +93,8 @@ static void kmt_init(){
 
     sign_irqs();        print_local("=== kmt init finished ===\n");
 
-    init_tasks();          
+    init_tasks();     
+
 }
 
 //need to mod global tasklist
@@ -134,7 +135,6 @@ static void kmt_teardown(task_t *task){
         }
         pre = p, p = p->next;
     }
-
     pmm->free(task->stack);
 }
 #define HOLD 0
@@ -149,17 +149,18 @@ void kmt_spin_lock(spinlock_t *lk){
     iset(false);
     pre_i = i;
 
-    while (1) {
-        intptr_t value = atomic_xchg(&(lk->val), NHOLD);
-        if (value == HOLD) {
-            break;
-        }
+    while (atomic_xchg(&(lk->val), NHOLD) == NHOLD) {
+        //curr->stat = SLEEPING;
+        yield();            // fail to lock and sleep
+        ;
     }
+    __sync_synchronize();
     n_lk++;
 }
 void kmt_spin_unlock(spinlock_t *lk){
     n_lk--;
 
+    __sync_synchronize();
     atomic_xchg(&(lk->val), HOLD);
     panic_report(n_lk < 0, "invalid num-lock: %d, curr : %p\n", curr->num_lock, curr);
     if(n_lk == 0){
