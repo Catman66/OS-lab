@@ -13,7 +13,7 @@ void Tsum(void* name){
         s_nlk++;
         kmt->spin_unlock(&lk);
     }
-    printf("%s finished, res:%d\n", s_nlk);
+    printf("%s finished, res:%d\n", *(const char *)name, s_nlk);
     while(1){
         ;
     }
