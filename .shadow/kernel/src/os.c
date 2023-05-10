@@ -54,8 +54,6 @@ static Context *os_trap(Event ev, Context *context){
     }
   }
   panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
-  //panic_on(!next_ctx, "returning NULL context");
-  //print_local("before ret: if:%d \n", ienabled());
   return next_ctx;
 }
 

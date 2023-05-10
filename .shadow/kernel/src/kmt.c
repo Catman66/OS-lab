@@ -42,6 +42,7 @@ Context * schedule(){
             curr = p;
             p->stat = RUNNING;
             UNLOCK(&task_lk);
+            printf("cpu[%d] return to task[%d]\n", cpu_current(), curr->id);
             return p->ctx;
         }
         p = p->next;
