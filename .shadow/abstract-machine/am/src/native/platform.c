@@ -154,8 +154,9 @@ static void init_platform() {
   iset(0);
 
   // set ncpu
-  const char *smp = getenv("smp");
-  __am_ncpu = smp ? atoi(smp) : 1;
+  //const char *smp = getenv("smp");
+  //__am_ncpu = smp ? atoi(smp) : 1;
+  __am_ncpu = 4;
   assert(0 < __am_ncpu && __am_ncpu <= MAX_CPU);
 
   // set pgsize
