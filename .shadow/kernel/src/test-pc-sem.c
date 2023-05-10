@@ -41,5 +41,6 @@ void test_pc_sem(){
       kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, "abcdefgijkl" + i);
       kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, "abcdefgh" + i);
   }
+  printf("init pc-test finished\n");
 }
 
