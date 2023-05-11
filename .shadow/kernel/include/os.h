@@ -44,7 +44,7 @@ struct semaphore {
 
 void panic_report(bool cond, const char * fmt, ...);
 
-task_t* task_alloc();
+task_t* tsk_alloc();
 
 #ifdef LOCAL_DEBUG
     #define print_local printf
