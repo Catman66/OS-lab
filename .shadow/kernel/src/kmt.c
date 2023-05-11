@@ -1,17 +1,35 @@
 #include <os.h>
 
-task_t* current[MAX_CPU], * tasks = NULL;   
-spinlock_t task_lk, print_lk;
+task_t * current[MAX_CPU], * tasks = NULL;   
+spinlock_t task_lk;
 
-int NLOCK[MAX_CPU];
+int     NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
 
 Context *   os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
-#define LOCK(lk) kmt->spin_lock((lk))
-#define UNLOCK(lk) kmt->spin_unlock((lk))
 int NTASK = 0;
+
+static void init_locks();
+
+static void sign_irqs();
+
+static void init_tasks();
+
+static void kmt_init(){
+    print_local("=== kmt init begin === \n");
+
+    init_locks();       print_local(" === locks init finished ===\n");
+
+    sign_irqs();        print_local(" === kmt init finished ===\n");
+
+    init_tasks(); 
+
+    print_local("=== num of tasks current: %d ===\n", NTASK);    
+}
+
+
 
 void check_task_link_structure();
 void print_tasks();
@@ -31,7 +49,7 @@ Context * schedule(){
     if(tasks == NULL){      //no tasks
         return os_ctx;
     }
-    LOCK(&task_lk);
+    kmt->spin_lock(&task_lk);
     
     if(curr == NULL){       //first useful schedule
         curr = tasks;
@@ -41,12 +59,12 @@ Context * schedule(){
         if(p->stat == RUNNABLE){
             curr = p;
             p->stat = RUNNING;
-            UNLOCK(&task_lk);
+            kmt->spin_unlock(&task_lk);
             return p->ctx;
         }
         p = p->next;
     }
-    UNLOCK(&task_lk);
+    kmt->spin_unlock(&task_lk);
     print_local("no threads to sched\n");
     curr = NULL;
     return os_ctx;
@@ -58,46 +76,15 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     }
     return schedule();
 }
+
 Context * yield_handler(Event ev, Context* ctx){
     return timer_intr_handler(ev, ctx);
 }
 
-/// page fault handler
-Context* page_fault_handler(Event ev, Context* ctx){
-    panic("page fault not implemented yet\n");
-    return ctx;             // return to the original program
-}
 
-spinlock_t usr_lk;
-static void init_locks(){
-    for(int i = 0; i < MAX_CPU; i++){
-        NLOCK[i] = 0;
-    }
-    kmt->spin_init(&task_lk, "lock for task link");
-    kmt->spin_init(&usr_lk, "user lock");
-    kmt->spin_init(&print_lk, "print-lock");
-}
-static void sign_irqs(){
-    os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
-    os->on_irq(1, EVENT_YIELD, yield_handler);
-}
-static void init_tasks(){
-    for(int i = 0; i < MAX_CPU; i++){
-        current[i] = NULL;
-    }
-}
-static void kmt_init(){
-    print_local("=== kmt init begin === \n");
 
-    init_locks();       print_local("=== locks init finished ===\n");
 
-    sign_irqs();        print_local("=== kmt init finished ===\n");
 
-    init_tasks(); 
-
-    print_local("num of tasks current: %d\n", NTASK);    
-
-}
 
 //need to mod global tasklist
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
@@ -213,14 +200,6 @@ task_t* sem_dequeue_locked(sem_t* sem){
     return ret;
 }
 
-void locked_print(sem_t* sem){
-    kmt->spin_lock(&print_lk);
-    for(P_task_node* p = sem->front; p; p = p->next){
-            print_local("[%d]", p->p_task->id);
-        }
-    print_local("\n");
-    kmt->spin_unlock(&print_lk);
-}
 
 void kmt_sem_wait(sem_t *sem){
     kmt_spin_lock(&sem->lock);
@@ -274,14 +253,26 @@ void check_task_link_structure(){
     print_local("check finished\n");
 }
 
-void print_tasks(){
-    print_local("=== current tasks: ");
-    LOCK(&task_lk);
-    task_t* p = tasks;
-    for(int i = 0; i < NTASK; i++){
-        print_local("[%s, %d]", p->name, p->stat);
-        p = p->next;
+/// page fault handler
+Context* page_fault_handler(Event ev, Context* ctx){
+    panic("page fault not implemented yet\n");
+    return ctx;             // return to the original program
+}
+
+static void init_locks(){
+    for(int i = 0; i < MAX_CPU; i++){
+        NLOCK[i] = 0;
     }
-    UNLOCK(&task_lk);
-    print_local("\n");
+    kmt->spin_init(&task_lk, "lock for task link");
+}
+
+static void sign_irqs(){
+    os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
+    os->on_irq(1, EVENT_YIELD, yield_handler);
+}
+
+static void init_tasks(){
+    for(int i = 0; i < MAX_CPU; i++){
+        current[i] = NULL;
+    }
 }
