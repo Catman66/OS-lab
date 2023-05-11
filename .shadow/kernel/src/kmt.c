@@ -143,6 +143,7 @@ static void kmt_teardown(task_t *task){
 #define HOLD 0
 #define NHOLD 1
 void kmt_spin_init(spinlock_t *lk, const char *name){
+    lk->desc = name;
     lk->val = HOLD;
 }
 int PRE_INTR[MAX_CPU];
