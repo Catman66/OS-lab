@@ -48,9 +48,6 @@ Context * schedule(){
     }
     kmt->spin_lock(&task_lk);
     
-    if(curr == NULL){       //first useful schedule
-        curr = tasks;
-    }
     task_t * p = curr->next;
     for(int n = 0; n < NTASK; n++){
         if(p->stat == RUNNABLE){
