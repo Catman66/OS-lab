@@ -9,6 +9,7 @@ extern void test_sum();
 extern void test_pc_sem();
 extern void test_starvation();
 extern void test_sched();
+extern void test_ctx();
 
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
@@ -22,7 +23,8 @@ static void os_init() {
   //test_sum();
   //test_sched();
   //test_starvation();
-  test_pc_sem();
+  //test_pc_sem();
+  test_ctx();
 #endif
 }
 
