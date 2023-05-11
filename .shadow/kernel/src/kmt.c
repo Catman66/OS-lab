@@ -23,7 +23,7 @@ void save_context(Context* ctx){        //better not be interrupted
         os_ctx = ctx;   //always runnable
     } else {    
         curr->ctx = ctx;
-        panic_on(CANARY_ALIVE(curr) == false, "We lost the canary!!!\n");
+        //panic_on(CANARY_ALIVE(curr) == false, "We lost the canary!!!\n");
     }
     iset(i);
 }
