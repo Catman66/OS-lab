@@ -36,8 +36,8 @@ test: git time-record
 DEBUG_FLAGS	:= -serial mon:stdio \
               -machine accel=tcg \
               -drive format=raw,file=build/kernel-x86_64-qemu \
-			  -s -S -nographic \
-			  -smp "2,sockets=2"
+			  -s -S -nographic 
+#-smp "3,sockets=3"
 
 
 
