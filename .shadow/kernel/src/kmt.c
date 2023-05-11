@@ -163,7 +163,7 @@ void kmt_spin_lock(spinlock_t *lk){
 }
 
 void kmt_spin_unlock(spinlock_t *lk){
-    assert(n_lk>= 1);
+    panic_on(n_lk < 1, curr->name);
     assert(lk->val == NHOLD);
     assert(ienabled() == false);
 
