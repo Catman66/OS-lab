@@ -97,7 +97,7 @@ static void kmt_init(){
 
     init_tasks(); 
 
-    printf("num of tasks current: %d\n", NTASK);    
+    print_local("num of tasks current: %d\n", NTASK);    
 
 }
 
@@ -211,7 +211,7 @@ task_t* sem_dequeue_locked(sem_t* sem){
 void locked_print(sem_t* sem){
     kmt->spin_lock(&print_lk);
     for(P_task_node* p = sem->front; p; p = p->next){
-            printf("[%d]", p->p_task->id);
+            print_local("[%d]", p->p_task->id);
         }
     print_local("\n");
     kmt->spin_unlock(&print_lk);

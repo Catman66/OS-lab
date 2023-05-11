@@ -33,6 +33,13 @@ test: git time-record
 	paste *.time >> ttime &&\
 	tail -5 ttime
 
-	
+DEBUG_FLAGS	:= -serial mon:stdio \
+              -machine accel=tcg \
+              -smp "4,sockets=4" \
+              -drive format=raw,file=build/kernel-x86_64-qemu \
+			  -s -S -nographic
+
+debug: build-arg
+	@qemu-system-x86_64 $(DEBUG_FLAGS) & gdb -x init.gdb
 
 

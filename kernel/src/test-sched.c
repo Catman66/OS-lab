@@ -11,11 +11,11 @@ void Tsilent(void* arg){
 
 void test_sched(){
     for(int i = 0; i < 8; i++){
-        kmt->create(task_alloc(), "T", Tsilent, NULL);
+        kmt->create(tsk_alloc(), "T", Tsilent, NULL);
     }
 }
 
 
-task_t* task_alloc(){
+task_t* tsk_alloc(){
     return pmm->alloc(sizeof(task_t));
 }
