@@ -161,6 +161,7 @@ void kmt_spin_lock(spinlock_t *lk){
     }
     __sync_synchronize();
     n_lk++;
+    panic_on(ienabled(), "i set in lock\n");
 }
 
 void kmt_spin_unlock(spinlock_t *lk){
