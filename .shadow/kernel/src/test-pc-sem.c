@@ -14,7 +14,7 @@ void Tproduce(void * pc) {
   int i = 0;
   while (i++ < NUM_PARE) {
     P(&empty);
-    //printf("(%c", *(char*)pc);
+    printf("(%c", *(char*)pc);
     s++;
     V(&fill);
     assert(s >= 0 && s <= dep);
@@ -30,7 +30,7 @@ void Tconsume(void * pc) {
   int i = 0;
   while (i++ < NUM_PARE) {
     P(&fill);
-    //printf(")%c", *(char*)pc);
+    printf(")%c", *(char*)pc);
     s--;
     V(&empty);
   }
