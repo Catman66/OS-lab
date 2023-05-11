@@ -23,7 +23,6 @@ void save_context(Context* ctx){        //better not be interrupted
         os_ctx = ctx;   //always runnable
     } else {    
         curr->ctx = ctx;
-        panic_on(CANARY_ALIVE(curr) == false, "We lost the canary!!!\n");
     }
     iset(i);
 }
@@ -42,7 +41,6 @@ Context * schedule(){
         if(p->stat == RUNNABLE){
             curr = p;
             p->stat = RUNNING;
-            //printf("[%d][%d][%d][%d]\n", current[0]->id, current[1]->id, current[2]->id, current[3]->id);
             UNLOCK(&task_lk);
             return p->ctx;
         }
@@ -105,7 +103,6 @@ static void kmt_init(){
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
     task->stack = pmm->alloc(STACK_SIZE);
     panic_on(task->stack == NULL, "fail to alloc stack \n");
-    *(uint32_t*)task->stack = CANARY;       //in case stack overflow
     Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
@@ -144,6 +141,7 @@ static void kmt_teardown(task_t *task){
 #define HOLD 0
 #define NHOLD 1
 void kmt_spin_init(spinlock_t *lk, const char *name){
+    lk->desc = name;
     lk->val = HOLD;
 }
 int PRE_INTR[MAX_CPU];
@@ -161,13 +159,19 @@ void kmt_spin_lock(spinlock_t *lk){
     }
     __sync_synchronize();
     n_lk++;
+    panic_on(ienabled(), "i set in lock\n");
 }
+
 void kmt_spin_unlock(spinlock_t *lk){
+    panic_on(n_lk < 1, curr->name);
+    assert(lk->val == NHOLD);
+    assert(ienabled() == false);
+
     n_lk--;
     __sync_synchronize();
 
     atomic_xchg(&(lk->val), HOLD);
-    if(n_lk == 0){
+    if(n_lk == 0){                  //intr protects n_lk
         iset(pre_i);
     }
 }
@@ -177,6 +181,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->val = value;
     kmt_spin_init(&(sem->lock), name);          
     sem->front = sem->rear = NULL;
+    sem->cnt = 0;                       //P or V operation adds cnt
 }
 
 P_task_node* make_new_semqueue_node(task_t* tsk, P_task_node* nxt){
@@ -223,20 +228,21 @@ void kmt_sem_wait(sem_t *sem){
     if(sem->val < 0){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
-        locked_print(sem);
     } 
-    kmt_spin_unlock(&sem->lock);
     
-    //printf("%d\n", pre_i);
-    assert(ienabled());
     if(curr->stat == SLEEPING){
+        kmt_spin_unlock(&sem->lock);
         yield();
+        return;
     }
+    kmt_spin_unlock(&sem->lock);
 }
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
     if(sem->val < 0){
-        sem_dequeue_locked(sem)->stat = RUNNABLE;
+        task_t* wakend = sem_dequeue_locked(sem);
+        assert(wakend->stat == SLEEPING);
+        wakend->stat = RUNNABLE;
     }
     sem->val++;
     kmt_spin_unlock(&sem->lock);
@@ -279,17 +285,3 @@ void print_tasks(){
     UNLOCK(&task_lk);
     print_local("\n");
 }
-/*
-static void PUSH(* ctx){
-    REAR->next = make_ctx_node(ctx, REAR->next);
-    REAR = REAR->next;
-}
-static Context* POP(){
-    Context* popped = FRONT->next->ctx;
-    Task_node* deleted = FRONT->next;
-    FRONT->next = deleted->next;
-    pmm->free(deleted);
-    return popped;
-}
-
-*/

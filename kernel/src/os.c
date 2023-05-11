@@ -27,7 +27,7 @@ static void os_init() {
 }
 
 static void os_run() {
-  print_local("os-run executed, hello, n_cpu: %d\n", cpu_count());
+  //print_local("os-run executed, hello, n_cpu: %d\n", cpu_count());
   iset(true);
   while (1) ;
 }
@@ -57,7 +57,7 @@ static Context *os_trap(Event ev, Context *context){
       if(ret_handle) next_ctx = ret_handle;
     }
   }
-  panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
+  panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
   return next_ctx;
 }
 

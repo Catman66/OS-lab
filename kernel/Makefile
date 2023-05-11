@@ -35,9 +35,11 @@ test: git time-record
 
 DEBUG_FLAGS	:= -serial mon:stdio \
               -machine accel=tcg \
-              -smp "4,sockets=4" \
               -drive format=raw,file=build/kernel-x86_64-qemu \
-			  -s -S -nographic
+			  -s -S -nographic \
+			  -smp "2,sockets=2"
+
+
 
 debug: build-arg
 	@qemu-system-x86_64 $(DEBUG_FLAGS) & gdb -x init.gdb
