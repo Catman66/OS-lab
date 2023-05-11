@@ -118,15 +118,15 @@ void * idx_to_pg(int idx){
 
 static void* pg_alloc(){
   int idx;
-  LOCK(&st_lk);
+  PMM_LOCK(&st_lk);
   if(EMPTY()){
-    UNLOCK(&st_lk);
+    PMM_UNLOCK(&st_lk);
     return NULL;
   }
   else{
     idx = POP();
   }
-  UNLOCK(&st_lk);
+  PMM_UNLOCK(&st_lk);
   return idx_to_pg(idx);
 }
 
@@ -162,14 +162,14 @@ static void* locked_simple_alloc(int hp, int size){
 
 void* simple_alloc(size_t size){
   int hp;
-  LOCK(&cnt_lk);
+  PMM_LOCK(&cnt_lk);
   hp = cnt++;
   cnt %= NUM_SIMPLE_SUB_HP;
-  UNLOCK(&cnt_lk);
+  PMM_UNLOCK(&cnt_lk);
 
-  LOCK(&(lk[hp]));
+  PMM_LOCK(&(lk[hp]));
   void * alloced = locked_simple_alloc(hp, size);
-  UNLOCK(&(lk[hp]));
+  PMM_UNLOCK(&(lk[hp]));
 
   return alloced;
 }
@@ -195,9 +195,9 @@ static void *kalloc_safe(size_t size) {
 
 void pg_free(void *ptr){
   int idx = pg_to_idx(ptr);
-  LOCK(&st_lk);
+  PMM_LOCK(&st_lk);
   PUSH(idx);  
-  UNLOCK(&st_lk);
+  PMM_UNLOCK(&st_lk);
 }
 
 static void kfree(void *ptr) {
@@ -207,7 +207,7 @@ static void kfree(void *ptr) {
   }
   int hp = which_simple_heap(ptr);
   Heap_node* freed_nd = ptr - HEAP_HEAD_SIZE;
-  LOCK(&(lk[hp]));
+  PMM_LOCK(&(lk[hp]));
 #ifdef PAINT
   check_paint(freed_nd, OUT_HEAP_TAG);
 #endif
@@ -233,7 +233,7 @@ static void kfree(void *ptr) {
 #ifdef PAINT
   paint(freed_nd, IN_HEAP_TAG);
 #endif
-  UNLOCK(&(lk[hp]));
+  PMM_UNLOCK(&(lk[hp]));
 }
 static void kfree_safe(void *ptr) {
   int i = ienabled();

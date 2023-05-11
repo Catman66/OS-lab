@@ -5,7 +5,7 @@
 
 typedef int lock_t;
 #define SPIN_INIT() 0
-void LOCK(lock_t *lk) {
+void PMM_LOCK(lock_t *lk) {
   while (1) {
     int value = atomic_xchg(lk, 1);
     if (value == 0) {
@@ -13,7 +13,7 @@ void LOCK(lock_t *lk) {
     }
   }
 }
-void UNLOCK(lock_t *lk) {
+void PMM_UNLOCK(lock_t *lk) {
   atomic_xchg(lk, 0);
 }
 
