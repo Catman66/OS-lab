@@ -17,7 +17,8 @@ void Tproduce(void * pc) {
     //printf("(%c", *(char*)pc);
     s++;
     V(&fill);
-    //assert(s >= 0 && s <= dep);
+    panic_on(s > dep, "big\n");
+    panic_on(s < 0, "samll\n");
   }
   printf("producer %c finished \n", c);
   while(1) {
@@ -33,6 +34,8 @@ void Tconsume(void * pc) {
     //printf(")%c", *(char*)pc);
     s--;
     V(&empty);
+    panic_on(s > dep, "big\n");
+    panic_on(s < 0, "samll\n");
   }
   printf("consumer %c finished\n", c);
   while(1) {
