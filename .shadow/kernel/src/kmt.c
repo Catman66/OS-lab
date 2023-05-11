@@ -104,7 +104,6 @@ static void kmt_init(){
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
     task->stack = pmm->alloc(STACK_SIZE);
     panic_on(task->stack == NULL, "fail to alloc stack \n");
-    *(uint32_t*)task->stack = CANARY;       //in case stack overflow
     Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
@@ -236,6 +235,7 @@ void kmt_sem_wait(sem_t *sem){
     if(curr->stat == SLEEPING){
         kmt_spin_unlock(&sem->lock);
         yield();
+        return;
     }
     kmt_spin_unlock(&sem->lock);
 }
