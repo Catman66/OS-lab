@@ -29,8 +29,6 @@ static void kmt_init(){
     print_local("=== num of tasks current: %d ===\n", NTASK);    
 }
 
-
-
 void check_task_link_structure();
 void print_tasks();
 
@@ -42,6 +40,7 @@ void save_context(Context* ctx){        //better not be interrupted
         curr->ctx = ctx;
     }
 }
+
 
 Context * schedule(){
     assert(ienabled() == false);
@@ -199,17 +198,15 @@ void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
     kmt_spin_lock(&sem->lock);
     sem->val --;
-    if(sem->val < 0){
+    int blc = sem->val < 0;
+    if(blc){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
-    
-    if(curr->stat == SLEEPING){
-        kmt_spin_unlock(&sem->lock);
-        yield();
-        return;
-    } 
     kmt_spin_unlock(&sem->lock);
+    if(blc){
+        yield();
+    } 
 }
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
