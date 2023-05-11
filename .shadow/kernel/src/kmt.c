@@ -234,7 +234,7 @@ void kmt_sem_wait(sem_t *sem){
         kmt_spin_unlock(&sem->lock);
         yield();
         return;
-    }
+    } 
     kmt_spin_unlock(&sem->lock);
 }
 void kmt_sem_signal(sem_t *sem){
