@@ -44,7 +44,6 @@ void Tconsume(void * pc) {
   }
   printf("consumer %c finished\n", c);
   while(1) {
-    //printf("after %c finish\n", *(char*)pc);
   }
 }
 

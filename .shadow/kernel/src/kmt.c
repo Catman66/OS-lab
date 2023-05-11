@@ -223,13 +223,13 @@ void kmt_sem_wait(sem_t *sem){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
-    kmt_spin_unlock(&sem->lock);
     
     //printf("%d\n", pre_i);
-    assert(ienabled());
     if(curr->stat == SLEEPING){
+        kmt_spin_unlock(&sem->lock);
         yield();
     }
+    kmt_spin_unlock(&sem->lock);
 }
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
