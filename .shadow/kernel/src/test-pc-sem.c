@@ -15,6 +15,7 @@ static void check(int turn, int sval){
     printf("invalid turn%d, val: %d\n", turn, sval);
   }
 }
+
 void Tproduce(void * pc) {
   char c = *(char*)pc;
   int i = 0;
