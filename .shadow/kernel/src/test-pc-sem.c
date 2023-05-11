@@ -17,8 +17,8 @@ static void check(int turn, int sval){
 }
 
 void Tproduce(void * pc) {
-  char c = *(char*)pc;
   int i = 0;
+  putstr("producer running\n");
   while (i++ < NUM_PARE) {
     P(&empty);
     //printf("(%c", *(char*)pc);
@@ -26,15 +26,15 @@ void Tproduce(void * pc) {
     V(&fill);
     check(i, s);
   }
-  printf("producer %c finished \n", c);
+  putstr("producer finished\n3");
   while(1) {
     //printf("after %c finish\n", *(char *)pc);
   }
 }
 
 void Tconsume(void * pc) {
-  char c = *(char*)pc;
   int i = 0;
+  putstr("consumer running\n");
   while (i++ < NUM_PARE) {
     P(&fill);
     //printf(")%c", *(char*)pc);
@@ -42,7 +42,7 @@ void Tconsume(void * pc) {
     V(&empty);
     check(i, s);
   }
-  printf("consumer %c finished\n", c);
+  putstr("consumer finished\n");
   while(1) {
   }
 }
