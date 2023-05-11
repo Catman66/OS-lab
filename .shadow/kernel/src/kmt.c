@@ -234,7 +234,9 @@ void kmt_sem_wait(sem_t *sem){
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
     if(sem->val < 0){
-        sem_dequeue_locked(sem)->stat = RUNNABLE;
+        task_t* wakend = sem_dequeue_locked(sem);
+        assert(wakend->stat == SLEEPING);
+        wakend->stat = RUNNABLE;
     }
     sem->val++;
     kmt_spin_unlock(&sem->lock);
