@@ -162,13 +162,13 @@ void kmt_spin_lock(spinlock_t *lk){
     n_lk++;
 }
 void kmt_spin_unlock(spinlock_t *lk){
-    n_lk--;
-    __sync_synchronize();
-
-    assert(n_lk>= 0);
+    assert(n_lk>= 1);
     assert(lk->val == NHOLD);
     assert(ienabled() == false);
 
+    n_lk--;
+    __sync_synchronize();
+    
     atomic_xchg(&(lk->val), HOLD);
     if(n_lk == 0){                  //intr protects n_lk
         iset(pre_i);
@@ -180,6 +180,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->val = value;
     kmt_spin_init(&(sem->lock), name);          
     sem->front = sem->rear = NULL;
+    sem->cnt = 0;                       //P or V operation adds cnt
 }
 
 P_task_node* make_new_semqueue_node(task_t* tsk, P_task_node* nxt){

@@ -38,6 +38,7 @@ struct semaphore {
   int val;
   spinlock_t lock;
   P_task_node * front, * rear;
+  int cnt;
 };
 #define SEM_NONE_WAITING(s) ((s)->front == NULL)
 #define SEM_ONE_WAITING(s) ((s)->front == (s)->rear)
