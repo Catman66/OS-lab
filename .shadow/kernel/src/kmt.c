@@ -42,7 +42,6 @@ Context * schedule(){
         if(p->stat == RUNNABLE){
             curr = p;
             p->stat = RUNNING;
-            //printf("[%d][%d][%d][%d]\n", current[0]->id, current[1]->id, current[2]->id, current[3]->id);
             UNLOCK(&task_lk);
             return p->ctx;
         }
@@ -223,7 +222,6 @@ void kmt_sem_wait(sem_t *sem){
     if(sem->val < 0){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
-        locked_print(sem);
     } 
     kmt_spin_unlock(&sem->lock);
     
@@ -279,17 +277,3 @@ void print_tasks(){
     UNLOCK(&task_lk);
     print_local("\n");
 }
-/*
-static void PUSH(* ctx){
-    REAR->next = make_ctx_node(ctx, REAR->next);
-    REAR = REAR->next;
-}
-static Context* POP(){
-    Context* popped = FRONT->next->ctx;
-    Task_node* deleted = FRONT->next;
-    FRONT->next = deleted->next;
-    pmm->free(deleted);
-    return popped;
-}
-
-*/
