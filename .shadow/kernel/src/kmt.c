@@ -81,11 +81,6 @@ Context * yield_handler(Event ev, Context* ctx){
     return timer_intr_handler(ev, ctx);
 }
 
-
-
-
-
-
 //need to mod global tasklist
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
     task->stack = pmm->alloc(STACK_SIZE);
@@ -94,7 +89,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
-
+    
     kmt->spin_lock(&task_lk);
     task->id = NTASK;
     if(tasks == NULL){          //make a circle of one task
