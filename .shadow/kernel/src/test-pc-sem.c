@@ -26,7 +26,7 @@ void Tproduce(void * pc) {
     V(&fill);
     check(i, s);
   }
-  putstr("producer finished\n3");
+  putstr("producer finished\n");
   while(1) {
     //printf("after %c finish\n", *(char *)pc);
   }
