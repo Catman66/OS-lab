@@ -23,8 +23,7 @@ static void os_init() {
   //test_sum();
   //test_sched();
   //test_starvation();
-  //test_pc_sem();
-  test_ctx();
+  test_pc_sem();
 #endif
 }
 
