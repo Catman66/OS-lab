@@ -230,7 +230,6 @@ void kmt_sem_wait(sem_t *sem){
         sem_enqueue_locked(sem, curr);
     } 
     
-    //printf("%d\n", pre_i);
     if(curr->stat == SLEEPING){
         kmt_spin_unlock(&sem->lock);
         yield();
