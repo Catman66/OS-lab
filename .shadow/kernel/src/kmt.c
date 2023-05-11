@@ -35,14 +35,11 @@ void check_task_link_structure();
 void print_tasks();
 
 void save_context(Context* ctx){        //better not be interrupted
-    bool i = ienabled();
-    iset(false);
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
     } else {    
         curr->ctx = ctx;
     }
-    iset(i);
 }
 
 Context * schedule(){
