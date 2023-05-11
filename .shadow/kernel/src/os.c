@@ -11,7 +11,7 @@ extern void test_starvation();
 extern void test_sched();
 
 static void os_init() {
-  printf("\nthis is cpu[%d]\n", cpu_current());
+  print_local("\nthis is cpu[%d]\n", cpu_current());
   pmm->init();
   kmt->init();
   print_handlers();
