@@ -57,7 +57,7 @@ static Context *os_trap(Event ev, Context *context){
       if(ret_handle) next_ctx = ret_handle;
     }
   }
-  panic_report(next_ctx == NULL, "trap ev-no: %d, msg: %s \n", ev.event, ev.msg);
+  panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
   return next_ctx;
 }
 
