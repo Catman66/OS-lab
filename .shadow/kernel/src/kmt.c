@@ -35,6 +35,7 @@ void check_task_link_structure();
 void print_tasks();
 
 void save_context(Context* ctx){        //better not be interrupted
+    assert(ienabled());
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
     } else {    
@@ -43,6 +44,7 @@ void save_context(Context* ctx){        //better not be interrupted
 }
 
 Context * schedule(){
+    assert(ienabled());
     if(tasks == NULL){      //no tasks
         return os_ctx;
     }
@@ -194,6 +196,7 @@ task_t* sem_dequeue_locked(sem_t* sem){
 
 
 void kmt_sem_wait(sem_t *sem){
+    assert(ienabled());
     kmt_spin_lock(&sem->lock);
     sem->val --;
     if(sem->val < 0){
