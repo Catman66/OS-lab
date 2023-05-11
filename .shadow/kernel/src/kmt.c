@@ -165,8 +165,12 @@ void kmt_spin_unlock(spinlock_t *lk){
     n_lk--;
     __sync_synchronize();
 
+    assert(n_lk>= 0);
+    assert(lk->val == NHOLD);
+    assert(ienabled() == false);
+
     atomic_xchg(&(lk->val), HOLD);
-    if(n_lk == 0){
+    if(n_lk == 0){                  //intr protects n_lk
         iset(pre_i);
     }
 }
