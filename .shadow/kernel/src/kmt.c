@@ -44,7 +44,7 @@ void save_context(Context* ctx){        //better not be interrupted
 }
 
 Context * schedule(){
-    assert(ienabled());
+    assert(ienabled() == false);
     if(tasks == NULL){      //no tasks
         return os_ctx;
     }
