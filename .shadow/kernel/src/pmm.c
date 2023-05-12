@@ -1,5 +1,6 @@
 #include <common.h>
 #include <mylock.h>
+#include <os.h>
 
 typedef struct Heap_node{
   uintptr_t size;
@@ -14,6 +15,7 @@ typedef struct Heap_node{
 
 static void INIT_SIMPLE_HPS();
 static void INIT_BOUNDS();
+
 
 void INIT_NODE(void* nd, uintptr_t sz, Heap_node* nxt){
   NODE(nd)->size = sz - HEAP_HEAD_SIZE;
@@ -44,7 +46,7 @@ int which_simple_heap(void* ptr){
       return i;
     }
   }
-  printf("which heap error, ptr: %p\n", ptr);
+  print_local("which heap error, ptr: %p\n", ptr);
   assert(0);
 }
 
@@ -68,7 +70,7 @@ void paint(Heap_node* nd, char val){
 void check_paint(Heap_node* nd, char val){
   for(char* p = (char*)FREE_SPACE_BEGIN(nd); INTP(p) < FREE_SPACE_END(nd); p++){
     if(*p != val){
-      printf("===CHECK_PAINT ERROR node: %p,  expected: %x, actual: %x === \n", nd, (uint8_t)val, (uint8_t)*p);
+      print_local("===CHECK_PAINT ERROR node: %p,  expected: %x, actual: %x === \n", nd, (uint8_t)val, (uint8_t)*p);
       //print_context(p, p + HEAP_HEAD_SIZE);
       assert(0);
     }
@@ -256,8 +258,7 @@ static void pmm_init() {
 #endif
   DIVIDE_INIT();
   INIT_BOUNDS();
-  printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
-  //print_bounds();
+  print_local("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
 }
 
 MODULE_DEF(pmm) = {
@@ -289,23 +290,23 @@ void INIT_BOUNDS(){
 original version of pmm_init
 static void pmm_init() {
   uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
-  printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+  print_local("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
 }
 */
 //printer
 void display_space_lst(int hp){
-  printf("FREE_LIST: ");
+  print_local("FREE_LIST: ");
   for(Heap_node* p = HEADS[hp].next; p ; p=p->next){
-    printf("[sz: %lx] ", p->size);
+    print_local("[sz: %lx] ", p->size);
   }
-  printf("\n");
+  print_local("\n");
 }
 
 void print_bounds(){
   for(int i = 0; i < NUM_SIMPLE_SUB_HP; i++){
-    printf("%d:[%lx]  ", i, UPPER_BOUNDS[i]);
+    print_local("%d:[%lx]  ", i, UPPER_BOUNDS[i]);
   }
-  printf("\n");
+  print_local("\n");
 }
 
 
@@ -315,8 +316,8 @@ void check_free_list(bool after_alloc){
       if(IN_RANGE((void*)p, heap) && IN_RANGE((void*)(FREE_SPACE_END(p) - 1), heap)){
         continue;
       }
-      printf("heap node out of range after %s \n", after_alloc ? "alloc" : "free");
-      printf("node at %p:[last = %p, next = %p]", p, (void*)FREE_SPACE_END(p), p->next);
+      print_local("heap node out of range after %s \n", after_alloc ? "alloc" : "free");
+      print_local("node at %p:[last = %p, next = %p]", p, (void*)FREE_SPACE_END(p), p->next);
       assert(0);
     }
   }
