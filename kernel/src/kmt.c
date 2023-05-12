@@ -80,9 +80,8 @@ Context * yield_handler(Event ev, Context* ctx){
 
 //need to mod global tasklist
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
-    task->stack = pmm->alloc(STACK_SIZE);
     panic_on(task->stack == NULL, "fail to alloc stack \n");
-    Area k_stk = (Area){ task->stack, task->stack + STACK_SIZE };
+    Area k_stk = (Area){ task->stack, (void*)task->stack + OS_STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
@@ -98,9 +97,9 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     }
     NTASK++;
     kmt->spin_unlock(&task_lk);
-    //check_task_link_structure();
     return 0;
 }
+
 static void kmt_teardown(task_t *task){
     //remove from link
     if(NTASK == 1){
