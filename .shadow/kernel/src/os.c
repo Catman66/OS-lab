@@ -21,9 +21,8 @@ static void os_init() {
 #ifdef LOCAL_DEBUG
   //dev->init();
   //test_sum();
-  //test_sched();
-  //test_starvation();
-  test_pc_sem();
+  test_ctx();
+  
 #endif
 }
 
@@ -60,7 +59,6 @@ static Context *os_trap(Event ev, Context *context){
   }
   panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
   iset(true);
-  
   return next_ctx;
 }
 
