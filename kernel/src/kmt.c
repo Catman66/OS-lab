@@ -29,23 +29,20 @@ static void kmt_init(){
     print_local("=== num of tasks current: %d ===\n", NTASK);    
 }
 
-
-
 void check_task_link_structure();
 void print_tasks();
 
 void save_context(Context* ctx){        //better not be interrupted
-    bool i = ienabled();
-    iset(false);
+    assert(ienabled() == false);
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
     } else {    
         curr->ctx = ctx;
     }
-    iset(i);
 }
 
 Context * schedule(){
+    assert(ienabled() == false);
     if(tasks == NULL){      //no tasks
         return os_ctx;
     }
@@ -81,11 +78,6 @@ Context * yield_handler(Event ev, Context* ctx){
     return timer_intr_handler(ev, ctx);
 }
 
-
-
-
-
-
 //need to mod global tasklist
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
     task->stack = pmm->alloc(STACK_SIZE);
@@ -94,7 +86,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
-
+    
     kmt->spin_lock(&task_lk);
     task->id = NTASK;
     if(tasks == NULL){          //make a circle of one task
@@ -202,19 +194,18 @@ task_t* sem_dequeue_locked(sem_t* sem){
 
 
 void kmt_sem_wait(sem_t *sem){
+    assert(ienabled());
     kmt_spin_lock(&sem->lock);
     sem->val --;
-    if(sem->val < 0){
+    int blc = sem->val < 0;
+    if(blc){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
-    
-    if(curr->stat == SLEEPING){
-        kmt_spin_unlock(&sem->lock);
-        yield();
-        return;
-    } 
     kmt_spin_unlock(&sem->lock);
+    if(blc){
+        yield();
+    } 
 }
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
