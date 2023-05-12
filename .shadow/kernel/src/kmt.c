@@ -278,7 +278,12 @@ struct X86_64_Context {
 };
 #define TXT_END 0x110000
 #define X86_64_CTX(ctx) ((struct X86_64_Context * )(ctx))
-bool sane_context(Context * ctx){                           //must be a 
-    struct X86_64_Context * pctx = X86_64_CTX(ctx);
-    return pctx->rip < TXT_END;
+
+bool sane_task(task_t * tsk){
+    struct X86_64_Context * ctx = X86_64_CTX(tsk->ctx);
+    return ctx->rip < TXT_END 
+    && 
+    ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack)
+    && 
+    tsk->canary1 == CANARY && tsk->canary2 == CANARY;
 }
