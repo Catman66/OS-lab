@@ -97,9 +97,9 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     }
     NTASK++;
     kmt->spin_unlock(&task_lk);
-    //check_task_link_structure();
     return 0;
 }
+
 static void kmt_teardown(task_t *task){
     //remove from link
     if(NTASK == 1){
