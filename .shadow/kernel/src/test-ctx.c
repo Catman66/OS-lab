@@ -2,7 +2,7 @@
 #include <os.h>
 
 static void Ttest(void * arg){
-    uint8_t taken[176];
+    int taken[176];
     for(int i = 0 ; i < 176; i++){
         taken[i] = i;
     }
