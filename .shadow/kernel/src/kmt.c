@@ -266,3 +266,19 @@ static void init_tasks(){
         current[i] = NULL;
     }
 }
+
+struct X86_64_Context {
+  void    *cr3;
+  uint64_t rax, rbx, rcx, rdx,
+           rbp, rsi, rdi,
+           r8, r9, r10, r11,
+           r12, r13, r14, r15,
+           rip, cs, rflags,
+           rsp, ss, rsp0;
+};
+#define TXT_END 0x110000
+#define X86_64_CTX(ctx) ((struct X86_64_Context * )(ctx))
+bool sane_context(Context * ctx){                           //must be a 
+    struct X86_64_Context * pctx = X86_64_CTX(ctx);
+    return pctx->rip < TXT_END;
+}
