@@ -17,6 +17,7 @@ struct task {
   uint8_t * stack;   
 };
 
+
 #define MAX_CPU 16
 extern task_t* current[MAX_CPU];
 #define curr (current[cpu_current()])

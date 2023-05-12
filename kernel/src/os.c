@@ -28,7 +28,9 @@ static void os_init() {
 static void os_run() {
   //print_local("os-run executed, hello, n_cpu: %d\n", cpu_count());
   iset(true);
-  while (1) ;
+  while (1) {
+    assert(ienabled());
+  }
 }
 
 //node module
@@ -43,10 +45,11 @@ static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_
   made->handler = h, made->seq = sq, made->event = ev, made->next = nxt;
   return made;
 }
+
 Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
 
 static Context *os_trap(Event ev, Context *context){
-  iset(false);
+  assert(ienabled() == false);
   save_context(context);
   Context* next_ctx = NULL;
   for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
@@ -57,7 +60,8 @@ static Context *os_trap(Event ev, Context *context){
     }
   }
   panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
-  iset(true);
+  //iset(true);
+  assert(ienabled() == false);
   return next_ctx;
 }
 
