@@ -38,8 +38,9 @@ void Tproduce(void * pc) {
     check(i, s);
   }
   putstr("producer finished\n");
+
   while(1) {
-    //printf("after %c finish\n", *(char *)pc);
+    assert(ienabled());
   }
 }
 
@@ -55,6 +56,7 @@ void Tconsume(void * pc) {
   }
   putstr("consumer finished\n");
   while(1) {
+    assert(ienabled());
   }
 }
 
