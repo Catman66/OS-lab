@@ -7,6 +7,7 @@ static void print_handlers();
 
 extern void test_sum();
 extern void test_pc_sem();
+//extern void test_sum_sem();
 extern void test_starvation();
 extern void test_sched();
 extern void test_ctx();
@@ -21,7 +22,6 @@ static void os_init() {
 #ifdef LOCAL_DEBUG
   //dev->init();
   test_pc_sem();
-  
 #endif
 }
 

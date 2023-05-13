@@ -15,6 +15,17 @@ static void check(int turn, int sval){
     printf("invalid turn%d, val: %d\n", turn, sval);
   }
 }
+static spinlock_t slk;
+static void atomic_inc(){
+  kmt->spin_lock(&slk);
+  s++;
+  kmt->spin_unlock(&slk);
+}
+static void atomic_dec(){
+  kmt->spin_lock(&slk);
+  s--;
+  kmt->spin_unlock(&slk);
+}
 
 void Tproduce(void * pc) {
   int i = 0;
@@ -22,7 +33,7 @@ void Tproduce(void * pc) {
   while (i++ < NUM_PARE) {
     P(&empty);
     //printf("(%c", *(char*)pc);
-    s++;
+    atomic_inc();
     V(&fill);
     check(i, s);
   }
@@ -38,7 +49,7 @@ void Tconsume(void * pc) {
   while (i++ < NUM_PARE) {
     P(&fill);
     //printf(")%c", *(char*)pc);
-    s--;
+    atomic_dec();
     V(&empty);
     check(i, s);
   }
