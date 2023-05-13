@@ -20,7 +20,6 @@ struct task {
       const char*   name;
       task_stat     stat;
       Context *     ctx;
-      struct task*  next;
       unsigned int  canary2;
     };
     uint8_t stack[OS_STACK_SIZE];
