@@ -93,6 +93,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
+    task->canary1 = task->canary2 = CANARY;
     
     kmt->spin_lock(&task_lk);
     task->id = NTASK;
