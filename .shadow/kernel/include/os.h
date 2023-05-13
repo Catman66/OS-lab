@@ -9,6 +9,11 @@
 #define MAX_CPU 16
 #define SEM_WAITING_LEN 32
 
+struct spinlock {
+  const char * desc;
+  int val;
+};
+
 typedef enum{ RUNNING, RUNNABLE, SLEEPING } task_stat;
 struct task {
   union 
@@ -17,9 +22,11 @@ struct task {
     {
       unsigned int  canary1;
       int           id;
+      int           cpu;          //if not running, then cpu is -1
       const char*   name;
       task_stat     stat;
       Context *     ctx;
+      spinlock_t    lock;
       unsigned int  canary2;
     };
     uint8_t stack[OS_STACK_SIZE];
@@ -27,16 +34,12 @@ struct task {
 };
 extern task_t * current[MAX_CPU];
 extern bool sane_task   (task_t* tsk);
-extern bool sane_context(Context * ctx);
 
 #define curr (current[cpu_current()])
 
 void save_context(Context* ctx);
 
-struct spinlock {
-  const char * desc;
-  int val;
-};
+
 
 typedef struct P_task_node {
   task_t* p_task;

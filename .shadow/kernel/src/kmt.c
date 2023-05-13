@@ -41,14 +41,18 @@ void print_tasks();
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
     n_switch++;
-    if(curr == NULL){   //first save 
+
+    if(curr == NULL){   //save from os-thread
         os_ctx = ctx;   //always runnable
-    } else {    
+    } else {       
+        kmt->spin_lock(&curr->lock);         
+        assert(curr->cpu == cpu_current());
+        
         curr->ctx = ctx;
-        if(sane_task(curr) == false) {
-            dump_task_info(curr);
-            assert(0);
-        }
+        curr->cpu = -1;
+        
+        assert(sane_task(curr));
+        kmt->spin_unlock(&curr->lock);
     }
 }
 
@@ -57,30 +61,35 @@ Context * schedule(){
     if(NTASK == 0){
         return os_ctx;
     }
-    kmt->spin_lock(&task_lk);
 
     int i = (last_sched + 1) % NTASK;
     task_t* p;
     for(int cnt = 0; cnt < NTASK; i = (i+ 1) % NTASK, cnt++){
         p = task_pool[i];
+        kmt->spin_lock(&p->lock);
         if(p->stat == RUNNABLE){
+            assert(p->cpu == -1);
+
+            p->stat = RUNNING;
+            kmt->spin_unlock(&p->lock);
             curr = p;
-            curr->stat = RUNNING;
-            kmt->spin_unlock(&task_lk);
+            last_sched = i;
             return curr->ctx;
+        } else {
+            kmt->spin_unlock(&p->lock);
         }
     }
-    
     curr = NULL;
-    kmt->spin_unlock(&task_lk);
     print_local("no threads to sched\n");
     return os_ctx;
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
-    if(curr != NULL && curr->stat == RUNNING){
+    if(curr != NULL){
+        kmt->spin_lock(&curr->lock);
         curr->stat = RUNNABLE;
+        kmt->spin_unlock(&curr->lock);
     }
     return schedule();
 }
@@ -93,17 +102,22 @@ Context * yield_handler(Event ev, Context* ctx){
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
     panic_on(NTASK + 1 > MAX_NTASK, "too much tasks\n");
     panic_on(task == NULL, "fail to alloc task \n");
-    Area k_stk = (Area){ task->stack, (void*)task->stack + OS_STACK_SIZE };
+    
+    Area k_stk = (Area){ task->stack + sizeof(task_t), (void*)task->stack + OS_STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
     task->canary1 = task->canary2 = CANARY;
-    
+    kmt->spin_init(&task->lock, name);
+    task->cpu = -1;
+
     kmt->spin_lock(&task_lk);
+    kmt->spin_lock(&task->lock);
 
     task->id = NTASK; 
     task_pool[NTASK++] = task;
 
+    kmt->spin_unlock(&task->lock);
     kmt->spin_unlock(&task_lk);
     return 0;
 }
