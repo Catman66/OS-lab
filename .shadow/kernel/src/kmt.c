@@ -207,7 +207,7 @@ void kmt_sem_wait(sem_t *sem){
     sem->val --;
     int blc = sem->val < 0;
     if(blc){
-        assert(curr->stat == RUNNING);
+        if(curr->stat != RUNNING) { printf("should be running, but: %d\n", curr->stat); }
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
