@@ -36,7 +36,6 @@ void check_task_link_structure();
 void print_tasks();
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
-    assert(!curr || curr->stat == RUNNING);
     n_switch++;
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
@@ -75,6 +74,7 @@ Context * schedule(){
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
+    assert(ienabled() == false);
     if(curr != NULL && curr->stat == RUNNING){
         curr->stat = RUNNABLE;
     }
