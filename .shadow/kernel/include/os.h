@@ -7,6 +7,7 @@
 #define CANARY_ALIVE(t) (*(uint32_t*)((t)->stack) == CANARY)
 #define OS_STACK_SIZE 8192
 #define MAX_CPU 16
+#define SEM_WAITING_LEN 32
 
 typedef enum{ RUNNING, RUNNABLE, SLEEPING } task_stat;
 struct task {
@@ -48,12 +49,12 @@ struct semaphore {
   const char * desc;
   int val;
   spinlock_t lock;
-  P_task_node * front, * rear;
+  task_t* waiting_tsk[SEM_WAITING_LEN];
+  int tp;
   int cnt;
   bool using;
 };
-#define SEM_NONE_WAITING(s) ((s)->front == NULL)
-#define SEM_ONE_WAITING(s) ((s)->front == (s)->rear)
+#define SEM_NONE_WAITING(s) ((s)->tp == -1)
 
 void panic_report(bool cond, const char * fmt, ...);
 

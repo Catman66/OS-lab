@@ -165,7 +165,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->desc = name;
     sem->val = value;
     kmt_spin_init(&(sem->lock), name);          
-    sem->front = sem->rear = NULL;
+    sem->tp = -1;
     sem->cnt = 0;                       //P or V operation adds cnt
     sem->using = false;
 }
@@ -176,27 +176,15 @@ P_task_node* make_new_semqueue_node(task_t* tsk, P_task_node* nxt){
     new_nd->next = nxt;
     return new_nd;
 }
+
 void sem_enqueue_locked(sem_t* sem, task_t* tsk){
-    if(SEM_NONE_WAITING(sem)){
-        sem->front = sem->rear = make_new_semqueue_node(tsk, NULL);
-    } else {
-        sem->rear->next = make_new_semqueue_node(tsk, NULL);
-        sem->rear = sem->rear->next;
-    }
+    sem->waiting_tsk[++sem->tp] = tsk;
+    assert(sem->tp < SEM_WAITING_LEN);
 }
+
 task_t* sem_dequeue_locked(sem_t* sem){
     assert(SEM_NONE_WAITING(sem) == false);
-    assert(sem->val < 0);
-    task_t *        ret = sem->front->p_task;
-    P_task_node *   del = sem->front;
-
-    if(SEM_ONE_WAITING(sem)){
-        sem->front = sem->rear = NULL;
-    } else {
-        sem->front = sem->front->next;
-    }
-    pmm->free(del);
-    return ret;
+    return sem->waiting_tsk[sem->tp--];
 }
 
 
