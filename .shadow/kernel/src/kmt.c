@@ -92,7 +92,9 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
     if(curr != NULL){
         kmt->spin_lock(&curr->lock);
-        curr->stat = RUNNABLE;
+        if(curr->stat == RUNNING){
+            curr->stat = RUNNABLE;
+        }
         kmt->spin_unlock(&curr->lock);
     }
     return schedule();
