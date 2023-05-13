@@ -210,10 +210,11 @@ void kmt_sem_wait(sem_t *sem){
     sem->val --;
     int blc = sem->val < 0;
     if(blc){
-        if(curr != NULL && curr->stat != RUNNING) { printf("should be running, but: %d\n", curr->stat);}
+        if(curr != NULL && curr->stat != RUNNING) {panic("should be running\n");}
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
+    
     sem->using = false;
     kmt_spin_unlock(&sem->lock);
     if(blc){
