@@ -37,6 +37,7 @@ void save_context(Context* ctx){        //better not be interrupted
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
     } else {    
+        assert(sane_task(curr));
         curr->ctx = ctx;
     }
 }
