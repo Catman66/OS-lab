@@ -204,10 +204,11 @@ task_t* sem_dequeue_locked(sem_t* sem){
 void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
     kmt_spin_lock(&sem->lock);
+    assert(ienabled() == false);
     sem->val --;
     int blc = sem->val < 0;
     if(blc){
-        if(curr->stat != RUNNING) { printf("should be running, but: %d\n", curr->stat); }
+        if(curr->stat != RUNNING) { printf("should be running, but: %d\n", curr->stat);}
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
