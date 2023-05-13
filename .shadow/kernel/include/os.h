@@ -50,6 +50,7 @@ struct semaphore {
   spinlock_t lock;
   P_task_node * front, * rear;
   int cnt;
+  bool using;
 };
 #define SEM_NONE_WAITING(s) ((s)->front == NULL)
 #define SEM_ONE_WAITING(s) ((s)->front == (s)->rear)

@@ -169,6 +169,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     kmt_spin_init(&(sem->lock), name);          
     sem->front = sem->rear = NULL;
     sem->cnt = 0;                       //P or V operation adds cnt
+    sem->using = false;
 }
 
 P_task_node* make_new_semqueue_node(task_t* tsk, P_task_node* nxt){
@@ -204,6 +205,9 @@ task_t* sem_dequeue_locked(sem_t* sem){
 void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
     kmt_spin_lock(&sem->lock);
+    assert(sem->using == false);
+    sem->using = true;
+
     assert(ienabled() == false);
     sem->val --;
     int blc = sem->val < 0;
@@ -212,6 +216,7 @@ void kmt_sem_wait(sem_t *sem){
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
+    sem->using = false;
     kmt_spin_unlock(&sem->lock);
     if(blc){
         yield();
@@ -219,12 +224,15 @@ void kmt_sem_wait(sem_t *sem){
 }
 void kmt_sem_signal(sem_t *sem){
     kmt_spin_lock(&sem->lock);
+    assert(sem->using == false);
+    sem->using = true;
     if(sem->val < 0){
         task_t* wakend = sem_dequeue_locked(sem);
         assert(wakend->stat == SLEEPING);
         wakend->stat = RUNNABLE;
     }
     sem->val++;
+    sem->using = false;
     kmt_spin_unlock(&sem->lock);
 }
 MODULE_DEF(kmt) = {
