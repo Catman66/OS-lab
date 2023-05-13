@@ -203,7 +203,7 @@ void sem_dequeue(sem_t* sem){
     task_t * wakend = sem->waiting_tsk[sem->tp--];
 
     LOCK(&wakend->lock);
-    assert(wakend->stat == SLEEPING);
+    if(wakend->stat != SLEEPING) { printf("should sleeping, but is%d\n", wakend->stat); assert(0); }
     wakend->stat = RUNNABLE;
     UNLOCK(&wakend->lock);
 }
