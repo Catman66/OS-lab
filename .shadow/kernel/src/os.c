@@ -61,7 +61,7 @@ static Context *os_trap(Event ev, Context *context){
   }
   panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
   //iset(true);
-  if(curr != NULL && curr->stat != RUNNING) { printf("T%d, should be running, but %d\n", curr->id, curr->stat); }
+  if(curr != NULL && curr->stat != RUNNING) { printf("not running\n"); }
   assert(ienabled() == false);
   return next_ctx;
 }
