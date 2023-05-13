@@ -297,6 +297,6 @@ bool sane_task(task_t * tsk){
 }
 
 void print_error_task(task_t * tsk){
-    printf("%dth switch,ctx@%p, id: %d, rip:%d, rsp: %d\n", 
+    printf("%dth switch,ctx@%p, id: %d, rip:%lx, rsp: %lx\n", 
     n_switch, tsk->ctx, tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp);
 }
