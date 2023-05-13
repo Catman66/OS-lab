@@ -7,7 +7,7 @@
 task_t * current[MAX_CPU], * task_pool[MAX_NTASK];
 int last_sched = 0;
 
-spinlock_t task_lk;
+spinlock_t ntask_lk;
 
 int     NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
@@ -38,9 +38,6 @@ static void kmt_init(){
     print_local("=== num of tasks current: %d ===\n", NTASK);    
 }
 
-void check_task_link_structure();
-void dump_task_info(task_t* tsk);
-void print_tasks();
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
     n_switch++;
@@ -84,18 +81,17 @@ Context * schedule(){
         }
     }
     curr = NULL;
-    print_local("no threads to sched\n");
     return os_ctx;
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
     if(curr != NULL){
-        kmt->spin_lock(&curr->lock);
+        LOCK(&curr->lock);
         if(curr->stat == RUNNING){
             curr->stat = RUNNABLE;
         }
-        kmt->spin_unlock(&curr->lock);
+        UNLOCK(&curr->lock);
     }
     return schedule();
 }
@@ -117,20 +113,20 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     kmt->spin_init(&task->lock, name);
     task->cpu = -1;
 
-    kmt->spin_lock(&task_lk);
+    kmt->spin_lock(&ntask_lk);
     kmt->spin_lock(&task->lock);
 
     task->id = NTASK; 
     task_pool[NTASK++] = task;
 
     kmt->spin_unlock(&task->lock);
-    kmt->spin_unlock(&task_lk);
+    kmt->spin_unlock(&ntask_lk);
     return 0;
 }
 
 static void kmt_teardown(task_t *task){
     panic_on(NTASK < 0, "no task to teardown\n");
-    kmt->spin_lock(&task_lk);
+    kmt->spin_lock(&ntask_lk);
     for(int i = 0; i < NTASK; i++){
         if(task_pool[i] == task){
             task_pool[i] = task_pool[NTASK - 1];
@@ -138,7 +134,7 @@ static void kmt_teardown(task_t *task){
             pmm->free(task->stack);
             NTASK--;
 
-            kmt->spin_unlock(&task_lk);
+            kmt->spin_unlock(&ntask_lk);
             return;
         }
     }
@@ -265,7 +261,7 @@ static void init_locks(){
     for(int i = 0; i < MAX_CPU; i++){
         NLOCK[i] = 0;
     }
-    kmt->spin_init(&task_lk, "lock for task link");
+    kmt->spin_init(&ntask_lk, "lock for task link");
 }
 
 static void sign_irqs(){
