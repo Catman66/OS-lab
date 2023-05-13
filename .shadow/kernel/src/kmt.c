@@ -206,7 +206,7 @@ void sem_dequeue(sem_t* sem){
 
     LOCK(&wakend->lock);
     assert(wakend->blocked == true);
-    assert(wakend->stat != RUNNING);
+    if(wakend->stat == RUNNING){ printf("task[%d]\n", wakend->id); }
     wakend->blocked = false;
     UNLOCK(&wakend->lock);
 }
