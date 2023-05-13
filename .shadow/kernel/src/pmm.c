@@ -258,7 +258,7 @@ static void pmm_init() {
 #endif
   DIVIDE_INIT();
   INIT_BOUNDS();
-  print_local("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+  printf("Got %ld MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
 }
 
 MODULE_DEF(pmm) = {
