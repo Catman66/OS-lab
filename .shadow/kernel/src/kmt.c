@@ -109,7 +109,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     panic_on(NTASK + 1 > MAX_NTASK, "too much tasks\n");
     panic_on(task == NULL, "fail to alloc task \n");
     
-    Area k_stk = (Area){ task->stack + sizeof(task_t), (void*)task->stack + OS_STACK_SIZE };
+    Area k_stk = (Area){ (void*)task->stack + sizeof(task_t), (void*)task->stack + OS_STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
     task->name = name;
