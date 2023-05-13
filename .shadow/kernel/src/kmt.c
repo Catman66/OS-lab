@@ -73,6 +73,7 @@ Context * schedule(){
             p->stat = RUNNING;
             kmt->spin_unlock(&p->lock);
             curr = p;
+            curr->cpu = cpu_current();
             last_sched = i;
             return curr->ctx;
         } else {
