@@ -50,7 +50,8 @@ void save_context(Context* ctx){        //better not be interrupted
         
         curr->ctx = ctx;
         curr->cpu = -1;
-        
+        curr->stat = INTR;
+
         assert(sane_task(curr));
         UNLOCK(&curr->lock);
     }
@@ -67,7 +68,7 @@ Context * schedule(){
     for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
         p = task_pool[i];
         LOCK(&p->lock);
-        if(p->stat == RUNNABLE){
+        if(p->stat == RUNNABLE && p->blocked == false){
             assert(p->cpu == -1);
 
             p->stat = RUNNING;
@@ -88,9 +89,8 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
     if(curr != NULL){
         LOCK(&curr->lock);
-        if(curr->stat == RUNNING){
-            curr->stat = RUNNABLE;
-        }
+        assert(curr->stat == INTR);
+        curr->stat = RUNNABLE;
         UNLOCK(&curr->lock);
     }
     return schedule();
@@ -108,6 +108,7 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     Area k_stk = (Area){ (void*)task->stack + sizeof(task_t), (void*)task->stack + OS_STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
+    task->blocked = false;
     task->name = name;
     task->canary1 = task->canary2 = CANARY;
     kmt->spin_init(&task->lock, name);
@@ -190,8 +191,11 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
 void sem_enqueue(sem_t* sem, task_t* tsk){
     LOCK(&tsk->lock);
     assert(tsk->stat == RUNNING);
-    tsk->stat = SLEEPING;               
+    assert(tsk->blocked == false);
+
+    tsk->blocked = true;               
     sem->waiting_tsk[++sem->tp] = tsk;
+
     assert(sem->tp < SEM_WAITING_LEN);
     UNLOCK(&tsk->lock);
 }
@@ -201,8 +205,9 @@ void sem_dequeue(sem_t* sem){
     task_t * wakend = sem->waiting_tsk[sem->tp--];
 
     LOCK(&wakend->lock);
-    if(wakend->stat != SLEEPING) { printf("should sleeping, but is%d\n", wakend->stat); assert(0); }
-    wakend->stat = RUNNABLE;
+    assert(wakend->blocked == true);
+    assert(wakend->stat != RUNNING);
+    wakend->blocked = false;
     UNLOCK(&wakend->lock);
 }
 
