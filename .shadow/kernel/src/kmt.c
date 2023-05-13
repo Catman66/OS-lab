@@ -45,14 +45,14 @@ void save_context(Context* ctx){        //better not be interrupted
     if(curr == NULL){   //save from os-thread
         os_ctx = ctx;   //always runnable
     } else {       
-        kmt->spin_lock(&curr->lock);         
+        LOCK(&curr->lock);         
         assert(curr->cpu == cpu_current());
         
         curr->ctx = ctx;
         curr->cpu = -1;
         
         assert(sane_task(curr));
-        kmt->spin_unlock(&curr->lock);
+        UNLOCK(&curr->lock);
     }
 }
 
@@ -64,20 +64,20 @@ Context * schedule(){
 
     int i = (last_sched + 1) % NTASK;
     task_t* p;
-    for(int cnt = 0; cnt < NTASK; i = (i+ 1) % NTASK, cnt++){
+    for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
         p = task_pool[i];
-        kmt->spin_lock(&p->lock);
+        LOCK(&p->lock);
         if(p->stat == RUNNABLE){
             assert(p->cpu == -1);
 
             p->stat = RUNNING;
-            kmt->spin_unlock(&p->lock);
+            UNLOCK(&p->lock);
             curr = p;
             curr->cpu = cpu_current();
             last_sched = i;
             return curr->ctx;
         } else {
-            kmt->spin_unlock(&p->lock);
+            UNLOCK(&p->lock);
         }
     }
     curr = NULL;
