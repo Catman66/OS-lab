@@ -292,7 +292,7 @@ bool sane_task(task_t * tsk){
     struct X86_64_Context * ctx = X86_64_CTX(tsk->ctx);
     return ctx->rip < TXT_END 
     && 
-    ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack)
+    ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack) + OS_STACK_SIZE
     && 
     tsk->canary1 == CANARY && tsk->canary2 == CANARY;
 }
