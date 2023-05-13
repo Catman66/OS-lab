@@ -20,7 +20,7 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 #ifdef LOCAL_DEBUG
   //dev->init();
-  test_sum();
+  test_pc_sem();
   
 #endif
 }

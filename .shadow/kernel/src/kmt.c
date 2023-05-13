@@ -207,10 +207,12 @@ void kmt_sem_wait(sem_t *sem){
     sem->val --;
     int blc = sem->val < 0;
     if(blc){
+        assert(curr->stat == RUNNING);
         curr->stat = SLEEPING;
         sem_enqueue_locked(sem, curr);
     } 
     kmt_spin_unlock(&sem->lock);
+
     if(blc){
         yield();
     } 
