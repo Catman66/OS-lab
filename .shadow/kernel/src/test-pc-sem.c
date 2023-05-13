@@ -64,7 +64,7 @@ void test_pc_sem(){
   printf("initiating pc-test\n");
   kmt->sem_init(&fill, "fill", 0);
   kmt->sem_init(&empty, "empty", dep);
-  
+  kmt->spin_init(&slk, "slk");
   for(int i = 0; i < NThread; i++){
       kmt->create(tsk_alloc(), "producer", Tproduce, "abcdefgijkl" + i);
       kmt->create(tsk_alloc(), "consumer", Tconsume, "abcdefgh" + i);
