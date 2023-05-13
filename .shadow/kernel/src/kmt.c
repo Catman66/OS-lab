@@ -33,6 +33,7 @@ static void kmt_init(){
 }
 
 void check_task_link_structure();
+void dump_task_info(task_t* tsk);
 void print_tasks();
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
@@ -42,6 +43,7 @@ void save_context(Context* ctx){        //better not be interrupted
     } else {    
         curr->ctx = ctx;
         if(sane_task(curr) == false) {
+            dump_task_info(curr);
             assert(0);
         }
     }
@@ -293,4 +295,8 @@ bool sane_task(task_t * tsk){
     ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack) + OS_STACK_SIZE
     && 
     tsk->canary1 == CANARY && tsk->canary2 == CANARY;
+}
+
+void dump_task_info(task_t * tsk){
+    printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp); 
 }
