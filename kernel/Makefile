@@ -37,7 +37,7 @@ DEBUG_FLAGS	:= -serial mon:stdio \
               -machine accel=tcg \
               -drive format=raw,file=build/kernel-x86_64-qemu \
 			  -s -S -nographic\
-			  -smp "2,sockets=2"
+			  -smp "4,sockets=4"
 
 
 t: build-arg 

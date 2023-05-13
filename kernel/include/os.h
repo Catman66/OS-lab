@@ -14,7 +14,7 @@ struct spinlock {
   int val;
 };
 
-typedef enum{ RUNNING, RUNNABLE, SLEEPING } task_stat;
+typedef enum{ RUNNING, RUNNABLE, INTR } task_stat;
 struct task {
   union 
   {
@@ -25,6 +25,7 @@ struct task {
       int           cpu;          //if not running, then cpu is -1
       const char*   name;
       task_stat     stat;
+      bool          blocked;      
       Context *     ctx;
       spinlock_t    lock;
       unsigned int  canary2;

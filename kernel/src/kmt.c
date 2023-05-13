@@ -7,7 +7,7 @@
 task_t * current[MAX_CPU], * task_pool[MAX_NTASK];
 int last_sched = 0;
 
-spinlock_t task_lk;
+spinlock_t ntask_lk;
 
 int     NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
@@ -38,9 +38,6 @@ static void kmt_init(){
     print_local("=== num of tasks current: %d ===\n", NTASK);    
 }
 
-void check_task_link_structure();
-void dump_task_info(task_t* tsk);
-void print_tasks();
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
     n_switch++;
@@ -48,14 +45,15 @@ void save_context(Context* ctx){        //better not be interrupted
     if(curr == NULL){   //save from os-thread
         os_ctx = ctx;   //always runnable
     } else {       
-        kmt->spin_lock(&curr->lock);         
+        LOCK(&curr->lock);         
         assert(curr->cpu == cpu_current());
         
         curr->ctx = ctx;
         curr->cpu = -1;
-        
+        curr->stat = INTR;
+
         assert(sane_task(curr));
-        kmt->spin_unlock(&curr->lock);
+        UNLOCK(&curr->lock);
     }
 }
 
@@ -67,35 +65,33 @@ Context * schedule(){
 
     int i = (last_sched + 1) % NTASK;
     task_t* p;
-    for(int cnt = 0; cnt < NTASK; i = (i+ 1) % NTASK, cnt++){
+    for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
         p = task_pool[i];
-        kmt->spin_lock(&p->lock);
-        if(p->stat == RUNNABLE){
+        LOCK(&p->lock);
+        if(p->stat == RUNNABLE && p->blocked == false){
             assert(p->cpu == -1);
 
             p->stat = RUNNING;
-            kmt->spin_unlock(&p->lock);
+            UNLOCK(&p->lock);
             curr = p;
             curr->cpu = cpu_current();
             last_sched = i;
             return curr->ctx;
         } else {
-            kmt->spin_unlock(&p->lock);
+            UNLOCK(&p->lock);
         }
     }
     curr = NULL;
-    print_local("no threads to sched\n");
     return os_ctx;
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
     if(curr != NULL){
-        kmt->spin_lock(&curr->lock);
-        if(curr->stat == RUNNING){
-            curr->stat = RUNNABLE;
-        }
-        kmt->spin_unlock(&curr->lock);
+        LOCK(&curr->lock);
+        assert(curr->stat == INTR);
+        curr->stat = RUNNABLE;
+        UNLOCK(&curr->lock);
     }
     return schedule();
 }
@@ -105,32 +101,33 @@ Context * yield_handler(Event ev, Context* ctx){
 }
 
 //need to mod global tasklist
-static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
+static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), void *arg){
     panic_on(NTASK + 1 > MAX_NTASK, "too much tasks\n");
-    panic_on(task == NULL, "fail to alloc task \n");
+    panic_on(tsk == NULL, "fail to alloc task \n");
     
-    Area k_stk = (Area){ (void*)task->stack + sizeof(task_t), (void*)task->stack + OS_STACK_SIZE };
-    task->ctx = kcontext(k_stk, entry, arg);
-    task->stat = RUNNABLE;
-    task->name = name;
-    task->canary1 = task->canary2 = CANARY;
-    kmt->spin_init(&task->lock, name);
-    task->cpu = -1;
+    Area k_stk = (Area){ (void*)&tsk->canary2 + sizeof(unsigned int), (void*)tsk->stack + OS_STACK_SIZE };
+    tsk->ctx = kcontext(k_stk, entry, arg);
+    tsk->stat = RUNNABLE;
+    tsk->blocked = false;
+    tsk->name = name;
+    tsk->canary1 = tsk->canary2 = CANARY;
+    kmt->spin_init(&tsk->lock, name);
+    tsk->cpu = -1;
 
-    kmt->spin_lock(&task_lk);
-    kmt->spin_lock(&task->lock);
+    kmt->spin_lock(&ntask_lk);
+    kmt->spin_lock(&tsk->lock);
 
-    task->id = NTASK; 
-    task_pool[NTASK++] = task;
+    tsk->id = NTASK; 
+    task_pool[NTASK++] = tsk;
 
-    kmt->spin_unlock(&task->lock);
-    kmt->spin_unlock(&task_lk);
+    kmt->spin_unlock(&tsk->lock);
+    kmt->spin_unlock(&ntask_lk);
     return 0;
 }
 
 static void kmt_teardown(task_t *task){
     panic_on(NTASK < 0, "no task to teardown\n");
-    kmt->spin_lock(&task_lk);
+    kmt->spin_lock(&ntask_lk);
     for(int i = 0; i < NTASK; i++){
         if(task_pool[i] == task){
             task_pool[i] = task_pool[NTASK - 1];
@@ -138,7 +135,7 @@ static void kmt_teardown(task_t *task){
             pmm->free(task->stack);
             NTASK--;
 
-            kmt->spin_unlock(&task_lk);
+            kmt->spin_unlock(&ntask_lk);
             return;
         }
     }
@@ -194,8 +191,11 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
 void sem_enqueue(sem_t* sem, task_t* tsk){
     LOCK(&tsk->lock);
     assert(tsk->stat == RUNNING);
-    tsk->stat = SLEEPING;               
+    assert(tsk->blocked == false);
+
+    tsk->blocked = true;               
     sem->waiting_tsk[++sem->tp] = tsk;
+
     assert(sem->tp < SEM_WAITING_LEN);
     UNLOCK(&tsk->lock);
 }
@@ -205,8 +205,8 @@ void sem_dequeue(sem_t* sem){
     task_t * wakend = sem->waiting_tsk[sem->tp--];
 
     LOCK(&wakend->lock);
-    if(wakend->stat != SLEEPING) { printf("should sleeping, but is%d\n", wakend->stat); assert(0); }
-    wakend->stat = RUNNABLE;
+    assert(wakend->blocked == true);
+    wakend->blocked = false;
     UNLOCK(&wakend->lock);
 }
 
@@ -265,7 +265,7 @@ static void init_locks(){
     for(int i = 0; i < MAX_CPU; i++){
         NLOCK[i] = 0;
     }
-    kmt->spin_init(&task_lk, "lock for task link");
+    kmt->spin_init(&ntask_lk, "lock for task link");
 }
 
 static void sign_irqs(){
