@@ -1,5 +1,8 @@
 #include <os.h>
 
+#define LOCK kmt->spin_lock
+#define UNLOCK kmt->spin_unlock
+
 #define MAX_NTASK 32
 task_t * current[MAX_CPU], * task_pool[MAX_NTASK];
 int last_sched = 0;
@@ -186,27 +189,29 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->using = false;
 }
 
-P_task_node* make_new_semqueue_node(task_t* tsk, P_task_node* nxt){
-    P_task_node * new_nd = pmm->alloc(sizeof(P_task_node));
-    new_nd->p_task = tsk;
-    new_nd->next = nxt;
-    return new_nd;
-}
-
-void sem_enqueue_locked(sem_t* sem, task_t* tsk){
+void sem_enqueue(sem_t* sem, task_t* tsk){
+    LOCK(&tsk->lock);
+    assert(tsk->stat == RUNNING);
+    tsk->stat = SLEEPING;               
     sem->waiting_tsk[++sem->tp] = tsk;
     assert(sem->tp < SEM_WAITING_LEN);
+    UNLOCK(&tsk->lock);
 }
 
-task_t* sem_dequeue_locked(sem_t* sem){
+void sem_dequeue(sem_t* sem){
     assert(SEM_NONE_WAITING(sem) == false);
-    return sem->waiting_tsk[sem->tp--];
+    task_t * wakend = sem->waiting_tsk[sem->tp--];
+
+    LOCK(&wakend->lock);
+    assert(wakend->stat == SLEEPING);
+    wakend->stat = RUNNABLE;
+    UNLOCK(&wakend->lock);
 }
 
 
 void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
-    kmt_spin_lock(&sem->lock);
+    LOCK(&sem->lock);
     assert(sem->using == false);
     sem->using = true;
 
@@ -214,29 +219,27 @@ void kmt_sem_wait(sem_t *sem){
     sem->val --;
     int blc = sem->val < 0;
     if(blc){
-        if(curr != NULL && curr->stat != RUNNING) {panic("should be running\n");}
-        curr->stat = SLEEPING;
-        sem_enqueue_locked(sem, curr);
+        assert(curr != NULL);
+        sem_enqueue(sem, curr);
     } 
     
     sem->using = false;
-    kmt_spin_unlock(&sem->lock);
+    UNLOCK(&sem->lock);
     if(blc){
         yield();
     } 
 }
+
 void kmt_sem_signal(sem_t *sem){
-    kmt_spin_lock(&sem->lock);
+    LOCK(&sem->lock);
     assert(sem->using == false);
     sem->using = true;
     if(sem->val < 0){
-        task_t* wakend = sem_dequeue_locked(sem);
-        assert(wakend->stat == SLEEPING);
-        wakend->stat = RUNNABLE;
+        sem_dequeue(sem);
     }
     sem->val++;
     sem->using = false;
-    kmt_spin_unlock(&sem->lock);
+    UNLOCK(&sem->lock);
 }
 MODULE_DEF(kmt) = {
  .init = kmt_init,
