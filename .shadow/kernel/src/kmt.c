@@ -41,11 +41,11 @@ void save_context(Context* ctx){        //better not be interrupted
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
     } else {    
+        curr->ctx = ctx;
         if(sane_task(curr) == false) {
             print_error_task(curr);
             assert(0);
         }
-        curr->ctx = ctx;
     }
 }
 
