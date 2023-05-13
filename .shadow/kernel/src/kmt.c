@@ -67,9 +67,9 @@ Context * schedule(){
         }
         p = p->next;
     }
+    curr = NULL;
     kmt->spin_unlock(&task_lk);
     print_local("no threads to sched\n");
-    curr = NULL;
     return os_ctx;
 }
 
