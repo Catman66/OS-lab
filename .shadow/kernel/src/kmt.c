@@ -36,6 +36,7 @@ void check_task_link_structure();
 void print_tasks();
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
+    assert(!curr || curr->stat == RUNNING);
     n_switch++;
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
