@@ -7,8 +7,8 @@ sem_t fill, empty;
 #define V kmt->sem_signal
 
 static int s = 0;
-#define NUM_PARE 100
-#define dep 3
+#define NUM_PARE 10000
+#define dep 5
 
 static void check(int turn, int sval){
   if(sval < 0 || sval > dep){
