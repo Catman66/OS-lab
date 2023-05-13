@@ -6,6 +6,9 @@ spinlock_t task_lk;
 int     NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
 
+int     N_SWITCH[MAX_CPU];
+#define n_switch (N_SWITCH[cpu_current()])
+
 Context *   os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
@@ -31,13 +34,17 @@ static void kmt_init(){
 
 void check_task_link_structure();
 void print_tasks();
-
+void print_error_task();
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
+    n_switch++;
     if(curr == NULL){   //first save 
         os_ctx = ctx;   //always runnable
     } else {    
-        assert(sane_task(curr));
+        if(sane_task(curr) == false) {
+            print_error_task(curr);
+            assert(0);
+        }
         curr->ctx = ctx;
     }
 }
@@ -287,4 +294,9 @@ bool sane_task(task_t * tsk){
     ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack)
     && 
     tsk->canary1 == CANARY && tsk->canary2 == CANARY;
+}
+
+void print_error_task(task_t * tsk){
+    printf("%dth switch,ctx@%p, id: %d, rip:%d, rsp: %d\n", 
+    n_switch, tsk->ctx, tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp);
 }
