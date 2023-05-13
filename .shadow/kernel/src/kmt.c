@@ -101,26 +101,26 @@ Context * yield_handler(Event ev, Context* ctx){
 }
 
 //need to mod global tasklist
-static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
+static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), void *arg){
     panic_on(NTASK + 1 > MAX_NTASK, "too much tasks\n");
-    panic_on(task == NULL, "fail to alloc task \n");
+    panic_on(tsk == NULL, "fail to alloc task \n");
     
-    Area k_stk = (Area){ (void*)&task->canary2 + sizeof(unsigned int), (void*)task->stack + OS_STACK_SIZE };
-    task->ctx = kcontext(k_stk, entry, arg);
-    task->stat = RUNNABLE;
-    task->blocked = false;
-    task->name = name;
-    task->canary1 = task->canary2 = CANARY;
-    kmt->spin_init(&task->lock, name);
-    task->cpu = -1;
+    Area k_stk = (Area){ (void*)&tsk->canary2 + sizeof(unsigned int), (void*)tsk->stack + OS_STACK_SIZE };
+    tsk->ctx = kcontext(k_stk, entry, arg);
+    tsk->stat = RUNNABLE;
+    tsk->blocked = false;
+    tsk->name = name;
+    tsk->canary1 = tsk->canary2 = CANARY;
+    kmt->spin_init(&tsk->lock, name);
+    tsk->cpu = -1;
 
     kmt->spin_lock(&ntask_lk);
-    kmt->spin_lock(&task->lock);
+    kmt->spin_lock(&tsk->lock);
 
-    task->id = NTASK; 
-    task_pool[NTASK++] = task;
+    tsk->id = NTASK; 
+    task_pool[NTASK++] = tsk;
 
-    kmt->spin_unlock(&task->lock);
+    kmt->spin_unlock(&tsk->lock);
     kmt->spin_unlock(&ntask_lk);
     return 0;
 }
