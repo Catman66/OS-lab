@@ -38,8 +38,9 @@ void Tproduce(void * pc) {
     check(i, s);
   }
   putstr("producer finished\n");
+
   while(1) {
-    //printf("after %c finish\n", *(char *)pc);
+    assert(ienabled());
   }
 }
 
@@ -55,6 +56,7 @@ void Tconsume(void * pc) {
   }
   putstr("consumer finished\n");
   while(1) {
+    assert(ienabled());
   }
 }
 
@@ -62,7 +64,7 @@ void test_pc_sem(){
   printf("initiating pc-test\n");
   kmt->sem_init(&fill, "fill", 0);
   kmt->sem_init(&empty, "empty", dep);
-  
+  kmt->spin_init(&slk, "slk");
   for(int i = 0; i < NThread; i++){
       kmt->create(tsk_alloc(), "producer", Tproduce, "abcdefgijkl" + i);
       kmt->create(tsk_alloc(), "consumer", Tconsume, "abcdefgh" + i);
