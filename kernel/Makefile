@@ -39,7 +39,9 @@ DEBUG_FLAGS	:= -serial mon:stdio \
 			  -s -S -nographic \
 			  -smp "3,sockets=3"
 
-debug: build-arg
+
+t: build-arg 
+	@objdump -d build/kernel-x86_64-qemu.elf > asm
+
+debug: build-arg t
 	@qemu-system-x86_64 $(DEBUG_FLAGS) & gdb -x init.gdb
-
-

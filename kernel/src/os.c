@@ -7,6 +7,7 @@ static void print_handlers();
 
 extern void test_sum();
 extern void test_pc_sem();
+//extern void test_sum_sem();
 extern void test_starvation();
 extern void test_sched();
 extern void test_ctx();
@@ -21,7 +22,6 @@ static void os_init() {
 #ifdef LOCAL_DEBUG
   //dev->init();
   test_pc_sem();
-  
 #endif
 }
 
@@ -61,6 +61,7 @@ static Context *os_trap(Event ev, Context *context){
   }
   panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
   //iset(true);
+  if(curr != NULL && curr->stat != RUNNING) { printf("T%d, should be running, but %d\n", curr->id, curr->stat); }
   assert(ienabled() == false);
   return next_ctx;
 }

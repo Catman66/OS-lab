@@ -7,13 +7,24 @@ sem_t fill, empty;
 #define V kmt->sem_signal
 
 static int s = 0;
-#define NUM_PARE 100
-#define dep 3
+#define NUM_PARE 10000
+#define dep 5
 
 static void check(int turn, int sval){
   if(sval < 0 || sval > dep){
     printf("invalid turn%d, val: %d\n", turn, sval);
   }
+}
+static spinlock_t slk;
+static void atomic_inc(){
+  kmt->spin_lock(&slk);
+  s++;
+  kmt->spin_unlock(&slk);
+}
+static void atomic_dec(){
+  kmt->spin_lock(&slk);
+  s--;
+  kmt->spin_unlock(&slk);
 }
 
 void Tproduce(void * pc) {
@@ -22,7 +33,7 @@ void Tproduce(void * pc) {
   while (i++ < NUM_PARE) {
     P(&empty);
     //printf("(%c", *(char*)pc);
-    s++;
+    atomic_inc();
     V(&fill);
     check(i, s);
   }
@@ -38,7 +49,7 @@ void Tconsume(void * pc) {
   while (i++ < NUM_PARE) {
     P(&fill);
     //printf(")%c", *(char*)pc);
-    s--;
+    atomic_dec();
     V(&empty);
     check(i, s);
   }
