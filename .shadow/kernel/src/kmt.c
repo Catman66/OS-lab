@@ -1,6 +1,9 @@
 #include <os.h>
 
-task_t * current[MAX_CPU], * tasks = NULL;   
+#define MAX_NTASK 32
+task_t * current[MAX_CPU], * task_pool[MAX_NTASK];
+int last_sched = 0;
+
 spinlock_t task_lk;
 
 int     NLOCK[MAX_CPU];
@@ -51,24 +54,23 @@ void save_context(Context* ctx){        //better not be interrupted
 
 Context * schedule(){
     assert(ienabled() == false);
-    if(tasks == NULL){      //no tasks
+    if(NTASK == 0){
         return os_ctx;
     }
     kmt->spin_lock(&task_lk);
-    
-    if(curr == NULL){       //first useful schedule
-        curr = tasks;
-    }
-    task_t * p = curr->next;
-    for(int n = 0; n < NTASK; n++){
+
+    int i = (last_sched + 1) % NTASK;
+    task_t* p;
+    for(int cnt = 0; cnt < NTASK; i = (i+ 1) % NTASK, cnt++){
+        p = task_pool[i];
         if(p->stat == RUNNABLE){
             curr = p;
-            p->stat = RUNNING;
+            curr->stat = RUNNING;
             kmt->spin_unlock(&task_lk);
-            return p->ctx;
+            return curr->ctx;
         }
-        p = p->next;
     }
+    
     curr = NULL;
     kmt->spin_unlock(&task_lk);
     print_local("no threads to sched\n");
@@ -89,7 +91,8 @@ Context * yield_handler(Event ev, Context* ctx){
 
 //need to mod global tasklist
 static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg){
-    panic_on(task->stack == NULL, "fail to alloc stack \n");
+    panic_on(NTASK + 1 > MAX_NTASK, "too much tasks\n");
+    panic_on(task == NULL, "fail to alloc task \n");
     Area k_stk = (Area){ task->stack, (void*)task->stack + OS_STACK_SIZE };
     task->ctx = kcontext(k_stk, entry, arg);
     task->stat = RUNNABLE;
@@ -97,34 +100,29 @@ static int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), 
     task->canary1 = task->canary2 = CANARY;
     
     kmt->spin_lock(&task_lk);
-    task->id = NTASK;
-    if(tasks == NULL){          //make a circle of one task
-        tasks = task;
-        tasks->next = tasks;
-    } else {
-        task->next = tasks->next;
-        tasks->next = task;
-    }
-    NTASK++;
+
+    task->id = NTASK; 
+    task_pool[NTASK++] = task;
+
     kmt->spin_unlock(&task_lk);
     return 0;
 }
 
 static void kmt_teardown(task_t *task){
-    //remove from link
-    if(NTASK == 1){
-        NTASK = 0;
-        tasks = NULL;
-    }
-    task_t* pre = tasks, * p = tasks->next;
-    for(int n = 0; n < NTASK; n++){
-        if(p == task){
-            pre->next = p->next;
-            break;
+    panic_on(NTASK < 0, "no task to teardown\n");
+    kmt->spin_lock(&task_lk);
+    for(int i = 0; i < NTASK; i++){
+        if(task_pool[i] == task){
+            task_pool[i] = task_pool[NTASK - 1];
+
+            pmm->free(task->stack);
+            NTASK--;
+
+            kmt->spin_unlock(&task_lk);
+            return;
         }
-        pre = p, p = p->next;
     }
-    pmm->free(task->stack);
+    panic("fail to find wanted task to teardown\n");
 }
 #define HOLD 0
 #define NHOLD 1
@@ -237,21 +235,6 @@ MODULE_DEF(kmt) = {
  .sem_wait = kmt_sem_wait
 };
 
-void check_task_link_structure(){
-    print_local("checking tasks\n");
-    kmt->spin_lock(&task_lk);
-    
-    task_t * p = tasks;
-    for(int i = 0;i < NTASK; i++){
-        panic_on(p == NULL, "error in check valid tasks: null ptr\n");
-        p = p->next;
-    }
-    panic_on(p != tasks, "error in task-link structure, num error\n");    //a circle of exact number N
-    
-    kmt->spin_unlock(&task_lk);
-    print_local("check finished\n");
-}
-
 /// page fault handler
 Context* page_fault_handler(Event ev, Context* ctx){
     panic("page fault not implemented yet\n");
@@ -274,6 +257,10 @@ static void init_tasks(){
     for(int i = 0; i < MAX_CPU; i++){
         current[i] = NULL;
     }
+    for(int i =0; i < MAX_NTASK; i++){
+        task_pool[i] = NULL;
+    }
+    last_sched = 0;
 }
 
 struct X86_64_Context {
