@@ -78,9 +78,9 @@ Context * schedule(){
     int i = (last_sched + 1) % NTASK;
     task_t* p;
     for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
-        if(i % cpu_count() != cpu_current()){
-            continue;
-        }
+        // if(i % cpu_count() != cpu_current()){
+        //     continue;
+        // }
         p = task_pool[i];
         simple_lock(&p->lock);
         if(p->stat == RUNNABLE){
@@ -88,7 +88,7 @@ Context * schedule(){
 
             p->stat = RUNNING;
             simple_unlock(&p->lock);
-            
+
             assert(ienabled() == false);
             curr = p;
             curr->cpu = cpu_current();
