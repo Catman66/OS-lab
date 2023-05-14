@@ -54,7 +54,8 @@ int itoa(char * buf, long long n);
 int htoa(char * buf, long long n);
 
 typedef enum {
-  CHAR_ct, INT_ct, PTR_ct, UINT_ct, STR_ct, LI_ct, LU_ct, LLI_ct, LLU_ct
+  CHAR_ct, INT_ct, PTR_ct, UINT_ct, STR_ct, LI_ct, LU_ct, LLI_ct, LLU_ct, 
+  HEX_ct, L_HEX_ct, LL_HEX_ct
 } CONVERSION_TYPE;
 int parse_type(const char * fmt, CONVERSION_TYPE* tp);
 int parse_prefix_long(const char * fmt, CONVERSION_TYPE* tp);
@@ -101,6 +102,15 @@ int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
         break;
       case LLU_ct:
         len_write_to_out = itoa(buffer, va_arg(ap, unsigned long long));
+        break;
+      case HEX_ct:
+        len_write_to_out = htoa(buffer, va_arg(ap, unsigned int));
+        break;
+      case L_HEX_ct:
+        len_write_to_out = htoa(buffer, va_arg(ap, unsigned long));
+        break;
+      case LL_HEX_ct:
+        len_write_to_out = htoa(buffer, va_arg(ap, unsigned long long));
         break;
       default:
         putch(*fmt);
@@ -149,6 +159,9 @@ int parse_type(const char * fmt, CONVERSION_TYPE* tp){
     case 'i':
       *tp = INT_ct;
       return 1;
+    case 'x':
+      *tp = HEX_ct;
+      return 1;
     case 's':
       *tp = STR_ct;
       return 1;
@@ -180,6 +193,9 @@ int parse_prefix_long(const char * fmt, CONVERSION_TYPE* tp){
     case 'u':
       *tp = LU_ct;
       return 1;
+    case 'x':
+      *tp = L_HEX_ct;
+      return 1;
     default:
       panic("parse with prefix long error type");
       return -1;
@@ -193,6 +209,9 @@ int parse_prefix_ll(const char * fmt, CONVERSION_TYPE * tp){
       return 1;
     case 'u':
       *tp = LLU_ct;
+      return 1;
+    case 'x':
+      *tp = LL_HEX_ct;
       return 1;
     default:
       panic("parse with prefix long error type");
