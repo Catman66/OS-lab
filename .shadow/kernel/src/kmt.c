@@ -276,7 +276,7 @@ struct X86_64_Context {
 #define X86_64_CTX(ctx) ((struct X86_64_Context * )(ctx))
 
 bool sane_task(task_t * tsk){
-    struct X86_64_Context * ctx = X86_64_CTX(&tsk->ctx);
+    struct X86_64_Context * ctx = X86_64_CTX(tsk->ctx);
     return ctx->rip < TXT_END 
     && 
     ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack) + OS_STACK_SIZE
