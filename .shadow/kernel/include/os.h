@@ -41,8 +41,6 @@ extern bool sane_task   (task_t* tsk);
 
 void save_context(Context* ctx);
 
-
-
 typedef struct P_task_node {
   task_t* p_task;
   struct P_task_node * next;
@@ -64,6 +62,5 @@ task_t* tsk_alloc();
 #endif
 
 bool cross_check();
-
 
 #endif

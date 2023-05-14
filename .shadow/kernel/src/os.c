@@ -31,6 +31,7 @@ static void os_run() {
   iset(true);
   while (1) {
     assert(ienabled());
+    putch('0');
   }
 }
 
