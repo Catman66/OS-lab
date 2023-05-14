@@ -28,7 +28,7 @@ struct task {
       task_stat     stat;
       bool          blocked;      
       Context *     ctx;
-      spinlock_t    lock;
+      int           lock;
       unsigned int  canary2;
     };
     uint8_t stack[OS_STACK_SIZE];
@@ -40,8 +40,6 @@ extern bool sane_task   (task_t* tsk);
 #define curr (current[cpu_current()])
 
 void save_context(Context* ctx);
-
-
 
 typedef struct P_task_node {
   task_t* p_task;
@@ -62,5 +60,7 @@ task_t* tsk_alloc();
     extern int no_print(const char * fmt, ...);
     #define print_local no_print
 #endif
+
+bool cross_check();
 
 #endif

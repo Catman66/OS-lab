@@ -20,6 +20,15 @@ Context *   os_contexts[MAX_CPU];             //os idle thread context saved her
 
 int NTASK = 0;
 
+void simple_lock(int * lk){
+    while(atomic_xchg(lk, 1)){
+        ;
+    }
+}
+void simple_unlock(int *lk){
+    atomic_xchg(lk, 0);
+}
+
 static void init_locks();
 
 static void sign_irqs();
@@ -45,15 +54,14 @@ void save_context(Context* ctx){        //better not be interrupted
     if(curr == NULL){   //save from os-thread
         os_ctx = ctx;   //always runnable
     } else {       
-        LOCK(&curr->lock);         
+        simple_lock(&curr->lock);         
         assert(curr->cpu == cpu_current());
-        
         curr->ctx = ctx;
         curr->cpu = -1;
         curr->stat = INTR;
 
         assert(sane_task(curr));
-        UNLOCK(&curr->lock);
+        simple_unlock(&curr->lock);
     }
 }
 
@@ -67,18 +75,18 @@ Context * schedule(){
     task_t* p;
     for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
         p = task_pool[i];
-        LOCK(&p->lock);
+        simple_lock(&p->lock);
         if(p->stat == RUNNABLE && p->blocked == false){
             assert(p->cpu == -1);
 
             p->stat = RUNNING;
-            UNLOCK(&p->lock);
+            simple_unlock(&p->lock);
             curr = p;
             curr->cpu = cpu_current();
             last_sched = i;
             return curr->ctx;
         } else {
-            UNLOCK(&p->lock);
+            simple_unlock(&p->lock);
         }
     }
     curr = NULL;
@@ -88,10 +96,10 @@ Context * schedule(){
 Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
     if(curr != NULL){
-        LOCK(&curr->lock);
+        simple_lock(&curr->lock);
         assert(curr->stat == INTR);
         curr->stat = RUNNABLE;
-        UNLOCK(&curr->lock);
+        simple_unlock(&curr->lock);
     }
     return schedule();
 }
@@ -111,17 +119,18 @@ static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), v
     tsk->blocked = false;
     tsk->name = name;
     tsk->canary1 = tsk->canary2 = CANARY;
-    kmt->spin_init(&tsk->lock, name);
+    tsk->lock = 0;
     tsk->cpu = -1;
 
     kmt->spin_lock(&ntask_lk);
-    kmt->spin_lock(&tsk->lock);
+    simple_lock(&tsk->lock);
 
     tsk->id = NTASK; 
     task_pool[NTASK++] = tsk;
 
-    kmt->spin_unlock(&tsk->lock);
+    simple_unlock(&tsk->lock);
     kmt->spin_unlock(&ntask_lk);
+    panic_on(cross_check(tsk) == false, "tasks stack cross!!!\n");
     return 0;
 }
 
@@ -187,14 +196,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->val    = value;
 }
 
-void simple_lock(int * lk){
-    while(atomic_xchg(lk, 1)){
-        ;
-    }
-}
-void simple_unlock(int *lk){
-    atomic_xchg(lk, 0);
-}
+
 
 //past version of P, V, using queue
 void kmt_sem_wait(sem_t *sem){
@@ -208,7 +210,6 @@ void kmt_sem_wait(sem_t *sem){
             break;
         }
         simple_unlock(&sem->lock);
-        
         yield();
     }
 }
@@ -282,4 +283,17 @@ bool sane_task(task_t * tsk){
 
 void dump_task_info(task_t * tsk){
     printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp); 
+}
+
+bool cross_check(task_t* tsk){
+    for(int i = 0; i < NTASK; i++){
+        if(task_pool[i] != tsk){
+            task_t * another = task_pool[i];
+            if(another + 1 < tsk || tsk + 1 < another){
+                continue;
+            }
+            return false;
+        }
+    }
+    return true;
 }
