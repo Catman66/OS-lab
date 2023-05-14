@@ -69,7 +69,6 @@ void save_context(Context* ctx){        //better not be interrupted
     }
 }
 
-int sched_lk = 0;
 Context * schedule(){
     assert(ienabled() == false);
     if(NTASK == 0){
@@ -78,27 +77,27 @@ Context * schedule(){
 
     int i = (last_sched + 1) % NTASK;
     task_t* p;
-    simple_lock(&sched_lk);
     for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
-        // if(i % cpu_count() != cpu_current()){
-        //     continue;
-        // }
+        if(i % cpu_count() != cpu_current()){
+            continue;
+        }
         p = task_pool[i];
-
+        simple_lock(&p->lock);
         if(p->stat == RUNNABLE){
             assert(p->cpu == -1);
 
             p->stat = RUNNING;
-            simple_unlock(&sched_lk);
-
+            simple_unlock(&p->lock);
+            
             assert(ienabled() == false);
             curr = p;
             curr->cpu = cpu_current();
             last_sched = i;
             return curr->ctx;
-        } 
+        } else {
+            simple_unlock(&p->lock);
+        }
     }
-    simple_unlock(&sched_lk);
     curr = NULL;
     return os_ctx;
 }
