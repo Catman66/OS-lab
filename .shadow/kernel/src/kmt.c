@@ -111,10 +111,6 @@ Context* timer_intr_handler(Event ev, Context* ctx){
     return schedule();
 }
 
-Context * yield_handler(Event ev, Context* ctx){
-    return timer_intr_handler(ev, ctx);
-}
-
 //need to mod global tasklist
 static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), void *arg){
     panic_on(NTASK + 1 > MAX_NTASK, "too much tasks\n");
@@ -248,7 +244,7 @@ static void init_locks(){
 
 static void sign_irqs(){
     os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
-    os->on_irq(1, EVENT_YIELD, yield_handler);
+    os->on_irq(1, EVENT_YIELD, timer_intr_handler);
 }
 
 static void init_tasks(){
