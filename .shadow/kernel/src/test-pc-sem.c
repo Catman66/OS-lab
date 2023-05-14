@@ -7,7 +7,7 @@ sem_t fill, empty;
 #define V kmt->sem_signal
 
 static int s = 0;
-#define NUM_PARE 100
+#define NUM_PARE 10000
 #define dep 5
 
 static void check(int turn, int sval){
