@@ -160,6 +160,7 @@ void kmt_spin_init(spinlock_t *lk, const char *name){
 }
 int PRE_INTR[MAX_CPU];
 #define pre_i (PRE_INTR[cpu_current()])
+
 void kmt_spin_lock(spinlock_t *lk){
     int i = ienabled();
     iset(false);
@@ -167,11 +168,8 @@ void kmt_spin_lock(spinlock_t *lk){
         pre_i = i;
     }
     while (atomic_xchg(&(lk->val), NHOLD) == NHOLD) {
-        //curr->stat = SLEEPING;
-        //yield();            // fail to lock and sleep
         ;
     }
-    __sync_synchronize();
     n_lk++;
     panic_on(ienabled(), "i set in lock\n");
 }
@@ -184,7 +182,6 @@ void kmt_spin_unlock(spinlock_t *lk){
     assert(ienabled() == false);
 
     n_lk--;
-    __sync_synchronize();
 
     atomic_xchg(&(lk->val), HOLD);
     if(n_lk == 0){                  //intr protects n_lk
