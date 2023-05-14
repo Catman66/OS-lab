@@ -285,7 +285,7 @@ bool sane_task(task_t * tsk){
 }
 
 void dump_task_info(task_t * tsk){
-    printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(&tsk->ctx)->rip, X86_64_CTX(&tsk->ctx)->rsp); 
+    printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp); 
 }
 
 bool cross_check(task_t* tsk){
