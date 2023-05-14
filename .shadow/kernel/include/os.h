@@ -63,4 +63,7 @@ task_t* tsk_alloc();
     #define print_local no_print
 #endif
 
+bool cross_check();
+
+
 #endif

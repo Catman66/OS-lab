@@ -56,7 +56,6 @@ void save_context(Context* ctx){        //better not be interrupted
     } else {       
         simple_lock(&curr->lock);         
         assert(curr->cpu == cpu_current());
-        
         curr->ctx = ctx;
         curr->cpu = -1;
         curr->stat = INTR;
@@ -131,6 +130,7 @@ static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), v
 
     simple_unlock(&tsk->lock);
     kmt->spin_unlock(&ntask_lk);
+    panic_on(cross_check(tsk) == false, "tasks stack cross!!!\n");
     return 0;
 }
 
@@ -283,4 +283,17 @@ bool sane_task(task_t * tsk){
 
 void dump_task_info(task_t * tsk){
     printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp); 
+}
+
+bool cross_check(task_t* tsk){
+    for(int i = 0; i < NTASK; i++){
+        if(task_pool[i] != tsk){
+            task_t * another = task_pool[i];
+            if(another + 1 < tsk || tsk + 1 < another){
+                continue;
+            }
+            return false;
+        }
+    }
+    return true;
 }
