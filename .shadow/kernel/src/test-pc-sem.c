@@ -32,7 +32,7 @@ void Tproduce(void * pc) {
   putstr("producer running\n");
   while (1) {
     P(&empty);
-    //printf("(%c", *(char*)pc);
+    putch('(');
     V(&fill);
   }
   putstr("producer finished\n");
