@@ -79,7 +79,7 @@ Context * schedule(){
         }
         p = task_pool[i];
         simple_lock(&p->lock);
-        if(p->stat == RUNNABLE && p->blocked == false){
+        if(p->stat == RUNNABLE){
             assert(p->cpu == -1);
 
             p->stat = RUNNING;
@@ -119,7 +119,6 @@ static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), v
     Area k_stk = (Area){ (void*)&tsk->canary2 + sizeof(unsigned int), (void*)tsk->stack + OS_STACK_SIZE };
     tsk->ctx = kcontext(k_stk, entry, arg);
     tsk->stat = RUNNABLE;
-    tsk->blocked = false;
     tsk->name = name;
     tsk->canary1 = tsk->canary2 = CANARY;
     tsk->lock = 0;
