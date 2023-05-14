@@ -88,6 +88,8 @@ Context * schedule(){
 
             p->stat = RUNNING;
             simple_unlock(&p->lock);
+            
+            assert(ienabled() == false);
             curr = p;
             curr->cpu = cpu_current();
             last_sched = i;

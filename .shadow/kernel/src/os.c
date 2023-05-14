@@ -12,6 +12,7 @@ extern void test_starvation();
 extern void test_sched();
 extern void test_ctx();
 extern void yield_test();
+extern void thread_switch_test();
 
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
