@@ -182,69 +182,43 @@ void kmt_spin_unlock(spinlock_t *lk){
 }
 
 void kmt_sem_init(sem_t *sem, const char *name, int value){
-    sem->desc = name;
-    sem->val = value;
-    kmt_spin_init(&(sem->lock), name);          
-    sem->tp = -1;
-    sem->cnt = 0;                       //P or V operation adds cnt
-    sem->using = false;
+    sem->name   = name;
+    sem->lock   = 0;
+    sem->val    = value;
 }
 
-void sem_enqueue(sem_t* sem, task_t* tsk){
-    LOCK(&tsk->lock);
-    assert(tsk->stat == RUNNING);
-    assert(tsk->blocked == false);
-
-    tsk->blocked = true;               
-    sem->waiting_tsk[++sem->tp] = tsk;
-
-    assert(sem->tp < SEM_WAITING_LEN);
-    UNLOCK(&tsk->lock);
+void simple_lock(int * lk){
+    while(atomic_xchg(lk, 1)){
+        ;
+    }
+}
+void simple_unlock(int *lk){
+    atomic_xchg(lk, 0);
 }
 
-void sem_dequeue(sem_t* sem){
-    assert(SEM_NONE_WAITING(sem) == false);
-    task_t * wakend = sem->waiting_tsk[sem->tp--];
-
-    LOCK(&wakend->lock);
-    assert(wakend->blocked == true);
-    wakend->blocked = false;
-    UNLOCK(&wakend->lock);
-}
-
-
+//past version of P, V, using queue
 void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
-    LOCK(&sem->lock);
-    assert(sem->using == false);
-    sem->using = true;
-
-    assert(ienabled() == false);
-    sem->val --;
-    int blc = sem->val < 0;
-    if(blc){
-        assert(curr != NULL);
-        sem_enqueue(sem, curr);
-    } 
     
-    sem->using = false;
-    UNLOCK(&sem->lock);
-    if(blc){
+    while(1){
+        simple_lock(&sem->lock);
+        if(sem->val > 0){
+            sem->val --;
+            simple_unlock(&sem->lock);
+            break;
+        }
+        simple_unlock(&sem->lock);
+        
         yield();
-    } 
+    }
 }
 
 void kmt_sem_signal(sem_t *sem){
-    LOCK(&sem->lock);
-    assert(sem->using == false);
-    sem->using = true;
-    if(sem->val < 0){
-        sem_dequeue(sem);
-    }
+    simple_lock(&sem->lock);
     sem->val++;
-    sem->using = false;
-    UNLOCK(&sem->lock);
+    simple_unlock(&sem->lock);
 }
+
 MODULE_DEF(kmt) = {
  .init = kmt_init,
  .create = kmt_create, 
