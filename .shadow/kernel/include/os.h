@@ -27,7 +27,7 @@ struct task {
       const char*   name;
       task_stat     stat;
       bool          blocked;      
-      Context *     ctx;
+      Context       ctx;
       int           lock;
       unsigned int  canary2;
     };
