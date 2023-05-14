@@ -28,7 +28,7 @@ struct task {
       task_stat     stat;
       bool          blocked;      
       Context *     ctx;
-      spinlock_t    lock;
+      int           lock;
       unsigned int  canary2;
     };
     uint8_t stack[OS_STACK_SIZE];
