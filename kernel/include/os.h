@@ -48,19 +48,11 @@ typedef struct P_task_node {
   struct P_task_node * next;
 } P_task_node;
 
-#define SEM_EMPTY(head) ((head).next == NULL)
 struct semaphore {
-  const char * desc;
+  const char * name;
   int val;
-  spinlock_t lock;
-  task_t* waiting_tsk[SEM_WAITING_LEN];
-  int tp;
-  int cnt;
-  bool using;
+  int lock;
 };
-#define SEM_NONE_WAITING(s) ((s)->tp == -1)
-
-void panic_report(bool cond, const char * fmt, ...);
 
 task_t* tsk_alloc();
 
