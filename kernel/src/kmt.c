@@ -15,7 +15,7 @@ int     NLOCK[MAX_CPU];
 int     N_SWITCH[MAX_CPU];
 #define n_switch (N_SWITCH[cpu_current()])
 
-Context *   os_contexts[MAX_CPU];             //os idle thread context saved here
+Context   os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
 int NTASK = 0;
@@ -52,15 +52,15 @@ void save_context(Context* ctx){        //better not be interrupted
     n_switch++;
 
     if(curr == NULL){   //save from os-thread
-        os_ctx = ctx;   //always runnable
+        os_ctx = *ctx;   //always runnable
     } else {       
         simple_lock(&curr->lock);         
         assert(curr->cpu == cpu_current());
-        curr->ctx = ctx;
+        curr->ctx = *ctx;
         curr->cpu = -1;
         curr->stat = INTR;
 
-        assert(sane_task(curr));
+        if(!sane_task(curr)){ dump_task_info(curr); assert(0); }
         simple_unlock(&curr->lock);
     }
 }
@@ -68,7 +68,7 @@ void save_context(Context* ctx){        //better not be interrupted
 Context * schedule(){
     assert(ienabled() == false);
     if(NTASK == 0){
-        return os_ctx;
+        return &os_ctx;
     }
 
     int i = (last_sched + 1) % NTASK;
@@ -84,13 +84,13 @@ Context * schedule(){
             curr = p;
             curr->cpu = cpu_current();
             last_sched = i;
-            return curr->ctx;
+            return &curr->ctx;
         } else {
             simple_unlock(&p->lock);
         }
     }
     curr = NULL;
-    return os_ctx;
+    return &os_ctx;
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
@@ -114,7 +114,7 @@ static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), v
     panic_on(tsk == NULL, "fail to alloc task \n");
     
     Area k_stk = (Area){ (void*)&tsk->canary2 + sizeof(unsigned int), (void*)tsk->stack + OS_STACK_SIZE };
-    tsk->ctx = kcontext(k_stk, entry, arg);
+    tsk->ctx = *kcontext(k_stk, entry, arg);
     tsk->stat = RUNNABLE;
     tsk->blocked = false;
     tsk->name = name;
@@ -273,7 +273,7 @@ struct X86_64_Context {
 #define X86_64_CTX(ctx) ((struct X86_64_Context * )(ctx))
 
 bool sane_task(task_t * tsk){
-    struct X86_64_Context * ctx = X86_64_CTX(tsk->ctx);
+    struct X86_64_Context * ctx = X86_64_CTX(&tsk->ctx);
     return ctx->rip < TXT_END 
     && 
     ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack) + OS_STACK_SIZE
@@ -282,7 +282,7 @@ bool sane_task(task_t * tsk){
 }
 
 void dump_task_info(task_t * tsk){
-    printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp); 
+    printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(&tsk->ctx)->rip, X86_64_CTX(&tsk->ctx)->rsp); 
 }
 
 bool cross_check(task_t* tsk){

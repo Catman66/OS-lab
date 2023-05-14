@@ -27,7 +27,7 @@ struct task {
       const char*   name;
       task_stat     stat;
       bool          blocked;      
-      Context *     ctx;
+      Context       ctx;
       int           lock;
       unsigned int  canary2;
     };
@@ -62,5 +62,6 @@ task_t* tsk_alloc();
 #endif
 
 bool cross_check();
+void dump_task_info(task_t* tsk);
 
 #endif
