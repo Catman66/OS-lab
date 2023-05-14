@@ -98,6 +98,7 @@ Context * schedule(){
             return curr->ctx;
         } 
     }
+    simple_unlock(&sched_lk);
     curr = NULL;
     return os_ctx;
 }
