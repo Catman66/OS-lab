@@ -6,10 +6,11 @@ sem_t fill, empty;
 #define P kmt->sem_wait
 #define V kmt->sem_signal
 
-static int s = 0;
-#define NUM_PARE 100
+//static int s = 0;
+#define NUM_PARE 10000
 #define dep 5
 
+/*
 static void check(int turn, int sval){
   if(sval < 0 || sval > dep){
     printf("invalid turn%d, val: %d\n", turn, sval);
@@ -26,16 +27,13 @@ static void atomic_dec(){
   s--;
   kmt->spin_unlock(&slk);
 }
-
+*/
 void Tproduce(void * pc) {
-  int i = 0;
   putstr("producer running\n");
-  while (i++ < NUM_PARE) {
+  while (1) {
     P(&empty);
-    //printf("(%c", *(char*)pc);
-    atomic_inc();
+    putch('(');
     V(&fill);
-    check(i, s);
   }
   putstr("producer finished\n");
 
@@ -45,14 +43,11 @@ void Tproduce(void * pc) {
 }
 
 void Tconsume(void * pc) {
-  int i = 0;
   putstr("consumer running\n");
-  while (i++ < NUM_PARE) {
+  while (1) {
     P(&fill);
-    //printf(")%c", *(char*)pc);
-    atomic_dec();
+    putch(')');
     V(&empty);
-    check(i, s);
   }
   putstr("consumer finished\n");
   while(1) {
@@ -64,7 +59,8 @@ void test_pc_sem(){
   printf("initiating pc-test\n");
   kmt->sem_init(&fill, "fill", 0);
   kmt->sem_init(&empty, "empty", dep);
-  kmt->spin_init(&slk, "slk");
+  //kmt->spin_init(&slk, "slk");
+  
   for(int i = 0; i < NThread; i++){
       kmt->create(tsk_alloc(), "producer", Tproduce, "abcdefgijkl" + i);
       kmt->create(tsk_alloc(), "consumer", Tconsume, "abcdefgh" + i);

@@ -165,6 +165,8 @@ void kmt_spin_lock(spinlock_t *lk){
     panic_on(ienabled(), "i set in lock\n");
 }
 
+
+
 void kmt_spin_unlock(spinlock_t *lk){
     panic_on(n_lk < 1, curr->name);
     assert(lk->val == NHOLD);

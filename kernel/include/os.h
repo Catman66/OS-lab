@@ -14,6 +14,7 @@ struct spinlock {
   int val;
 };
 
+
 typedef enum{ RUNNING, RUNNABLE, INTR } task_stat;
 struct task {
   union 
