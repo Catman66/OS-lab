@@ -11,6 +11,7 @@ extern void test_pc_sem();
 extern void test_starvation();
 extern void test_sched();
 extern void test_ctx();
+extern void yield_test();
 
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
@@ -21,7 +22,7 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 #ifdef LOCAL_DEBUG
   //dev->init();
-  test_pc_sem();
+  yield_test();
 #endif
 }
 
