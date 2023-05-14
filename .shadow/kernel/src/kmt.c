@@ -49,6 +49,7 @@ static void kmt_init(){
 
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
+    
     n_switch++;
 
     if(curr == NULL){   //save from os-thread
@@ -56,11 +57,14 @@ void save_context(Context* ctx){        //better not be interrupted
     } else {       
         simple_lock(&curr->lock);         
         assert(curr->cpu == cpu_current());
+        assert(curr->stat == RUNNING);
+        assert(curr->canary1 == CANARY && curr->canary2 == CANARY);
+        
         curr->ctx = ctx;
         curr->cpu = -1;
         curr->stat = INTR;
 
-        if(!sane_task(curr)){ dump_task_info(curr); assert(0); }
+        if(!sane_task(curr)){ dump_task_info(curr); while(1); }
         simple_unlock(&curr->lock);
     }
 }
@@ -102,7 +106,7 @@ Context* timer_intr_handler(Event ev, Context* ctx){
         simple_lock(&curr->lock);
         assert(curr->stat == INTR);
         curr->stat = RUNNABLE;
-        simple_unlock(&curr->lock);
+        simple_unlock(&curr->lock);     //from this point, current can be load on another CPU
     }
     return schedule();
 }
@@ -173,8 +177,6 @@ void kmt_spin_lock(spinlock_t *lk){
     n_lk++;
     panic_on(ienabled(), "i set in lock\n");
 }
-
-
 
 void kmt_spin_unlock(spinlock_t *lk){
     panic_on(n_lk < 1, curr->name);
