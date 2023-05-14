@@ -62,5 +62,6 @@ task_t* tsk_alloc();
 #endif
 
 bool cross_check();
+void dump_task_info(task_t* tsk);
 
 #endif

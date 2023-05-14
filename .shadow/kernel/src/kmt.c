@@ -60,7 +60,7 @@ void save_context(Context* ctx){        //better not be interrupted
         curr->cpu = -1;
         curr->stat = INTR;
 
-        assert(sane_task(curr));
+        if(!sane_task(curr)){ dump_task_info(curr); assert(0); }
         simple_unlock(&curr->lock);
     }
 }
