@@ -213,6 +213,7 @@ void sem_dequeue(sem_t* sem){
 }
 
 
+//past version of P, V, using queue
 void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
     LOCK(&sem->lock);
@@ -226,7 +227,6 @@ void kmt_sem_wait(sem_t *sem){
         assert(curr != NULL);
         sem_enqueue(sem, curr);
     } 
-    
     sem->using = false;
     UNLOCK(&sem->lock);
     if(blc){
