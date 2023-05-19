@@ -51,7 +51,7 @@ struct semaphore {
   int lock;
 };
 
-task_t* tsk_alloc();
+task_t * tsk_alloc();
 
 #ifdef LOCAL_DEBUG
     #define print_local printf

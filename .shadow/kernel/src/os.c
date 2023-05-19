@@ -55,6 +55,8 @@ Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL };
 static Context *os_trap(Event ev, Context *context){
   assert(ienabled() == false);
   save_context(context);
+  assert(ienabled() == true);
+  
   Context* next_ctx = NULL;
   for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
     if(nd->event == ev.event || nd->event == EVENT_NULL){
