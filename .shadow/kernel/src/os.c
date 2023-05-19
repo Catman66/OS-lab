@@ -23,8 +23,8 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 
 #ifdef LOCAL_DEBUG
-  dev->init();
-  //thread_switch_test();
+  //dev->init();
+  thread_switch_test();
 #endif
 }
 
