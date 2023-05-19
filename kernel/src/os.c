@@ -12,6 +12,7 @@ extern void test_starvation();
 extern void test_sched();
 extern void test_ctx();
 extern void yield_test();
+extern void thread_switch_test();
 
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
@@ -20,9 +21,10 @@ static void os_init() {
   print_handlers();
   print_local("os init finished\n");
   print_local("num cpu: %d\n", cpu_count());
+
 #ifdef LOCAL_DEBUG
   //dev->init();
-  yield_test();
+  thread_switch_test();
 #endif
 }
 
@@ -31,7 +33,7 @@ static void os_run() {
   iset(true);
   while (1) {
     assert(ienabled());
-    putch('0');
+    //putch('0');
   }
 }
 
@@ -98,6 +100,7 @@ static void print_handlers(){
 int no_print(const char * fmt, ...){
     return 0;
 }
+
 #define STR_BUFFER_SIZE 1024
 int vprintf_os(const char *fmt, va_list ap) {
   char formated[STR_BUFFER_SIZE];

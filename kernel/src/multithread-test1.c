@@ -16,3 +16,8 @@ void yield_test(){
     }
     putstr("yield test initiated\n");
 }
+
+void thread_switch_test(){
+    putstr("One thread, switching between CPU\n");
+    kmt->create(tsk_alloc(), "single-thread", Tyield, "a");
+}

@@ -5,7 +5,6 @@ NAME           := kernel
 SRCS           := framework/main.c $(shell find -L ./src/ -name "*.c")
 INC_PATH       := include/ framework/
 
-export smp := 4
 export AM_HOME := $(PWD)/../abstract-machine
 #check if ARCH 已定义
 ifeq ($(ARCH),)
@@ -40,8 +39,7 @@ DEBUG_FLAGS	:= -serial mon:stdio \
 			  -smp "2,sockets=2"
 
 
-t: build-arg 
-	@objdump -d build/kernel-x86_64-qemu.elf > asm
+
 
 debug: build-arg t
 	@qemu-system-x86_64 $(DEBUG_FLAGS) & gdb -x init.gdb
