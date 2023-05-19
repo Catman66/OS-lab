@@ -172,12 +172,12 @@ static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), v
     tsk->name = name;
     tsk->canary1 = tsk->canary2 = CANARY;
     tsk->lock = 0;
-    tsk->cpu = -1;
 
     kmt->spin_lock(&ntask_lk);
     simple_lock(&tsk->lock);
 
     tsk->id = NTASK; 
+    tsk->cpu = NTASK % cpu_count();
     task_pool[NTASK++] = tsk;
 
     simple_unlock(&tsk->lock);
