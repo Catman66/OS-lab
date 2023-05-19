@@ -6,7 +6,7 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-#define STR_BUFFER_SIZE 1024
+#define STR_BUFFER_SIZE 256
 #define CONVERSION_BUFFER_SIZE 64
 
 int vprintf(const char *fmt, va_list ap) {

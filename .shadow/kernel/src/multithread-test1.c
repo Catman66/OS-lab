@@ -1,10 +1,11 @@
 #include <common.h>
 #include <os.h>
 
+int cnt = 0;
 void Tyield(void * arg){
     while(1){
         assert(ienabled());
-        putch(*(char*)arg);
+        printf("%d ", cnt++);
         yield();
     }
 }
