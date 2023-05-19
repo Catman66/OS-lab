@@ -21,6 +21,7 @@ static void os_init() {
   print_handlers();
   print_local("os init finished\n");
   print_local("num cpu: %d\n", cpu_count());
+
 #ifdef LOCAL_DEBUG
   //dev->init();
   thread_switch_test();
@@ -99,6 +100,7 @@ static void print_handlers(){
 int no_print(const char * fmt, ...){
     return 0;
 }
+
 #define STR_BUFFER_SIZE 1024
 int vprintf_os(const char *fmt, va_list ap) {
   char formated[STR_BUFFER_SIZE];
