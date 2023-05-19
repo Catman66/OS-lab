@@ -39,7 +39,5 @@ DEBUG_FLAGS	:= -serial mon:stdio \
 			  -smp "2,sockets=2"
 
 
-
-
-debug: build-arg t
+debug: build-arg
 	@qemu-system-x86_64 $(DEBUG_FLAGS) & gdb -x init.gdb
