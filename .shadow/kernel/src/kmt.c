@@ -5,7 +5,7 @@
 
 #define MAX_NTASK 32
 task_t * current[MAX_CPU], * task_pool[MAX_NTASK];
-task_t * scheduler[MAX_CPU];
+task_t * schedulers[MAX_CPU];
 
 spinlock_t ntask_lk;
 int link_lk = 0;
@@ -27,8 +27,6 @@ void simple_unlock(int *lk){
     atomic_xchg(lk, 0);
 }
 
-
-
 //init components
 
 static void init_locks();
@@ -44,7 +42,7 @@ static void kmt_init(){
 
     sign_irqs();        print_local(" === kmt init finished ===\n");
 
-    init_tasks(); 
+    init_tasks();       
 
     print_local("=== num of tasks current: %d ===\n", NTASK);    
 }
@@ -101,6 +99,10 @@ task_t * try_swap(task_t* ret,  int i){
     simple_lock(&link_lk);
 
     task_t * swp = task_pool[j];
+    if(swp == ret){
+        simple_unlock(&link_lk);
+        return  ret;
+    }
     simple_lock(&swp->lock);
     if(swp->cpu == -1){
         swp->cpu = cpu_current();
