@@ -23,8 +23,8 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 
 #ifdef LOCAL_DEBUG
-  //dev->init();
-  thread_switch_test();
+  dev->init();
+  //thread_switch_test();
 #endif
 }
 
@@ -67,7 +67,6 @@ static Context *os_trap(Event ev, Context *context){
   }
   panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
   //iset(true);
-  if(curr != NULL && curr->stat != RUNNING) { printf("not running\n"); }
   assert(ienabled() == false);
   return next_ctx;
 }

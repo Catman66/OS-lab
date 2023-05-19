@@ -23,9 +23,8 @@ struct task {
     {
       unsigned int  canary1;
       int           id;
-      int           cpu;          //if not running, then cpu is -1
+      int           cpu;          //if not running, then cpu is -1, using this as a flag
       const char*   name;
-      task_stat     stat;
       Context  *    ctx;
       int           lock;
       unsigned int  canary2;

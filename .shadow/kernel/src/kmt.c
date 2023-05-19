@@ -5,21 +5,19 @@
 
 #define MAX_NTASK 32
 task_t * current[MAX_CPU], * task_pool[MAX_NTASK];
-int last_sched = 0;
+task_t * scheduler[MAX_CPU];
 
 spinlock_t ntask_lk;
+int link_lk = 0;
 
 int     NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
-
-int     N_SWITCH[MAX_CPU];
-#define n_switch (N_SWITCH[cpu_current()])
 
 Context * os_contexts[MAX_CPU];             //os idle thread context saved here
 #define os_ctx (os_contexts[cpu_current()])
 
 int NTASK = 0;
-
+int last_sched = 0;
 void simple_lock(int * lk){
     while(atomic_xchg(lk, 1)){
         ;
@@ -28,6 +26,10 @@ void simple_lock(int * lk){
 void simple_unlock(int *lk){
     atomic_xchg(lk, 0);
 }
+
+
+
+//init components
 
 static void init_locks();
 
@@ -47,26 +49,73 @@ static void kmt_init(){
     print_local("=== num of tasks current: %d ===\n", NTASK);    
 }
 
+
+//save and schedule
+
+static void release_tasks_not_running(int c){
+    simple_lock(&link_lk);
+    for(int i = 0; i < NTASK; i++){
+        if(i % cpu_count() == c){
+            task_t * tsk = task_pool[i];
+            if(tsk == curr){
+                continue;
+            }
+
+            simple_lock(&tsk->lock);
+            if(tsk->cpu == c){
+                tsk->cpu = -1;
+            }
+            simple_unlock(&tsk->lock);
+        }
+    }
+    simple_unlock(&link_lk);
+}
+
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
-    
-    n_switch++;
+    if(cpu_count() > 1){
+        release_tasks_not_running(cpu_current());
+    }
 
     if(curr == NULL){   //save from os-thread
         os_ctx = ctx;   //always runnable
     } else {       
         simple_lock(&curr->lock);         
         assert(curr->cpu == cpu_current());
-        assert(curr->stat == RUNNING);
         assert(curr->canary1 == CANARY && curr->canary2 == CANARY);
         
         curr->ctx = ctx;
-        curr->cpu = -1;
-        curr->stat = INTR;
 
         if(!sane_task(curr)){ dump_task_info(curr); while(1); }
         simple_unlock(&curr->lock);
     }
+}
+
+task_t * try_swap(task_t* ret,  int i){
+    if(ret == NULL){
+        return NULL;
+    }
+    int j = (i + 1) % NTASK;
+
+
+    simple_lock(&link_lk);
+
+    task_t * swp = task_pool[j];
+    simple_lock(&swp->lock);
+    if(swp->cpu == -1){
+        swp->cpu = cpu_current();
+        task_pool[j] = ret;
+        task_pool[i] = swp;
+    }
+    simple_unlock(&swp->lock);
+
+    simple_lock(&ret->lock);
+    ret->cpu = -1;
+    simple_unlock(&ret->lock);
+    
+    simple_unlock(&link_lk);
+
+    return task_pool[i];
 }
 
 Context * schedule(){
@@ -75,41 +124,41 @@ Context * schedule(){
         return os_ctx;
     }
 
+    task_t * ret = NULL, *tsk;                        //try to swap from another cpu
+    
     int i = (last_sched + 1) % NTASK;
-    task_t* p;
-    for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
-        // if(i % cpu_count() != cpu_current()){
-        //     continue;
-        // }
-        p = task_pool[i];
-        simple_lock(&p->lock);
-        if(p->stat == RUNNABLE){
-            assert(p->cpu == -1);
 
-            p->stat = RUNNING;
-            simple_unlock(&p->lock);
-            
-            assert(ienabled() == false);
-            curr = p;
-            curr->cpu = cpu_current();
+    simple_lock(&link_lk);
+    for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
+        if(i % cpu_count() != cpu_current()){
+            continue;
+        }
+        tsk = task_pool[i];
+        simple_lock(&tsk->lock);
+        if(tsk->cpu == -1 || tsk == curr){
+            ret = tsk;
+            tsk->cpu = cpu_current();
             last_sched = i;
-            return curr->ctx;
+            simple_unlock(&tsk->lock);
+            break;
         } else {
-            simple_unlock(&p->lock);
+            simple_unlock(&tsk->lock);
         }
     }
-    curr = NULL;
-    return os_ctx;
+    simple_unlock(&link_lk);
+    if(cpu_count() > 1){
+        curr = try_swap(ret, i);
+    } else {
+        curr = ret;
+    }
+    if(curr == NULL){
+        return os_ctx;
+    }
+    return curr->ctx;
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
-    if(curr != NULL){
-        simple_lock(&curr->lock);
-        assert(curr->stat == INTR);
-        curr->stat = RUNNABLE;
-        simple_unlock(&curr->lock);     //from this point, current can be load on another CPU
-    }
     return schedule();
 }
 
@@ -120,7 +169,6 @@ static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), v
     
     Area k_stk = (Area){ (void*)&tsk->canary2 + sizeof(unsigned int), (void*)tsk->stack + OS_STACK_SIZE };
     tsk->ctx = kcontext(k_stk, entry, arg);
-    tsk->stat = RUNNABLE;
     tsk->name = name;
     tsk->canary1 = tsk->canary2 = CANARY;
     tsk->lock = 0;
@@ -195,8 +243,6 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->val    = value;
 }
 
-
-
 //past version of P, V, using queue
 void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
@@ -220,15 +266,15 @@ void kmt_sem_signal(sem_t *sem){
 }
 
 MODULE_DEF(kmt) = {
- .init = kmt_init,
- .create = kmt_create, 
- .teardown = kmt_teardown,
- .spin_init = kmt_spin_init,
- .spin_lock = kmt_spin_lock,
- .spin_unlock = kmt_spin_unlock,
- .sem_init = kmt_sem_init,
- .sem_signal = kmt_sem_signal,
- .sem_wait = kmt_sem_wait
+ .init          = kmt_init,
+ .create        = kmt_create, 
+ .teardown      = kmt_teardown,
+ .spin_init     = kmt_spin_init,
+ .spin_lock     = kmt_spin_lock,
+ .spin_unlock   = kmt_spin_unlock,
+ .sem_init      = kmt_sem_init,
+ .sem_signal    = kmt_sem_signal,
+ .sem_wait      = kmt_sem_wait
 };
 
 /// page fault handler
@@ -256,7 +302,6 @@ static void init_tasks(){
     for(int i =0; i < MAX_NTASK; i++){
         task_pool[i] = NULL;
     }
-    last_sched = 0;
 }
 
 struct X86_64_Context {
