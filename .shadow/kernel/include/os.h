@@ -17,27 +17,22 @@ struct spinlock {
 
 typedef enum{ RUNNING, RUNNABLE, INTR } task_stat;
 struct task {
-  union 
-  {
-    struct 
-    {
-      unsigned int  canary1;
-      int           id;
-      int           cpu;          //if not running, then cpu is -1, using this as a flag
-      const char*   name;
-      Context  *    ctx;
-      int           lock;
-      unsigned int  canary2;
-    };
-    uint8_t stack[OS_STACK_SIZE];
-  }; 
-};
+  const char*   name;
+  unsigned int  canary1;
+  int           cpu;          //if not running, then cpu is -1, using this as a flag
+  Context  *    ctx;
+  int           lock;         //only manipulated in handler, intr not enabled
+  unsigned int  canary2;
+  uint8_t       stack[OS_STACK_SIZE];
+}; 
+
 extern task_t * current[MAX_CPU];
 extern bool sane_task   (task_t* tsk);
 
 #define curr (current[cpu_current()])
 
 void save_context(Context* ctx);
+void enable_last_task(int c);
 
 typedef struct P_task_node {
   task_t* p_task;

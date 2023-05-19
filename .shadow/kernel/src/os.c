@@ -52,10 +52,13 @@ static Handler_node* make_new_handler_node(handler_t h, int sq, int ev, Handler_
 
 Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL }; 
 
+
 static Context *os_trap(Event ev, Context *context){
   assert(ienabled() == false);
+
+  enable_last_task(cpu_current());
+
   save_context(context);
-  assert(ienabled() == false);
 
   Context* next_ctx = NULL;
   for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
@@ -66,7 +69,6 @@ static Context *os_trap(Event ev, Context *context){
     }
   }
   panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
-  //iset(true);
   assert(ienabled() == false);
   return next_ctx;
 }

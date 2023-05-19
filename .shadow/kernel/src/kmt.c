@@ -4,8 +4,8 @@
 #define UNLOCK kmt->spin_unlock
 
 #define MAX_NTASK 32
-task_t * current[MAX_CPU], * task_pool[MAX_NTASK];
-task_t * schedulers[MAX_CPU];
+#define NTASK_PERCPU 16
+task_t * current[MAX_CPU], * task_pool[MAX_NTASK], *last_tsk[MAX_CPU];
 
 spinlock_t ntask_lk;
 int link_lk = 0;
@@ -48,32 +48,20 @@ static void kmt_init(){
 }
 
 
-//save and schedule
+void enable_last_task(int c){
+    task_t * last = last_tsk[c];
+    if(last != NULL && last != curr){           
+        simple_lock(&last->lock);
 
-static void release_tasks_not_running(int c){
-    simple_lock(&link_lk);
-    for(int i = 0; i < NTASK; i++){
-        if(i % cpu_count() == c){
-            task_t * tsk = task_pool[i];
-            if(tsk == curr){
-                continue;
-            }
-
-            simple_lock(&tsk->lock);
-            if(tsk->cpu == c){
-                tsk->cpu = -1;
-            }
-            simple_unlock(&tsk->lock);
-        }
+        assert(last->cpu == c);
+        last->cpu = -1;
+        
+        simple_unlock(&last->lock);
     }
-    simple_unlock(&link_lk);
 }
 
 void save_context(Context* ctx){        //better not be interrupted
     assert(ienabled() == false);
-    if(cpu_count() > 1){
-        release_tasks_not_running(cpu_current());
-    }
 
     if(curr == NULL){   //save from os-thread
         os_ctx = ctx;   //always runnable
@@ -81,43 +69,11 @@ void save_context(Context* ctx){        //better not be interrupted
         simple_lock(&curr->lock);         
         assert(curr->cpu == cpu_current());
         assert(curr->canary1 == CANARY && curr->canary2 == CANARY);
-        
+
         curr->ctx = ctx;
 
-        if(!sane_task(curr)){ dump_task_info(curr); while(1); }
         simple_unlock(&curr->lock);
     }
-}
-
-task_t * try_swap(task_t* ret,  int i){
-    if(ret == NULL){
-        return NULL;
-    }
-    int j = (i + 1) % NTASK;
-
-
-    simple_lock(&link_lk);
-
-    task_t * swp = task_pool[j];
-    if(swp == ret){
-        simple_unlock(&link_lk);
-        return  ret;
-    }
-    simple_lock(&swp->lock);
-    if(swp->cpu == -1){
-        swp->cpu = cpu_current();
-        task_pool[j] = ret;
-        task_pool[i] = swp;
-    }
-    simple_unlock(&swp->lock);
-
-    simple_lock(&ret->lock);
-    ret->cpu = -1;
-    simple_unlock(&ret->lock);
-    
-    simple_unlock(&link_lk);
-
-    return task_pool[i];
 }
 
 Context * schedule(){
@@ -126,37 +82,34 @@ Context * schedule(){
         return os_ctx;
     }
 
-    task_t * ret = NULL, *tsk;                        //try to swap from another cpu
+    task_t * tsk;                        //try to swap from another cpu
     
     int i = (last_sched + 1) % NTASK;
 
-    simple_lock(&link_lk);
     for(int cnt = 0; cnt < NTASK; i = (i + 1) % NTASK, cnt++){
-        if(i % cpu_count() != cpu_current()){
-            continue;
-        }
         tsk = task_pool[i];
+
         simple_lock(&tsk->lock);
-        if(tsk->cpu == -1 || tsk == curr){
-            ret = tsk;
+        if(tsk->cpu == -1){
             tsk->cpu = cpu_current();
             last_sched = i;
             simple_unlock(&tsk->lock);
-            break;
+
+            last_tsk[cpu_current()] = curr;
+            curr = tsk;
+
+            return tsk->ctx;
+
         } else {
             simple_unlock(&tsk->lock);
         }
     }
-    simple_unlock(&link_lk);
-    if(cpu_count() > 1){
-        curr = try_swap(ret, i);
-    } else {
-        curr = ret;
-    }
-    if(curr == NULL){
-        return os_ctx;
-    }
-    return curr->ctx;
+    
+    //no task avaliable
+    last_tsk[cpu_current()] = curr;
+    curr = NULL;
+
+    return os_ctx;
 }
 
 Context* timer_intr_handler(Event ev, Context* ctx){
@@ -169,21 +122,22 @@ static int kmt_create(task_t *tsk, const char *name, void (*entry)(void *arg), v
     panic_on(NTASK + 1 > MAX_NTASK, "too much tasks\n");
     panic_on(tsk == NULL, "fail to alloc task \n");
     
-    Area k_stk = (Area){ (void*)&tsk->canary2 + sizeof(unsigned int), (void*)tsk->stack + OS_STACK_SIZE };
+    Area k_stk = (Area){ tsk->stack, (void*)tsk->stack + OS_STACK_SIZE };
     tsk->ctx = kcontext(k_stk, entry, arg);
+
     tsk->name = name;
-    tsk->canary1 = tsk->canary2 = CANARY;
     tsk->lock = 0;
+    tsk->cpu = -1;
+    tsk->canary1 = tsk->canary2 = CANARY;
 
     kmt->spin_lock(&ntask_lk);
     simple_lock(&tsk->lock);
 
-    tsk->id = NTASK; 
-    tsk->cpu = NTASK % cpu_count();
     task_pool[NTASK++] = tsk;
 
     simple_unlock(&tsk->lock);
     kmt->spin_unlock(&ntask_lk);
+
     panic_on(cross_check(tsk) == false, "tasks stack cross!!!\n");
     return 0;
 }
@@ -299,8 +253,9 @@ static void sign_irqs(){
 
 static void init_tasks(){
     for(int i = 0; i < MAX_CPU; i++){
-        current[i] = NULL;
+        current[i] = last_tsk[i] = NULL;
     }
+
     for(int i =0; i < MAX_NTASK; i++){
         task_pool[i] = NULL;
     }
@@ -325,10 +280,6 @@ bool sane_task(task_t * tsk){
     ctx->rsp > (intptr_t)(&(tsk->canary2)) && ctx->rsp <= (uintptr_t)(tsk->stack) + OS_STACK_SIZE
     && 
     tsk->canary1 == CANARY && tsk->canary2 == CANARY;
-}
-
-void dump_task_info(task_t * tsk){
-    printf("task_info: id: %d, rip: %p, rsp %p\n", tsk->id, X86_64_CTX(tsk->ctx)->rip, X86_64_CTX(tsk->ctx)->rsp); 
 }
 
 bool cross_check(task_t* tsk){
