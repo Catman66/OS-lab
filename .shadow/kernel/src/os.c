@@ -24,7 +24,7 @@ static void os_init() {
 
 #ifdef LOCAL_DEBUG
   //dev->init();
-  thread_switch_test();
+  test_pc_sem();
 #endif
 }
 
