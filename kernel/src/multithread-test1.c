@@ -5,7 +5,7 @@ int cnt = 0;
 void Tyield(void * arg){
     while(1){
         assert(ienabled());
-        printf("%d ", cnt++);
+        printf("%d\n ", cnt++);
         yield();
     }
 }
