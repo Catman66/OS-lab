@@ -305,4 +305,5 @@ void print_tasks(){
     for(int i = 0; i < NTASK; i++){
         print_local("[ptr: %p, name: %s] ", task_pool[i], task_pool[i]->name);
     }
+    putch('\n');
 }
