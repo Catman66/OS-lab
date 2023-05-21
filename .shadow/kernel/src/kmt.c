@@ -300,3 +300,9 @@ void dump_task_info(task_t * tsk){
   printf("tsk %ld, [name: %s, cpu: %d , ctx: %ld, two canaries: %x, %x]\n", \
     (uintptr_t)tsk, tsk->name, tsk->cpu, (uintptr_t)tsk->ctx, tsk->canary1, tsk->canary2);
 }
+
+void print_tasks(){
+    for(int i = 0; i < NTASK; i++){
+        print_local("[ptr: %p, name: %s] ", task_pool[i], task_pool[i]->name);
+    }
+}

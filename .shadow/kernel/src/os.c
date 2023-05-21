@@ -3,7 +3,7 @@
 #include <devices.h>
 
 static void print_handlers();
-
+extern void print_tasks();
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
   pmm->init();
@@ -17,6 +17,7 @@ static void os_init() {
   local_test(T_DEV);
   print_local("test prepared\n");
   print_handlers();
+  print_tasks();
 #endif
 }
 
@@ -111,6 +112,5 @@ void panic_report(bool cond, const char * fmt, ...){
     halt(1);
   }
 }
-
 
 
