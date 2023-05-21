@@ -297,7 +297,7 @@ bool cross_check(task_t* tsk){
 }
 
 void dump_task_info(task_t * tsk){
-  printf("tsk %ld, [name: %s, cpu: %d , ctx: %ld, two canaries: %x, %x]\n", \
+  printf("tsk %p, [name: %s, cpu: %d , ctx: %ld, two canaries: %x, %x]\n", \
     (uintptr_t)tsk, tsk->name, tsk->cpu, (uintptr_t)tsk->ctx, tsk->canary1, tsk->canary2);
 }
 
