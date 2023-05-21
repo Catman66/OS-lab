@@ -25,9 +25,10 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 
 #ifdef LOCAL_DEBUG
+  print_local("prepare tests\n");
   dev->init();
   test_dev();
-  //test_pc_sem();
+  print_local("test prepared \n");
 #endif
 }
 
