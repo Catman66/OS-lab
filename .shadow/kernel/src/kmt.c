@@ -47,7 +47,6 @@ static void kmt_init(){
     print_local("=== num of tasks current: %d ===\n", NTASK);    
 }
 
-
 void enable_last_task(int c){
     task_t * last = last_tsk[c];
     if(last != NULL && last != curr){           
