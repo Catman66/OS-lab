@@ -113,7 +113,7 @@ Context * schedule(){
 
 Context* timer_intr_handler(Event ev, Context* ctx){
     assert(ienabled() == false);
-    return schedule();
+    return NULL;
 }
 
 //need to mod global tasklist
@@ -247,6 +247,7 @@ static void init_locks(){
 static void sign_irqs(){
     os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
     os->on_irq(1, EVENT_YIELD, timer_intr_handler);
+    os->on_irq(1000, EVENT_NULL, schedule);
 }
 
 static void init_tasks(){
