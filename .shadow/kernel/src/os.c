@@ -14,7 +14,7 @@ static void os_init() {
 
 #ifdef LOCAL_DEBUG
   print_local("prepare tests\n");
-  local_test(T_DEV);
+  local_test(T_PC);
   print_local("test prepared\n");
   print_handlers();
   print_tasks();
