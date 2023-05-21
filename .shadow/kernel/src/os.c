@@ -137,7 +137,9 @@ static void tty_reader(void *arg) {
 }
 
 static void dev_init(){
+  printf("dev init\n");
   kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty1");
   kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty2");
+  printf("dev init finished\n");
 }
 
