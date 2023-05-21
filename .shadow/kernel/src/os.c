@@ -67,9 +67,9 @@ static Context *os_trap(Event ev, Context *context){
   save_context(context);
 
   Context* next_ctx = NULL;
-  for(Handler_node* nd = Handlers.next; nd; nd = nd->next){
-    if(nd->event == ev.event || nd->event == EVENT_NULL){
-      Context* ret_handle = nd->handler(ev, context);
+  for(Handler_node* hdlr = Handlers.next; hdlr; hdlr = hdlr->next){
+    if(hdlr->event == ev.event || hdlr->event == EVENT_NULL){
+      Context* ret_handle = hdlr->handler(ev, context);
       panic_on(ret_handle && next_ctx, "returning to multiple context!!!\n");
       if(ret_handle) next_ctx = ret_handle;
     }
