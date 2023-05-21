@@ -49,7 +49,7 @@ Handler_node Handlers = { .handler = NULL, .seq = 0, .event = 0, .next = NULL };
 static Context *os_trap(Event ev, Context *context){
   assert(ienabled() == false);
 
-  print_local("in trap with ev: %d\n",ev.event);
+  //print_local("in trap with ev: %d\n",ev.event);
   enable_last_task(cpu_current());
 
   save_context(context);
@@ -65,7 +65,7 @@ static Context *os_trap(Event ev, Context *context){
   panic_report(next_ctx == NULL, "cpu[%d] receives sig: trap ev-no: %d, msg: %s \n", cpu_current(), ev.event, ev.msg);
   assert(ienabled() == false);
 
-  print_local("out trap of ev: %d\n", ev.event);
+  //print_local("out trap of ev: %d\n", ev.event);
   return next_ctx;
 }
 
