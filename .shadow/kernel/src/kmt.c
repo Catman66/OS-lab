@@ -68,7 +68,7 @@ void save_context(Context* ctx){        //better not be interrupted
     } else {       
         simple_lock(&curr->lock);         
         assert(curr->cpu == cpu_current());
-        assert(curr->canary1 == CANARY && curr->canary2 == CANARY);
+        if((curr->canary1 == CANARY && curr->canary2 == CANARY) == false) { dump_task_info(curr); assert(0); }
 
         curr->ctx = ctx;
 

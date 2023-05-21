@@ -112,6 +112,9 @@ void panic_report(bool cond, const char * fmt, ...){
   }
 }
 
+void dump_task_info(task_t * tsk){
+  printf("[name: %s, cpu: %d , two canaries: %x %x]\n", tsk->name, tsk->cpu, tsk->canary1, tsk->canary2);
+}
 
 
 
