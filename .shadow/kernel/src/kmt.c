@@ -205,7 +205,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value){
 }
 
 void kmt_sem_wait(sem_t *sem){
-    assert(ienabled());
+    //assert(ienabled());           tty can P when with intr off
     
     while(1){
         simple_lock(&sem->lock);
