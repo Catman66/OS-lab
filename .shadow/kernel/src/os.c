@@ -1,5 +1,6 @@
 #include <common.h>
 #include <os.h>
+#include <devices.h>
 
 static void print_handlers();
 
@@ -7,12 +8,13 @@ static void print_handlers();
 
 extern void test_sum();
 extern void test_pc_sem();
-//extern void test_sum_sem();
 extern void test_starvation();
 extern void test_sched();
 extern void test_ctx();
 extern void yield_test();
 extern void thread_switch_test();
+
+static void dev_init();
 
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
@@ -23,8 +25,9 @@ static void os_init() {
   print_local("num cpu: %d\n", cpu_count());
 
 #ifdef LOCAL_DEBUG
-  //dev->init();
-  test_pc_sem();
+  dev->init();
+  dev_init();
+  //test_pc_sem();
 #endif
 }
 
@@ -119,3 +122,22 @@ void panic_report(bool cond, const char * fmt, ...){
     halt(1);
   }
 }
+
+static void tty_reader(void *arg) {
+  device_t *tty = dev->lookup(arg);
+  char cmd[128], resp[128], ps[16];
+  snprintf(ps, 16, "(%s) $ ", arg);
+  while (1) {
+    tty->ops->write(tty, 0, ps, strlen(ps));
+    int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
+    cmd[nread] = '\0';
+    sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
+    tty->ops->write(tty, 0, resp, strlen(resp));
+  }
+}
+
+static void dev_init(){
+  kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty1");
+  kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty2");
+}
+

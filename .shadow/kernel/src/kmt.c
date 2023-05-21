@@ -8,7 +8,6 @@
 task_t * current[MAX_CPU], * task_pool[MAX_NTASK], *last_tsk[MAX_CPU];
 
 spinlock_t ntask_lk;
-int link_lk = 0;
 
 int     NLOCK[MAX_CPU];
 #define n_lk (NLOCK[cpu_current()])         //used by lock and unlock, 
@@ -18,6 +17,7 @@ Context * os_contexts[MAX_CPU];             //os idle thread context saved here
 
 int NTASK = 0;
 int last_sched = 0;
+
 void simple_lock(int * lk){
     while(atomic_xchg(lk, 1)){
         ;
@@ -157,14 +157,18 @@ static void kmt_teardown(task_t *task){
     }
     panic("fail to find wanted task to teardown\n");
 }
-#define HOLD 0
-#define NHOLD 1
+
+//lock 
+
+int PRE_INTR[MAX_CPU];
+#define pre_i   (PRE_INTR[cpu_current()])
+#define HOLD    0
+#define NHOLD   1
+
 void kmt_spin_init(spinlock_t *lk, const char *name){
     lk->desc = name;
     lk->val = HOLD;
 }
-int PRE_INTR[MAX_CPU];
-#define pre_i (PRE_INTR[cpu_current()])
 
 void kmt_spin_lock(spinlock_t *lk){
     int i = ienabled();
@@ -192,13 +196,14 @@ void kmt_spin_unlock(spinlock_t *lk){
     }
 }
 
+//semaphore 
+
 void kmt_sem_init(sem_t *sem, const char *name, int value){
     sem->name   = name;
     sem->lock   = 0;
     sem->val    = value;
 }
 
-//past version of P, V, using queue
 void kmt_sem_wait(sem_t *sem){
     assert(ienabled());
     
@@ -231,12 +236,6 @@ MODULE_DEF(kmt) = {
  .sem_signal    = kmt_sem_signal,
  .sem_wait      = kmt_sem_wait
 };
-
-/// page fault handler
-Context* page_fault_handler(Event ev, Context* ctx){
-    panic("page fault not implemented yet\n");
-    return ctx;             // return to the original program
-}
 
 static void init_locks(){
     for(int i = 0; i < MAX_CPU; i++){
@@ -293,3 +292,5 @@ bool cross_check(task_t* tsk){
     }
     return true;
 }
+
+
