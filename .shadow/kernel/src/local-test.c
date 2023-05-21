@@ -48,7 +48,6 @@ static void create_dev_task(){
 }
 
 static void test_dev(){
-    local_test(T_DEV);
     dev->init();
     create_dev_task();
 }
