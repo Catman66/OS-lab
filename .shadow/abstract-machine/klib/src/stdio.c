@@ -34,7 +34,14 @@ int sprintf(char *out, const char *fmt, ...) {
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
-  panic("Not implemented");
+  va_list para_lst;
+  va_start(para_lst, fmt);
+
+  int len = vsnprintf(out, n, fmt, para_lst);
+
+  va_end(para_lst);
+  
+  return len;
 }
 
 #define SWAP(tp, a, b) { tp t = (a); (a) = (b); (b) = t; }
