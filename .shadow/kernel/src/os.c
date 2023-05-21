@@ -29,6 +29,8 @@ static void os_init() {
   dev->init();
   test_dev();
   print_local("test prepared \n");
+
+  print_handlers();
 #endif
 }
 
