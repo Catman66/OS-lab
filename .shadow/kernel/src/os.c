@@ -14,7 +14,7 @@ extern void test_ctx();
 extern void yield_test();
 extern void thread_switch_test();
 
-static void dev_init();
+static void test_dev();
 
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
@@ -26,7 +26,7 @@ static void os_init() {
 
 #ifdef LOCAL_DEBUG
   dev->init();
-  dev_init();
+  test_dev();
   //test_pc_sem();
 #endif
 }
@@ -136,7 +136,7 @@ static void tty_reader(void *arg) {
   }
 }
 
-static void dev_init(){
+static void test_dev(){
   printf("dev init\n");
   kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty1");
   kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty2");

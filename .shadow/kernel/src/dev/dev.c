@@ -33,7 +33,7 @@ static device_t *dev_create(int size, const char* name, int id, devops_t *ops) {
 void dev_input_task();
 void dev_tty_task();
 
-static void dev_init() {
+static void test_dev() {
 #define INIT(id, device_type, dev_name, dev_id, dev_ops) \
   devices[id] = dev_create(sizeof(device_type), dev_name, dev_id, dev_ops); \
   devices[id]->ops->init(devices[id]);
@@ -45,6 +45,6 @@ static void dev_init() {
 }
 
 MODULE_DEF(dev) = {
-  .init   = dev_init,
+  .init   = test_dev,
   .lookup = dev_lookup,
 };
