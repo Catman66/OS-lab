@@ -4,18 +4,6 @@
 
 static void print_handlers();
 
-//#define DEBUG_LOCAL0
-
-extern void test_sum();
-extern void test_pc_sem();
-extern void test_starvation();
-extern void test_sched();
-extern void test_ctx();
-extern void yield_test();
-extern void thread_switch_test();
-
-static void test_dev();
-
 static void os_init() {
   print_local("\nthis is cpu[%d]\n", cpu_current());
   pmm->init();
@@ -26,10 +14,8 @@ static void os_init() {
 
 #ifdef LOCAL_DEBUG
   print_local("prepare tests\n");
-  dev->init();
-  test_dev();
+  
   print_local("test prepared \n");
-
   print_handlers();
 #endif
 }
@@ -126,23 +112,7 @@ void panic_report(bool cond, const char * fmt, ...){
   }
 }
 
-static void tty_reader(void *arg) {
-  device_t *tty = dev->lookup(arg);
-  char cmd[128], resp[128], ps[16];
-  snprintf(ps, 16, "(%s) $ ", arg);
-  while (1) {
-    tty->ops->write(tty, 0, ps, strlen(ps));
-    int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
-    cmd[nread] = '\0';
-    sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
-    tty->ops->write(tty, 0, resp, strlen(resp));
-  }
-}
 
-static void test_dev(){
-  print_local("dev init\n");
-  kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty1");
-  kmt->create(tsk_alloc(), "tty_reader", tty_reader, "tty2");
-  print_local("dev init finished\n");
-}
+
+
 

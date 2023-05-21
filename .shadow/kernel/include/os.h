@@ -57,4 +57,6 @@ task_t * tsk_alloc();
 bool cross_check();
 void dump_task_info(task_t* tsk);
 
+typedef enum { T_DEV, T_PC } test_n;
+void local_test(test_n t);
 #endif
