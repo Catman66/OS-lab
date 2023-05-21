@@ -1,4 +1,5 @@
 #include <os.h>
+#include <limits.h>
 
 #define LOCK kmt->spin_lock
 #define UNLOCK kmt->spin_unlock
@@ -245,9 +246,10 @@ static void init_locks(){
 }
 
 static void sign_irqs(){
+    //os->on_irq(INT_MIN, EVENT_NULL, save_context);
     os->on_irq(2, EVENT_IRQ_TIMER, timer_intr_handler);
     os->on_irq(1, EVENT_YIELD, timer_intr_handler);
-    os->on_irq(1000, EVENT_NULL, schedule);
+    os->on_irq(INT_MAX, EVENT_NULL, schedule);
 }
 
 static void init_tasks(){
